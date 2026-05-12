@@ -2,20 +2,25 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 
 
 @Entity()
-export class Utilizador {
+export class Alerta {
 
     //Auto-incremento
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column()
-    password!: string;
+    //Falta a chave estrangeira (id_avaliacao, id_sintomas, id_utente, id_medico)
 
     @Column()
-    tipo_utilizador!: string;
+    tipo!: string;
 
     @Column()
-    email!: string;
+    prioridade!: string;
+
+    @Column()
+    estado!: string;
+
+    @Column()
+    motivo!: string;
 
     // Atalho do TypeORM para criação automática
     @CreateDateColumn()
@@ -23,8 +28,6 @@ export class Utilizador {
 
     //O TypeORM atualiza este valor automaticamente sempre que o registo é modificado
     @UpdateDateColumn()
-    data_ultimo_acesso!: Date
+    data_atualizacao!: Date
 
-    @Column()
-    estado!: string
 }
