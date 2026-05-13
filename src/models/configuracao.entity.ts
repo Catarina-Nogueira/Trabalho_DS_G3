@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn } from 'typeorm';
-
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Administrador } from './administrador.entity';
 
 @Entity()
 export class Configuracao {
@@ -8,12 +8,16 @@ export class Configuracao {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    //Falta a chave estrangeira (id_administrador)
+    //chave estrangeira (id_administrador)
+    // Muitas configurações podem ser geridas pelo mesmo administrador
+    @ManyToOne(() => Administrador)
+    @JoinColumn({ name: 'id_administrador' })
+    administrador!: Administrador;
 
     @Column()
     nome_parametro!: string;
 
-    @Column()
+    @Column({type: 'float'})
     valor_limiar!: number;
 
     @Column()

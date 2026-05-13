@@ -14,7 +14,7 @@ export class Utilizador {
     @Column()
     tipo_utilizador!: string;
 
-    @Column()
+    @Column({ unique: true })
     email!: string;
 
     // Atalho do TypeORM para criação automática

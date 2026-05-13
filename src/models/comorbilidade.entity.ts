@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Utente } from './utente.entity';
 
 @Entity()
 export class Comorbilidade {
@@ -8,7 +8,11 @@ export class Comorbilidade {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    //Falta a chave estrangeira (id_utente)
+    //chave estrangeira (id_utente)
+    // Muitas comorbilidades podem pertencer ao mesmo utente
+    @ManyToOne(() => Utente)
+    @JoinColumn({ name: 'id_utente' })
+    utente!: Utente;
 
     @Column()
     nome!: string;
