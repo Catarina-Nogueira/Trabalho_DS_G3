@@ -3,6 +3,12 @@ import { Utente } from './utente.entity';
 import { Medico } from './medico.entity';
 import { Questionario_Carat } from './questionarioCarat.entity';
 
+export enum NivelControlo {
+    CONTROLADO = 'controlado',
+    PARCIALMENTE_CONTROLADO = 'parcialmente_controlado',
+    NAO_CONTROLADO = 'nao_controlado'
+}
+
 @Entity()
 export class Avaliacao_Carat {
 
@@ -30,7 +36,7 @@ export class Avaliacao_Carat {
     @CreateDateColumn()
     data_avaliacao!: Date;
     
-    @Column()
+    @Column({ type: 'simple-enum', enum: NivelControlo })
     nivel_controlo!: string;
 
     @Column({type: 'integer'})

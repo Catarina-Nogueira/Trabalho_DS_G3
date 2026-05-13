@@ -2,6 +2,11 @@ import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, CreateDateColumn, O
 import { Utilizador } from './utilizador.entity';
 import { Medico } from './medico.entity';
 
+export enum Sexo_Biologico {
+    FEMININO = 'feminino',
+    MASCULINO = 'masculino'
+}
+
 @Entity()
 export class Utente {
 
@@ -26,7 +31,7 @@ export class Utente {
     @Column({ type: 'date' })
     data_nascimento!: string;
 
-    @Column()
-    genero!: string;
+    @Column({ type: 'simple-enum', enum: Sexo_Biologico })
+    sexo_biologico!: string;
 
 }

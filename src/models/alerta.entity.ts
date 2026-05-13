@@ -5,6 +5,28 @@ import { Utente } from './utente.entity';
 import { Medico } from './medico.entity';
 
 
+export enum TipoAlerta {
+    SCORE_CARAT = 'score_carat',           // alerta gerado por score baixo no CARAT
+    SINTOMA_GRAVE = 'sintoma_grave',       // alerta gerado por sintoma grave reportado
+    MEDICACAO = 'medicacao',               // alerta relacionado com medicação
+    EXAME_PENDENTE = 'exame_pendente',     // alerta de exame por realizar
+    SEM_AVALIACAO = 'sem_avaliacao',       // utente sem avaliação há muito tempo
+    MANUAL = 'manual'                      // alerta criado manualmente pelo médico
+}
+
+export enum PrioridadeAlerta {
+    BAIXA = 'baixa',
+    MEDIA = 'media',
+    ALTA = 'alta'
+}
+
+export enum EstadoAlerta {
+    NOVO = 'novo',
+    VISTO = 'visto',
+    EM_SEGUIMENTO = 'em_seguimento',
+    FECHADO = 'fechado'
+}
+
 @Entity()
 export class Alerta {
 
@@ -14,14 +36,14 @@ export class Alerta {
 
     //chave estrangeira (id_avaliacao, id_sintomas, id_utente, id_medico)
     // Muitos alertas podem pertencer à mesma avaliação
-    @ManyToOne(() => Avaliacao_Carat)
+    @ManyToOne(() => Avaliacao_Carat, { nullable: true })
     @JoinColumn({ name: 'id_avaliacao' })
-    avaliacao!: Avaliacao_Carat;
+    avaliacao!: Avaliacao_Carat | null;
 
     // Muitos alertas podem estar associados ao mesmo sintoma
-    @ManyToOne(() => Sintoma_Reportado)
+    @ManyToOne(() => Sintoma_Reportado, { nullable: true })
     @JoinColumn({ name: 'id_sintoma' })
-    sintoma!: Sintoma_Reportado;
+    sintoma!: Sintoma_Reportado | null;
 
     // Muitos alertas podem pertencer ao mesmo utente
     @ManyToOne(() => Utente)
@@ -33,13 +55,13 @@ export class Alerta {
     @JoinColumn({ name: 'id_medico' })
     medico!: Medico;
 
-    @Column()
+    @Column({ type: 'simple-enum', enum: TipoAlerta })
     tipo!: string;
 
-    @Column()
+    @Column({ type: 'simple-enum', enum: PrioridadeAlerta })
     prioridade!: string;
 
-    @Column()
+    @Column({ type: 'simple-enum', enum: EstadoAlerta, default: EstadoAlerta.NOVO })
     estado!: string;
 
     @Column()

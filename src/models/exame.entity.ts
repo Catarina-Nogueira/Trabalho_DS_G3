@@ -1,5 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column} from 'typeorm';
 
+export enum TipoExame {
+    LABORATORIAL = 'laboratorial',
+    IMAGEM = 'imagem',
+    ENDOSCOPICO = 'endoscopico',
+    FUNCIONAL = 'funcional'
+}
 
 @Entity()
 export class Exame {
@@ -8,12 +14,12 @@ export class Exame {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column()
+    @Column({ unique: true })
     nome_exame!: string;
 
     @Column()
     descricao!: string;
     
-    @Column()
+    @Column({ type: 'simple-enum', enum: TipoExame })
     tipo!: string;
 }

@@ -1,5 +1,15 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
+export enum Tipo_Utilizador {
+    ADMINISTRADOR = 'administrador',
+    MEDICO = 'medico',
+    UTENTE = 'utente'
+}
+
+export enum Estado {
+    ATIVO = 'ativo',
+    INATIVO = 'inativo'
+}
 
 @Entity()
 export class Utilizador {
@@ -11,7 +21,7 @@ export class Utilizador {
     @Column()
     password!: string;
 
-    @Column()
+    @Column({ type: 'simple-enum', enum: Tipo_Utilizador })
     tipo_utilizador!: string;
 
     @Column({ unique: true })
@@ -25,6 +35,6 @@ export class Utilizador {
     @UpdateDateColumn()
     data_ultimo_acesso!: Date
 
-    @Column()
+    @Column({ type: 'simple-enum', enum: Estado })
     estado!: string
 }
