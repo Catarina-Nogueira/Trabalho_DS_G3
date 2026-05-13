@@ -15,9 +15,9 @@ export class Historia_Familiar {
     @JoinColumn({ name: 'id_utente' })
     utente!: Utente;
     
-    @Column({ nullable: true })
+    @Column({ type: 'text', nullable: true })
     nome!: string | null;
     
-    @Column({ nullable: true })
+    @Column({ type: 'text', nullable: true })
     descricao!: string | null;
 }

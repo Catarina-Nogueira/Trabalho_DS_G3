@@ -35,7 +35,7 @@ export class Sintoma_Reportado {
     @Column({type: 'integer'})
     gatilho_identificavel!: number;
 
-    @Column({nullable: true})
+    @Column({type: 'text', nullable: true})
     notas_adicionais!: string | null;
 
 }
