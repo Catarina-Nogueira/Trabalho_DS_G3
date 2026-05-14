@@ -1,8 +1,8 @@
-import 'reflect-metadata';
-import express from 'express';
-import { AppDataSource } from './database/database';
+import 'reflect-metadata'; //Necessário para o typeORM
+import express from 'express'; //Framework web que cria o servidor HTTP
+import { AppDataSource } from './database/database'; 
 
-const app = express();
+const app = express(); // Cria o objeto principal da aplicação Express
 const PORT = 3000;
 
 // Middleware para parsing de JSON
