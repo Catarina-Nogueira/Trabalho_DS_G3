@@ -5,6 +5,10 @@ import { AppDataSource } from './database/database';
 import utilizadorRoutes from './routes/utilizador.routes';
 import utenteRoutes from './routes/utente.routes';
 import medicoRoutes from './routes/medico.routes';
+import administradorRoutes from './routes/administrador.routes';
+import alertaRoutes from './routes/alerta.routes';
+import auditoriaRoutes from './routes/auditoria.routes';
+
 
 
 const app = express(); // Cria o objeto principal da aplicação Express
@@ -17,6 +21,11 @@ app.use(express.json());
 app.use('/utilizadores', utilizadorRoutes);
 app.use('/utentes', utenteRoutes);
 app.use ('/medicos', medicoRoutes);
+app.use('/administradores', administradorRoutes);
+app.use('/alertas', alertaRoutes);
+app.use('/auditoria', auditoriaRoutes);
+
+
 
 
 // Inicializar a base de dados
