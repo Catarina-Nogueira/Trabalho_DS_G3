@@ -5,26 +5,60 @@ const utenteRepo = AppDataSource.getRepository(Utente);
 
 export const UtenteService = {
 
-    //vai à base de dados e devolve todos os utentes
+    // RF51 - Listagem de utentes (para o médico ver os seus utentes)
     listarTodos: async () => {
-        return await utenteRepo.find();
+        return await utenteRepo.find({
+            relations: ['medico']
+        });
     },
 
-    //vai à base de dados e devolve o utente com o id indicado. Se não existir devolve null
+    // RF51 - Listar utentes de um médico específico
+    listarPorMedico: async (id_medico: number) => {
+        return await utenteRepo.find({
+            where: { medico: { id: id_medico } },
+            relations: ['medico']
+        });
+    },
+
+    // RF50 - Consulta de detalhe de utente
     buscarPorId: async (id: number) => {
-        return await utenteRepo.findOneBy({ id });
+        return await utenteRepo.findOne({
+            where: { id },
+            relations: ['medico'],
+        });
     },
 
-    //cria um novo utilizador na base de dados com os dados recebidos. O create prepara o objeto e o save guarda-o
-    /*criar: async (dados: Partial<Utilizador>) => {
-        const utilizador = utilizadorRepo.create(dados);
-        return await utilizadorRepo.save(utilizador);
-    },*/
+    // RF50 - Consulta de detalhe de utente
+    buscarDadosPermitidos: async (id: number) => {
+        return await utenteRepo.findOne({
+            where: { id },
+            select: {
+                id: true,
+                nome: true,
+                data_nascimento: true,
+                sexo_biologico: true
+            }
+        });
+    },
 
-    /*
-    //elimina o utilizador com o id indicado da base de dados:
+    // RF05 - Gestão de dados pessoais
+    criar: async (dados: Partial<Utente>) => {
+        const utente = utenteRepo.create(dados);
+        return await utenteRepo.save(utente);
+    },
+
+    // RF05 - Atualizar dados pessoais permitidos
+    atualizar: async (id: number, dados: Partial<Utente>) => {
+        await utenteRepo.update(id, dados);
+        return await utenteRepo.findOne({
+            where: { id },
+            relations: ['medico']
+        });
+    },
+
+    //eliminação do utente
     eliminar: async (id: number) => {
-        return await utilizadorRepo.delete(id);
-    }*/
+        return await utenteRepo.delete(id);
+    }
 };
-// O Partial<Utilizador> significa que não se precisa de enviar todos os campos do utilizador, apenas os que se quer criar ou atualizar.
+

@@ -2,11 +2,22 @@ import 'reflect-metadata'; //Necessário para o typeORM
 import express from 'express'; //Framework web que cria o servidor HTTP
 import { AppDataSource } from './database/database'; 
 
+import utilizadorRoutes from './routes/utilizador.routes';
+import utenteRoutes from './routes/utente.routes';
+import medicoRoutes from './routes/medico.routes';
+
+
 const app = express(); // Cria o objeto principal da aplicação Express
 const PORT = 3000;
 
 // Middleware para parsing de JSON
 app.use(express.json());
+
+// Rotas
+app.use('/utilizadores', utilizadorRoutes);
+app.use('/utentes', utenteRoutes);
+app.use ('/medicos', medicoRoutes);
+
 
 // Inicializar a base de dados
 AppDataSource.initialize()
