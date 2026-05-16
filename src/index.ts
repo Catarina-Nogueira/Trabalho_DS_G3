@@ -17,10 +17,27 @@ const PORT = 3000;
 // Middleware para parsing de JSON
 app.use(express.json());
 
+
+// Rota inicial para evitar "Cannot GET /" - temporário
+app.get('/', (req, res) => {
+  res.json({
+    mensagem: 'API SaudINOB a funcionar!',
+    status: 'OK',
+    endpoints: [
+      '/utilizadores',
+      '/utentes',
+      '/medicos',
+      '/administradores',
+      '/alertas',
+      '/auditoria'
+    ]
+  });
+});
+
 // Rotas
 app.use('/utilizadores', utilizadorRoutes);
 app.use('/utentes', utenteRoutes);
-app.use ('/medicos', medicoRoutes);
+app.use('/medicos', medicoRoutes);
 app.use('/administradores', administradorRoutes);
 app.use('/alertas', alertaRoutes);
 app.use('/auditoria', auditoriaRoutes);
