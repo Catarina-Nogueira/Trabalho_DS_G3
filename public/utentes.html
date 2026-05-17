@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB - Utentes</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(99, 179, 237, 0.15);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #63b3ed;
+      text-decoration: none;
+    }
+
+    .nav-pagina { font-size: 0.85rem; color: #64748b; }
+
+    .voltar {
+      font-size: 0.85rem;
+      color: #63b3ed;
+      text-decoration: none;
+    }
+
+    .voltar:hover { text-decoration: underline; }
+
+    .container {
+      max-width: 1000px;
+      margin: 48px auto;
+      padding: 0 24px;
+    }
+
+    .cabecalho {
+      margin-bottom: 32px;
+    }
+
+    .cabecalho h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 6px;
+    }
+
+    .cabecalho p {
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+
+    .secao {
+      background: #1e293b;
+      border: 1px solid rgba(99, 179, 237, 0.1);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+
+    .secao h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #63b3ed;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(99, 179, 237, 0.1);
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 14px;
+      background: #0f172a;
+      border: 1px solid rgba(99, 179, 237, 0.2);
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus { border-color: #63b3ed; }
+    select option { background: #1e293b; }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+
+    .btn-danger {
+      background: transparent;
+      color: #f87171;
+      border: 1px solid #f87171;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    .btn-danger:hover { background: rgba(248, 113, 113, 0.1); }
+
+    .btn-grupo {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .erro {
+      grid-column: 1 / -1;
+      color: #f87171;
+      font-size: 0.85rem;
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.2);
+      padding: 10px 14px;
+      border-radius: 8px;
+    }
+
+    .sucesso {
+      grid-column: 1 / -1;
+      color: #34d399;
+      font-size: 0.85rem;
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+      padding: 10px 14px;
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #64748b;
+      border-bottom: 1px solid rgba(99, 179, 237, 0.1);
+    }
+
+    td {
+      padding: 14px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(99, 179, 237, 0.05);
+      color: #cbd5e1;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(99, 179, 237, 0.03); }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-feminino {
+      background: rgba(244, 114, 182, 0.1);
+      color: #f472b6;
+      border: 1px solid rgba(244, 114, 182, 0.2);
+    }
+
+    .badge-masculino {
+      background: rgba(96, 165, 250, 0.1);
+      color: #60a5fa;
+      border: 1px solid rgba(96, 165, 250, 0.2);
+    }
+
+    .vazio {
+      text-align: center;
+      padding: 40px;
+      color: #475569;
+      font-size: 0.9rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: #334155;
+      border-top: 1px solid rgba(99, 179, 237, 0.08);
+      margin-top: 48px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="index.html">SaudINOB</a>
+    <span class="nav-pagina">Gestão de Utentes</span>
+    <a class="voltar" href="index.html">Voltar ao menu</a>
+  </nav>
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function FormularioUtente({ onCriado, medicos }) {
+      const [nome, setNome] = useState('');
+      const [data_nascimento, setDataNascimento] = useState('');
+      const [sexo_biologico, setSexo] = useState('feminino');
+      const [id_utilizador, setIdUtilizador] = useState('');
+      const [id_medico, setIdMedico] = useState('');
+      const [utilizadores, setUtilizadores] = useState([]);
+      const [erro, setErro] = useState('');
+      const [sucesso, setSucesso] = useState('');
+
+      useEffect(() => {
+        // Buscar utilizadores do tipo utente que ainda não têm perfil criado
+        async function buscarUtilizadores() {
+          const resposta = await fetch('/utilizadores');
+          const dados = await resposta.json();
+          // Filtrar apenas utilizadores do tipo utente
+          const utentes = dados.filter(u => u.tipo_utilizador === 'utente');
+          setUtilizadores(utentes);
+          if (utentes.length > 0) setIdUtilizador(utentes[0].id);
+        }
+        buscarUtilizadores();
+      }, []);
+
+      useEffect(() => {
+        if (medicos.length > 0) setIdMedico(medicos[0].id);
+      }, [medicos]);
+
+      async function handleSubmit(e) {
+        e.preventDefault();
+        setErro('');
+        setSucesso('');
+
+        const resposta = await fetch('/utentes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nome,
+            data_nascimento,
+            sexo_biologico,
+            utilizador: { id: Number(id_utilizador) },
+            medico: { id: Number(id_medico) }
+          }),
+        });
+
+        if (resposta.ok) {
+          setSucesso('Utente criado com sucesso!');
+          setNome('');
+          setDataNascimento('');
+          setSexo('feminino');
+          onCriado();
+        } else {
+          const dados = await resposta.json();
+          setErro(dados.erro || 'Erro ao criar utente');
+        }
+      }
+
+      return (
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label>Nome Completo</label>
+            <input
+              type="text"
+              value={nome}
+              onChange={e => setNome(e.target.value)}
+              placeholder="Nome do utente"
+              required
+            />
+          </div>
+          <div>
+            <label>Data de Nascimento</label>
+            <input
+              type="date"
+              value={data_nascimento}
+              onChange={e => setDataNascimento(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label>Sexo Biológico</label>
+            <select value={sexo_biologico} onChange={e => setSexo(e.target.value)}>
+              <option value="feminino">Feminino</option>
+              <option value="masculino">Masculino</option>
+            </select>
+          </div>
+          <div>
+            <label>Conta de Utilizador</label>
+            <select value={id_utilizador} onChange={e => setIdUtilizador(e.target.value)} required>
+              {utilizadores.length === 0
+                ? <option value="">Nenhum utilizador disponível</option>
+                : utilizadores.map(u => (
+                    <option key={u.id} value={u.id}>{u.email}</option>
+                  ))
+              }
+            </select>
+          </div>
+          <div>
+            <label>Médico Responsável</label>
+            <select value={id_medico} onChange={e => setIdMedico(e.target.value)} required>
+              {medicos.length === 0
+                ? <option value="">Nenhum médico disponível</option>
+                : medicos.map(m => (
+                    <option key={m.id} value={m.id}>{m.nome}</option>
+                  ))
+              }
+            </select>
+          </div>
+          {erro && <div className="erro">{erro}</div>}
+          {sucesso && <div className="sucesso">{sucesso}</div>}
+          <div className="btn-grupo">
+            <button type="submit" className="btn btn-primary">Criar Utente</button>
+          </div>
+        </form>
+      );
+    }
+
+    function ListaUtentes({ utentes, onEliminar }) {
+      if (utentes.length === 0) {
+        return <div className="vazio">Nenhum utente registado.</div>;
+      }
+
+      function formatarData(data) {
+        if (!data) return '-';
+        return new Date(data).toLocaleDateString('pt-PT');
+      }
+
+      return (
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nome</th>
+              <th>Data Nascimento</th>
+              <th>Sexo</th>
+              <th>Médico</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {utentes.map(u => (
+              <tr key={u.id}>
+                <td>{u.id}</td>
+                <td>{u.nome}</td>
+                <td>{formatarData(u.data_nascimento)}</td>
+                <td>
+                  <span className={`badge badge-${u.sexo_biologico}`}>
+                    {u.sexo_biologico}
+                  </span>
+                </td>
+                <td>{u.medico ? u.medico.nome : '-'}</td>
+                <td>
+                  <button className="btn btn-danger" onClick={() => onEliminar(u.id)}>
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+
+    function App() {
+      const [utentes, setUtentes] = useState([]);
+      const [medicos, setMedicos] = useState([]);
+
+      async function buscarUtentes() {
+        const resposta = await fetch('/utentes');
+        const dados = await resposta.json();
+        setUtentes(dados);
+      }
+
+      async function buscarMedicos() {
+        const resposta = await fetch('/medicos');
+        const dados = await resposta.json();
+        setMedicos(dados);
+      }
+
+      async function eliminarUtente(id) {
+        if (!confirm('Tem a certeza que quer eliminar este utente?')) return;
+        await fetch(`/utentes/${id}`, { method: 'DELETE' });
+        buscarUtentes();
+      }
+
+      useEffect(() => {
+        buscarUtentes();
+        buscarMedicos();
+      }, []);
+
+      return (
+        <div className="container">
+          <div className="cabecalho">
+            <h1>Gestão de Utentes</h1>
+            <p>Registe os dados dos utentes e associe-os ao médico responsável.</p>
+          </div>
+
+          <div className="secao">
+            <h2>Novo Utente</h2>
+            <FormularioUtente onCriado={buscarUtentes} medicos={medicos} />
+          </div>
+
+          <div className="secao">
+            <h2>Utentes Registados</h2>
+            <ListaUtentes utentes={utentes} onEliminar={eliminarUtente} />
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+
+  <footer>
+    SaudINOB © 2025 — Saúde Digital e Inovação Biomédica
+  </footer>
+
+</body>
+</html>

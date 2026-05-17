@@ -1,6 +1,7 @@
 import 'reflect-metadata'; //Necessário para o typeORM
 import express from 'express'; //Framework web que cria o servidor HTTP
 import { AppDataSource } from './database/database'; 
+import path from 'path';
 
 import utilizadorRoutes from './routes/utilizador.routes';
 import utenteRoutes from './routes/utente.routes';
@@ -14,25 +15,11 @@ import auditoriaRoutes from './routes/auditoria.routes';
 const app = express(); // Cria o objeto principal da aplicação Express
 const PORT = 3000;
 
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
 // Middleware para parsing de JSON
 app.use(express.json());
 
-
-// Rota inicial para evitar "Cannot GET /" - temporário
-app.get('/', (req, res) => {
-  res.json({
-    mensagem: 'API SaudINOB a funcionar!',
-    status: 'OK',
-    endpoints: [
-      '/utilizadores',
-      '/utentes',
-      '/medicos',
-      '/administradores',
-      '/alertas',
-      '/auditoria'
-    ]
-  });
-});
 
 // Rotas
 app.use('/utilizadores', utilizadorRoutes);

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #0f172a;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(99, 179, 237, 0.15);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #63b3ed;
+      letter-spacing: 1px;
+    }
+
+    .nav-info {
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    .hero {
+      padding: 80px 48px 60px;
+      text-align: center;
+      background: radial-gradient(ellipse at top, rgba(99, 179, 237, 0.08) 0%, transparent 70%);
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(99, 179, 237, 0.1);
+      border: 1px solid rgba(99, 179, 237, 0.3);
+      color: #63b3ed;
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 999px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      color: #f1f5f9;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    .hero h1 span {
+      color: #63b3ed;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      max-width: 560px;
+      margin: 0 auto 48px;
+      line-height: 1.7;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-valor {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #63b3ed;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    .stat-divisor {
+      width: 1px;
+      background: rgba(99, 179, 237, 0.2);
+    }
+
+    .modulos {
+      padding: 0 48px 80px;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .secao-titulo {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #64748b;
+      margin-bottom: 16px;
+      margin-top: 48px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .secao-titulo::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(99, 179, 237, 0.1);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      display: block;
+      text-decoration: none;
+      background: #1e293b;
+      border: 1px solid rgba(99, 179, 237, 0.1);
+      border-radius: 16px;
+      padding: 28px 24px;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--cor);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--cor);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-titulo {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    footer {
+      margin-top: auto;
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: #334155;
+      border-top: 1px solid rgba(99, 179, 237, 0.08);
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <div class="nav-logo">SaudINOB</div>
+    <div class="nav-info">Sistema de Monitorização Respiratória</div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-badge">Plataforma Clínica Digital</div>
+    <h1>Monitorização <span>Inteligente</span><br/>de Doenças Respiratórias</h1>
+    <p>Acompanhamento contínuo de utentes com asma e rinite alérgica através do protocolo CARAT, geração automática de alertas e apoio à decisão médica.</p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-valor">CARAT</div>
+        <div class="stat-label">Protocolo Clínico</div>
+      </div>
+      <div class="stat-divisor"></div>
+      <div class="stat">
+        <div class="stat-valor">24/7</div>
+        <div class="stat-label">Monitorização</div>
+      </div>
+      <div class="stat-divisor"></div>
+      <div class="stat">
+        <div class="stat-valor">RGPD</div>
+        <div class="stat-label">Conformidade</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="modulos">
+
+    <div class="secao-titulo">Gestão Clínica</div>
+    <div class="grid">
+      <a class="card" href="utentes.html" style="--cor: #34d399;">
+        <div class="card-titulo">Utentes</div>
+        <div class="card-desc">Gestão de dados clínicos e administrativos dos utentes registados no sistema.</div>
+      </a>
+      <a class="card" href="medicos.html" style="--cor: #60a5fa;">
+        <div class="card-titulo">Médicos</div>
+        <div class="card-desc">Consulta e gestão dos médicos responsáveis pelo acompanhamento dos utentes.</div>
+      </a>
+      <a class="card" href="alertas.html" style="--cor: #f87171;">
+        <div class="card-titulo">Alertas Clínicos</div>
+        <div class="card-desc">Geração automática e gestão de alertas com base em scores CARAT e sintomas.</div>
+      </a>
+    </div>
+
+    <div class="secao-titulo">Administração</div>
+    <div class="grid">
+      <a class="card" href="utilizadores.html" style="--cor: #a78bfa;">
+        <div class="card-titulo">Utilizadores</div>
+        <div class="card-desc">Gestão de contas, perfis e permissões de acesso ao sistema.</div>
+      </a>
+      <a class="card" href="administradores.html" style="--cor: #a78bfa;">
+        <div class="card-titulo">Administradores</div>
+        <div class="card-desc">Gestão dos administradores responsáveis pela operação da plataforma.</div>
+      </a>
+      <a class="card" href="auditoria.html" style="--cor: #fbbf24;">
+        <div class="card-titulo">Auditoria</div>
+        <div class="card-desc">Consulta e exportação de logs de auditoria para rastreabilidade de ações críticas.</div>
+      </a>
+    </div>
+
+  </div>
+
+  <footer>
+    SaudINOB © 2025 — Saúde Digital e Inovação Biomédica
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB - Utilizadores</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(99, 179, 237, 0.15);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #63b3ed;
+      text-decoration: none;
+    }
+
+    .nav-pagina { font-size: 0.85rem; color: #64748b; }
+
+    .voltar {
+      font-size: 0.85rem;
+      color: #63b3ed;
+      text-decoration: none;
+    }
+
+    .voltar:hover { text-decoration: underline; }
+
+    .container {
+      max-width: 1000px;
+      margin: 48px auto;
+      padding: 0 24px;
+    }
+
+    .cabecalho {
+      margin-bottom: 32px;
+    }
+
+    .cabecalho h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 6px;
+    }
+
+    .cabecalho p {
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+
+    .secao {
+      background: #1e293b;
+      border: 1px solid rgba(99, 179, 237, 0.1);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+
+    .secao h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #63b3ed;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(99, 179, 237, 0.1);
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 14px;
+      background: #0f172a;
+      border: 1px solid rgba(99, 179, 237, 0.2);
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus { border-color: #63b3ed; }
+
+    select option { background: #1e293b; }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+
+    .btn-danger {
+      background: transparent;
+      color: #f87171;
+      border: 1px solid #f87171;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    .btn-danger:hover { background: rgba(248, 113, 113, 0.1); }
+
+    .btn-grupo {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .erro {
+      grid-column: 1 / -1;
+      color: #f87171;
+      font-size: 0.85rem;
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.2);
+      padding: 10px 14px;
+      border-radius: 8px;
+    }
+
+    .sucesso {
+      grid-column: 1 / -1;
+      color: #34d399;
+      font-size: 0.85rem;
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+      padding: 10px 14px;
+      border-radius: 8px;
+      line-height: 1.6;
+    }
+
+    .password-box {
+      font-family: monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #34d399;
+      background: rgba(52, 211, 153, 0.05);
+      border: 1px dashed rgba(52, 211, 153, 0.3);
+      padding: 8px 14px;
+      border-radius: 8px;
+      margin-top: 8px;
+      display: inline-block;
+    }
+
+    .aviso {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #64748b;
+      border-bottom: 1px solid rgba(99, 179, 237, 0.1);
+    }
+
+    td {
+      padding: 14px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(99, 179, 237, 0.05);
+      color: #cbd5e1;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(99, 179, 237, 0.03); }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-ativo {
+      background: rgba(52, 211, 153, 0.1);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.2);
+    }
+
+    .badge-inativo {
+      background: rgba(248, 113, 113, 0.1);
+      color: #f87171;
+      border: 1px solid rgba(248, 113, 113, 0.2);
+    }
+
+    .badge-medico {
+      background: rgba(96, 165, 250, 0.1);
+      color: #60a5fa;
+      border: 1px solid rgba(96, 165, 250, 0.2);
+    }
+
+    .badge-utente {
+      background: rgba(52, 211, 153, 0.1);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.2);
+    }
+
+    .badge-administrador {
+      background: rgba(167, 139, 250, 0.1);
+      color: #a78bfa;
+      border: 1px solid rgba(167, 139, 250, 0.2);
+    }
+
+    .vazio {
+      text-align: center;
+      padding: 40px;
+      color: #475569;
+      font-size: 0.9rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: #334155;
+      border-top: 1px solid rgba(99, 179, 237, 0.08);
+      margin-top: 48px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="index.html">SaudINOB</a>
+    <span class="nav-pagina">Gestão de Utilizadores</span>
+    <a class="voltar" href="index.html">Voltar ao menu</a>
+  </nav>
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function gerarPassword() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let password = '';
+      for (let i = 0; i < 10; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return password;
+    }
+
+    function FormularioUtilizador({ onCriado }) {
+      const [email, setEmail] = useState('');
+      const [tipo_utilizador, setTipo] = useState('utente');
+      const [estado, setEstado] = useState('ativo');
+      const [erro, setErro] = useState('');
+      const [passwordGerada, setPasswordGerada] = useState('');
+
+      async function handleSubmit(e) {
+        e.preventDefault();
+        setErro('');
+        setPasswordGerada('');
+
+        const password = gerarPassword();
+
+        const resposta = await fetch('/utilizadores', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, tipo_utilizador, estado }),
+        });
+
+        if (resposta.ok) {
+          setPasswordGerada(password);
+          setEmail('');
+          setTipo('utente');
+          setEstado('ativo');
+          onCriado();
+        } else {
+          const dados = await resposta.json();
+          setErro(dados.erro || 'Erro ao criar utilizador');
+        }
+      }
+
+      return (
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label>Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="exemplo@email.com"
+              required
+            />
+          </div>
+          <div>
+            <label>Tipo de Utilizador</label>
+            <select value={tipo_utilizador} onChange={e => setTipo(e.target.value)}>
+              <option value="utente">Utente</option>
+              <option value="medico">Médico</option>
+              <option value="administrador">Administrador</option>
+            </select>
+          </div>
+          <div>
+            <label>Estado</label>
+            <select value={estado} onChange={e => setEstado(e.target.value)}>
+              <option value="ativo">Ativo</option>
+              <option value="inativo">Inativo</option>
+            </select>
+          </div>
+          {erro && <div className="erro">{erro}</div>}
+          {passwordGerada && (
+            <div className="sucesso">
+              Utilizador criado com sucesso! Comunique esta password temporária ao utilizador:
+              <div className="password-box">{passwordGerada}</div>
+              <div className="aviso">Esta password não será mostrada novamente. O utilizador deve alterá-la no primeiro acesso.</div>
+            </div>
+          )}
+          <div className="btn-grupo">
+            <button type="submit" className="btn btn-primary">Criar Utilizador</button>
+          </div>
+        </form>
+      );
+    }
+
+    function ListaUtilizadores({ utilizadores, onEliminar }) {
+      if (utilizadores.length === 0) {
+        return <div className="vazio">Nenhum utilizador registado.</div>;
+      }
+
+      function badgeTipo(tipo) {
+        return <span className={`badge badge-${tipo}`}>{tipo}</span>;
+      }
+
+      function badgeEstado(estado) {
+        return <span className={`badge badge-${estado}`}>{estado}</span>;
+      }
+
+      function formatarData(data) {
+        if (!data) return '-';
+        return new Date(data).toLocaleDateString('pt-PT');
+      }
+
+      return (
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Email</th>
+              <th>Tipo</th>
+              <th>Estado</th>
+              <th>Data Criação</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {utilizadores.map(u => (
+              <tr key={u.id}>
+                <td>{u.id}</td>
+                <td>{u.email}</td>
+                <td>{badgeTipo(u.tipo_utilizador)}</td>
+                <td>{badgeEstado(u.estado)}</td>
+                <td>{formatarData(u.data_criacao)}</td>
+                <td>
+                  <button className="btn btn-danger" onClick={() => onEliminar(u.id)}>
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+
+    function App() {
+      const [utilizadores, setUtilizadores] = useState([]);
+
+      async function buscarUtilizadores() {
+        const resposta = await fetch('/utilizadores');
+        const dados = await resposta.json();
+        setUtilizadores(dados);
+      }
+
+      async function eliminarUtilizador(id) {
+        if (!confirm('Tem a certeza que quer eliminar este utilizador?')) return;
+        await fetch(`/utilizadores/${id}`, { method: 'DELETE' });
+        buscarUtilizadores();
+      }
+
+      useEffect(() => { buscarUtilizadores(); }, []);
+
+      return (
+        <div className="container">
+          <div className="cabecalho">
+            <h1>Gestão de Utilizadores</h1>
+            <p>Crie contas de acesso ao sistema. O utilizador preencherá os seus dados no primeiro acesso.</p>
+          </div>
+
+          <div className="secao">
+            <h2>Nova Conta de Acesso</h2>
+            <FormularioUtilizador onCriado={buscarUtilizadores} />
+          </div>
+
+          <div className="secao">
+            <h2>Utilizadores Registados</h2>
+            <ListaUtilizadores
+              utilizadores={utilizadores}
+              onEliminar={eliminarUtilizador}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+
+  <footer>
+    SaudINOB © 2025 — Saúde Digital e Inovação Biomédica
+  </footer>
+
+</body>
+</html>
