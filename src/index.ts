@@ -10,6 +10,7 @@ import administradorRoutes from './routes/administrador.routes';
 import alertaRoutes from './routes/alerta.routes';
 import auditoriaRoutes from './routes/auditoria.routes';
 import comorbilidadeRoutes from './routes/comorbilidades.routes';
+import configuracaoRoutes from './routes/configuracao.routes';
 
 
 
@@ -30,6 +31,7 @@ app.use('/administradores', administradorRoutes);
 app.use('/alertas', alertaRoutes);
 app.use('/auditoria', auditoriaRoutes);
 app.use('/comorbilidades', comorbilidadeRoutes);
+app.use('/configuracao', configuracaoRoutes);
 
 
 
