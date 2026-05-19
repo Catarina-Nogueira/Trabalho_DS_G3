@@ -9,6 +9,7 @@ import medicoRoutes from './routes/medico.routes';
 import administradorRoutes from './routes/administrador.routes';
 import alertaRoutes from './routes/alerta.routes';
 import auditoriaRoutes from './routes/auditoria.routes';
+import comorbilidadeRoutes from './routes/comorbilidades.routes';
 
 
 
@@ -28,6 +29,7 @@ app.use('/medicos', medicoRoutes);
 app.use('/administradores', administradorRoutes);
 app.use('/alertas', alertaRoutes);
 app.use('/auditoria', auditoriaRoutes);
+app.use('/comorbilidades', comorbilidadeRoutes);
 
 
 
