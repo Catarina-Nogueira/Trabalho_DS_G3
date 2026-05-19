@@ -11,8 +11,8 @@ import alertaRoutes from './routes/alerta.routes';
 import auditoriaRoutes from './routes/auditoria.routes';
 import comorbilidadeRoutes from './routes/comorbilidades.routes';
 import configuracaoRoutes from './routes/configuracao.routes';
-import { DadoAdministrativoController } from './controllers/dadoAdministrativo.controller';
 import dadoAdministrativoRoutes from './routes/dadoAdministrativo.routes';
+import exameRoutes from './routes/exame.routes';
 
 
 
@@ -35,6 +35,7 @@ app.use('/auditoria', auditoriaRoutes);
 app.use('/comorbilidades', comorbilidadeRoutes);
 app.use('/configuracao', configuracaoRoutes);
 app.use('/dadoAdministrativos', dadoAdministrativoRoutes);
+app.use('/exames', exameRoutes);
 
 
 // Inicializar a base de dados
