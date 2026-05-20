@@ -15,7 +15,7 @@ import dadoAdministrativoRoutes from './routes/dadoAdministrativo.routes';
 import exameRoutes from './routes/exame.routes';
 import exameUtenteRoutes from './routes/exameUtente.routes';
 import historiaFamiliarRoutes from './routes/historiaFamiliar.routes';
-
+import medicacaoRoutes from './routes/medicacao.routes';    
 
 
 const app = express(); // Cria o objeto principal da aplicação Express
@@ -40,6 +40,7 @@ app.use('/dadoAdministrativos', dadoAdministrativoRoutes);
 app.use('/exames', exameRoutes);
 app.use('/exameUtente', exameUtenteRoutes);
 app.use('/historiaFamiliar', historiaFamiliarRoutes);
+app.use('/medicacao', medicacaoRoutes);
 
 
 // Inicializar a base de dados
