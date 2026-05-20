@@ -14,6 +14,7 @@ import configuracaoRoutes from './routes/configuracao.routes';
 import dadoAdministrativoRoutes from './routes/dadoAdministrativo.routes';
 import exameRoutes from './routes/exame.routes';
 import exameUtenteRoutes from './routes/exameUtente.routes';
+import historiaFamiliarRoutes from './routes/historiaFamiliar.routes';
 
 
 
@@ -38,6 +39,7 @@ app.use('/configuracao', configuracaoRoutes);
 app.use('/dadoAdministrativos', dadoAdministrativoRoutes);
 app.use('/exames', exameRoutes);
 app.use('/exameUtente', exameUtenteRoutes);
+app.use('/historiaFamiliar', historiaFamiliarRoutes);
 
 
 // Inicializar a base de dados
