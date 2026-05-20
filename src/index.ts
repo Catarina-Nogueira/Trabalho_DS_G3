@@ -13,6 +13,7 @@ import comorbilidadeRoutes from './routes/comorbilidades.routes';
 import configuracaoRoutes from './routes/configuracao.routes';
 import dadoAdministrativoRoutes from './routes/dadoAdministrativo.routes';
 import exameRoutes from './routes/exame.routes';
+import exameUtenteRoutes from './routes/exameUtente.routes';
 
 
 
@@ -36,6 +37,7 @@ app.use('/comorbilidades', comorbilidadeRoutes);
 app.use('/configuracao', configuracaoRoutes);
 app.use('/dadoAdministrativos', dadoAdministrativoRoutes);
 app.use('/exames', exameRoutes);
+app.use('/exameUtente', exameUtenteRoutes);
 
 
 // Inicializar a base de dados
