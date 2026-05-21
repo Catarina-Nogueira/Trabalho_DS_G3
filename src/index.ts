@@ -16,6 +16,7 @@ import exameRoutes from './routes/exame.routes';
 import exameUtenteRoutes from './routes/exameUtente.routes';
 import historiaFamiliarRoutes from './routes/historiaFamiliar.routes';
 import medicacaoRoutes from './routes/medicacao.routes';   
+import medicacaoUtenteRoutes from './routes/medicacaoUtente.routes';
 import opcaoRespostaRoutes from './routes/opcaoResposta.routes'; 
 import permissaoRoutes from './routes/permissao.routes';
 
@@ -43,6 +44,7 @@ app.use('/exames', exameRoutes);
 app.use('/exameUtente', exameUtenteRoutes);
 app.use('/historiaFamiliar', historiaFamiliarRoutes);
 app.use('/medicacao', medicacaoRoutes);
+app.use('/medicacaoUtente', medicacaoUtenteRoutes);
 app.use('/opcaoResposta', opcaoRespostaRoutes);
 app.use('/permissoes', permissaoRoutes);
 
