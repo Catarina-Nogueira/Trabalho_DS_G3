@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Utente } from './utente.entity';
 import { Medicacao } from './medicacao.entity';
+import { Medico } from './medico.entity';
 
 @Entity()
 export class Medicacao_Utente {
@@ -15,6 +16,10 @@ export class Medicacao_Utente {
     @JoinColumn({ name: 'id_utente' })
     utente!: Utente;
 
+    @ManyToOne(() => Medico)
+    @JoinColumn({ name: 'id_medico' })
+    medico!: Medico;
+
     // Muitos registos podem estar associados à mesma medicação
     @ManyToOne(() => Medicacao)
     @JoinColumn({ name: 'id_medicacao' })
@@ -28,5 +33,8 @@ export class Medicacao_Utente {
 
     @Column()
     duracao!: string;
+
+    @Column({ default: true })
+    ativo!: boolean;
 
 }

@@ -16,9 +16,12 @@ import exameRoutes from './routes/exame.routes';
 import exameUtenteRoutes from './routes/exameUtente.routes';
 import historiaFamiliarRoutes from './routes/historiaFamiliar.routes';
 import medicacaoRoutes from './routes/medicacao.routes';   
+import medicacaoUtenteRoutes from './routes/medicacaoUtente.routes';
 import opcaoRespostaRoutes from './routes/opcaoResposta.routes'; 
 import permissaoRoutes from './routes/permissao.routes';
-
+import planoAcompanhamentoRoutes from './routes/planoAcompanhamento.routes';
+import questaoCaratRoutes from './routes/questaoCarat.routes';
+import questionarioCaratRoutes from './routes/questionarioCarat.routes';
 
 const app = express(); // Cria o objeto principal da aplicação Express
 const PORT = 3000;
@@ -43,8 +46,12 @@ app.use('/exames', exameRoutes);
 app.use('/exameUtente', exameUtenteRoutes);
 app.use('/historiaFamiliar', historiaFamiliarRoutes);
 app.use('/medicacao', medicacaoRoutes);
+app.use('/medicacaoUtente', medicacaoUtenteRoutes);
 app.use('/opcaoResposta', opcaoRespostaRoutes);
 app.use('/permissoes', permissaoRoutes);
+app.use('/planoAcompanhamento', planoAcompanhamentoRoutes);
+app.use('/questaoCarat', questaoCaratRoutes);
+app.use('/questionarioCarat', questionarioCaratRoutes);
 
 // Inicializar a base de dados
 AppDataSource.initialize()
