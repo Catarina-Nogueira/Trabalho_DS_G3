@@ -1,43 +1,49 @@
 import { Request, Response } from 'express';
 import { AdministradorService } from '../services/administrador.services';
+import { CriarAdministradorDTO } from '../dtos/administrador.dto';
 
 export const AdministradorController = {
 
     listarTodos: async (req: Request, res: Response) => {
         try {
             const administradores = await AdministradorService.listarTodos();
-            res.json(administradores);
-        } catch (err) {
-            res.status(500).json({ erro: 'Erro ao listar administradores' });
+            return res.json(administradores);
+        } catch (err: any) {
+            return res.status(500).json({ erro: err.message || 'Erro ao listar administradores' });
         }
     },
 
     buscarPorId: async (req: Request, res: Response) => {
         try {
             const administrador = await AdministradorService.buscarPorId(Number(req.params.id));
-            if (!administrador) return res.status(404).json({ erro: 'Administrador não encontrado' });
-            res.json(administrador);
-        } catch (err) {
-            res.status(500).json({ erro: 'Erro ao buscar administrador' });
+            return res.json(administrador);
+        } catch (err: any) {
+            const status = err.message === 'Administrador não encontrado' ? 404 :
+                           err.message === 'ID inválido' ? 400 : 500;
+            return res.status(status).json({ erro: err.message });
         }
     },
 
     criar: async (req: Request, res: Response) => {
         try {
-            const administrador = await AdministradorService.criar(req.body);
-            res.status(201).json(administrador);
-        } catch (err) {
-            res.status(500).json({ erro: 'Erro ao criar administrador' });
+            const dados: CriarAdministradorDTO = req.body;
+            const administrador = await AdministradorService.criar(dados);
+            return res.status(201).json(administrador);
+        } catch (err: any) {
+            const status = err.message.includes('obrigatório') ? 400 :
+                           err.message.includes('Já existe') ? 409 : 500;
+            return res.status(status).json({ erro: err.message });
         }
     },
-   
 
     eliminar: async (req: Request, res: Response) => {
         try {
-            await AdministradorService.eliminar(Number(req.params.id));
-            res.status(204).send();
-        } catch (err) {
-            res.status(500).json({ erro: 'Erro ao eliminar administrador' });
+            const resultado = await AdministradorService.eliminar(Number(req.params.id));
+            return res.json(resultado);
+        } catch (err: any) {
+            const status = err.message === 'Administrador não encontrado' ? 404 :
+                           err.message === 'ID inválido' ? 400 : 500;
+            return res.status(status).json({ erro: err.message });
         }
     }
 };

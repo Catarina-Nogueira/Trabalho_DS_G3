@@ -1,23 +1,16 @@
-export interface CriarAlertaDTO {
-    id_utente: number;
-    id_medico: number;
-    tipo: string;
-    motivo: string;
-    id_avaliacao?: number;
-    id_sintoma?: number;
-}
+import { EstadoAlerta, PrioridadeAlerta, TipoAlerta } from "../models/alerta.entity";
 
-// O médico só pode atualizar o estado do alerta
+// O médico só pode atualizar o estado
 export interface AtualizarAlertaDTO {
-    estado: 'novo' | 'visto' | 'em_seguimento' | 'fechado';
+    estado: EstadoAlerta;
 }
 
-// deve-se por o id_avaliacao e id-sintoma?
+// O que a API devolve
 export interface AlertaRespostaDTO {
     id: number;
-    tipo: string;
-    prioridade: string;
-    estado: string;
+    tipo: TipoAlerta;
+    prioridade: PrioridadeAlerta
+    estado: EstadoAlerta;
     motivo: string;
     data_criacao: Date;
     data_atualizacao: Date;
@@ -29,4 +22,6 @@ export interface AlertaRespostaDTO {
         id: number;
         nome: string;
     };
+    id_avaliacao?: number | null;  // útil para o médico saber de onde veio o alerta
+    id_sintoma?: number | null;    // útil para o médico saber de onde veio o alerta
 }

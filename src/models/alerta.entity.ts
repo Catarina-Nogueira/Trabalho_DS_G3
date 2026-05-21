@@ -11,7 +11,7 @@ export enum TipoAlerta {
     MEDICACAO = 'medicacao',               // alerta relacionado com medicação
     EXAME_PENDENTE = 'exame_pendente',     // alerta de exame por realizar
     SEM_AVALIACAO = 'sem_avaliacao',       // utente sem avaliação há muito tempo
-    MANUAL = 'manual'                      // alerta criado manualmente pelo médico
+   
 }
 
 export enum PrioridadeAlerta {

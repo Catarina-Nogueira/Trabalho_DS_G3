@@ -1,22 +1,28 @@
 import { AppDataSource } from '../database/database';
 import { Alerta, EstadoAlerta, PrioridadeAlerta, TipoAlerta } from '../models/alerta.entity';
+import { AtualizarAlertaDTO} from '../dtos/alerta.dto';
 
 const alertaRepo = AppDataSource.getRepository(Alerta);
 
+// Validação do fluxo de estados
+const fluxoValido: Record<EstadoAlerta, EstadoAlerta[]> = {
+    [EstadoAlerta.NOVO]: [EstadoAlerta.VISTO],
+    [EstadoAlerta.VISTO]: [EstadoAlerta.EM_SEGUIMENTO, EstadoAlerta.FECHADO],
+    [EstadoAlerta.EM_SEGUIMENTO]: [EstadoAlerta.FECHADO],
+    [EstadoAlerta.FECHADO]: []
+};
+
 export const AlertaService = {
-
+    
     // RF36 - Listagem de alertas do médico com filtros
-    /* vai à base de dados buscar todos os alertas de um médico específico. 
-    Usa createQueryBuilder em vez do find normal porque precisa de filtros opcionais 
-    (estado e prioridade). Os alertas são ordenados por prioridade e data. 
-    O médico pode filtrar passando ?estado=novo ou ?prioridade=alta no URL (RF36)*/
+    listarPorMedico: async (id_medico: number, estado?: EstadoAlerta, prioridade?: PrioridadeAlerta) => {
+        if (!id_medico || id_medico <= 0) throw new Error('ID do médico inválido');
 
-    listarPorMedico: async (id_medico: number, estado?: string, prioridade?: string) => {
         const query = alertaRepo.createQueryBuilder('alerta')
             .leftJoinAndSelect('alerta.utente', 'utente')
             .leftJoinAndSelect('alerta.avaliacao', 'avaliacao')
             .leftJoinAndSelect('alerta.sintoma', 'sintoma')
-            .where('alerta.medico = :id_medico', { id_medico })
+            .where('alerta.medico.id = :id_medico', { id_medico })
             .orderBy('alerta.prioridade', 'DESC')
             .addOrderBy('alerta.data_criacao', 'DESC');
 
@@ -27,10 +33,9 @@ export const AlertaService = {
     },
 
     // RF38 - Consulta de alertas pelo utente
-    /* Busca todos os alertas de um utente específico, ordenados do mais recente para o mais antigo. 
-    Usa select para limitar os campos retornados, mostrando apenas o essencial ao utente: tipo, prioridade, estado, motivo e data (RF38)*/
-    
     listarPorUtente: async (id_utente: number) => {
+        if (!id_utente || id_utente <= 0) throw new Error('ID do utente inválido');
+
         return await alertaRepo.find({
             where: { utente: { id: id_utente } },
             relations: ['avaliacao', 'sintoma'],
@@ -42,43 +47,35 @@ export const AlertaService = {
                 estado: true,
                 motivo: true,
                 data_criacao: true,
+                avaliacao: {
+                    id: true, // Adiciona aqui os campos que queres da avaliação
+                },
+                sintoma: {
+                    id: true, // Adiciona aqui os campos que queres do sintoma
+                }
             }
         });
     },
 
     // Buscar alerta por id
     buscarPorId: async (id: number) => {
-        return await alertaRepo.findOne({
+        if (!id || id <= 0) throw new Error('ID inválido');
+
+        const alerta = await alertaRepo.findOne({
             where: { id },
             relations: ['utente', 'medico', 'avaliacao', 'sintoma']
         });
+
+        if (!alerta) throw new Error('Alerta não encontrado');
+        return alerta;
     },
 
-    // RF29, RF30, RF31, RF32, RF33 - Gerar alerta automático
-    gerarAlerta: async (
-        id_utente: number,
-        id_medico: number,
-        tipo: TipoAlerta,
-        motivo: string,
-        id_avaliacao?: number,
-        id_sintoma?: number
-    ) => {
-        // RF33 - Cálculo automático da prioridade
-        const prioridade = AlertaService.calcularPrioridade(tipo);
-
-        const alerta = alertaRepo.create({
-            utente: { id: id_utente },
-            medico: { id: id_medico },
-            avaliacao: id_avaliacao ? { id: id_avaliacao } : null,
-            sintoma: id_sintoma ? { id: id_sintoma } : null,
-            tipo,
-            prioridade,
-            estado: EstadoAlerta.NOVO,
-            motivo
-        });
+    /*// RF29, RF30, RF31, RF32, RF33 - Gerar alerta automático
+    gerarAlerta: async () => {
+        
 
         return await alertaRepo.save(alerta);
-    },
+    },*/
 
     // RF33 - Calcular prioridade automaticamente com base no tipo
     calcularPrioridade: (tipo: TipoAlerta): PrioridadeAlerta => {
@@ -95,12 +92,39 @@ export const AlertaService = {
     },
 
     // RF34 - Atualização do estado do alerta pelo médico
-    atualizarEstado: async (id: number, estado: EstadoAlerta) => {
-        await alertaRepo.update(id, { estado });
-        return await alertaRepo.findOne({
+    atualizarEstado: async (id: number, dados: AtualizarAlertaDTO) => {
+        if (!id || id <= 0) throw new Error('ID inválido');
+
+        const alerta = await alertaRepo.findOne({
             where: { id },
             relations: ['utente', 'medico']
         });
+
+        if (!alerta) throw new Error('Alerta não encontrado');
+
+        const possiveisEstados = fluxoValido[alerta.estado as EstadoAlerta];
+
+        if (!possiveisEstados || !possiveisEstados.includes(dados.estado)) {
+            throw new Error(`Transição inválida: ${alerta.estado} → ${dados.estado}`
+        );
+    }
+
+    alerta.estado = dados.estado;
+    alerta.data_atualizacao = new Date();
+
+     return await alertaRepo.save(alerta);
+    
     },
 
+    // Eliminar alerta
+    eliminar: async (id: number) => {
+        if (!id || id <= 0) throw new Error('ID inválido');
+
+        const alerta = await alertaRepo.findOneBy({ id });
+        if (!alerta) throw new Error('Alerta não encontrado');
+
+        await alertaRepo.delete(id);
+        return { mensagem: 'Alerta eliminado com sucesso' };
+    }
 };
+
