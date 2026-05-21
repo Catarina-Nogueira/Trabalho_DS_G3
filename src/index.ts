@@ -20,6 +20,7 @@ import medicacaoUtenteRoutes from './routes/medicacaoUtente.routes';
 import opcaoRespostaRoutes from './routes/opcaoResposta.routes'; 
 import permissaoRoutes from './routes/permissao.routes';
 import planoAcompanhamentoRoutes from './routes/planoAcompanhamento.routes';
+import questaoCaratRoutes from './routes/questaoCarat.routes';
 
 
 const app = express(); // Cria o objeto principal da aplicação Express
@@ -49,6 +50,7 @@ app.use('/medicacaoUtente', medicacaoUtenteRoutes);
 app.use('/opcaoResposta', opcaoRespostaRoutes);
 app.use('/permissoes', permissaoRoutes);
 app.use('/planoAcompanhamento', planoAcompanhamentoRoutes);
+app.use('/questaoCarat', questaoCaratRoutes);
 
 // Inicializar a base de dados
 AppDataSource.initialize()
