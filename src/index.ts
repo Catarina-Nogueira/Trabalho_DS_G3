@@ -17,6 +17,7 @@ import exameUtenteRoutes from './routes/exameUtente.routes';
 import historiaFamiliarRoutes from './routes/historiaFamiliar.routes';
 import medicacaoRoutes from './routes/medicacao.routes';   
 import opcaoRespostaRoutes from './routes/opcaoResposta.routes'; 
+import permissaoRoutes from './routes/permissao.routes';
 
 
 const app = express(); // Cria o objeto principal da aplicação Express
@@ -43,7 +44,7 @@ app.use('/exameUtente', exameUtenteRoutes);
 app.use('/historiaFamiliar', historiaFamiliarRoutes);
 app.use('/medicacao', medicacaoRoutes);
 app.use('/opcaoResposta', opcaoRespostaRoutes);
-
+app.use('/permissoes', permissaoRoutes);
 
 // Inicializar a base de dados
 AppDataSource.initialize()
