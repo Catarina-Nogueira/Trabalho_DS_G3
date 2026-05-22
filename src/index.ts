@@ -23,6 +23,7 @@ import planoAcompanhamentoRoutes from './routes/planoAcompanhamento.routes';
 import questaoCaratRoutes from './routes/questaoCarat.routes';
 import questionarioCaratRoutes from './routes/questionarioCarat.routes';
 import recomendacaoRoutes from './routes/recomendacao.routes';
+import respostaUtenteRoutes from './routes/respostaUtente.routes';
 
 const app = express(); // Cria o objeto principal da aplicação Express
 const PORT = 3000;
@@ -54,6 +55,7 @@ app.use('/planoAcompanhamento', planoAcompanhamentoRoutes);
 app.use('/questaoCarat', questaoCaratRoutes);
 app.use('/questionarioCarat', questionarioCaratRoutes);
 app.use('/recomendacoes', recomendacaoRoutes);
+app.use('/respostaUtente', respostaUtenteRoutes);
 
 // Inicializar a base de dados
 AppDataSource.initialize()
