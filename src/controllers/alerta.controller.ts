@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { AlertaService } from '../services/alerta.services';
-import { EstadoAlerta, TipoAlerta } from '../models/alerta.entity';
+import { EstadoAlerta, PrioridadeAlerta, TipoAlerta } from '../models/alerta.entity';
 
 export const AlertaController = {
 
@@ -10,8 +10,8 @@ export const AlertaController = {
             const { estado, prioridade } = req.query;
             const alertas = await AlertaService.listarPorMedico(
                 Number(req.params.id_medico),
-                estado as string,
-                prioridade as string
+                estado as EstadoAlerta,
+                prioridade as PrioridadeAlerta
             );
             res.json(alertas);
         } catch (err) {
@@ -39,7 +39,7 @@ export const AlertaController = {
         }
     },
 
-    // RF29-RF33 - Gerar alerta manualmente
+   /* // RF29-RF33 - Gerar alerta manualmente
     gerarAlerta: async (req: Request, res: Response) => {
         try {
             const { id_utente, id_medico, tipo, motivo, id_avaliacao, id_sintoma } = req.body;
@@ -56,7 +56,7 @@ export const AlertaController = {
             res.status(500).json({ erro: 'Erro ao gerar alerta' });
         }
     },
-
+*/
     // RF34 - Atualização do estado do alerta
     atualizarEstado: async (req: Request, res: Response) => {
         try {
