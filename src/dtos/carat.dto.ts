@@ -10,7 +10,6 @@ export interface RespostaItemDto {
 }
 
 export interface SubmeterAvaliacaoDto {
-    id_utente: number;
     id_questionario: number;
     respostas: RespostaItemDto[];
 }
