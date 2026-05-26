@@ -7,8 +7,8 @@ export interface CriarMedicoDTO {
 }
 
 export interface AtualizarMedicoDTO {
-    nome: string;
-    telemovel: string;
+    nome?: string;
+    telemovel?: string;
 }
 
 export interface MedicoRespostaDTO {
@@ -17,5 +17,5 @@ export interface MedicoRespostaDTO {
     especialidade: string;
     numero_medico: number;
     telemovel: string;
-    utilizador: { id: number; email: string };
+    utilizador: { id: number; email: string; tipo_utilizador: string };
 }
