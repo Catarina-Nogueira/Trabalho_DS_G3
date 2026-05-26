@@ -24,7 +24,7 @@ export interface MedicacaoUtenteRespostaDTO {
     id: number;
     frequencia: string;
     data_inicio: string;
-    duracao: number;
+    duracao: string;
     ativo: boolean;
     utente: { id: number; nome: string };
     medico: { id: number; nome: string };
