@@ -7,7 +7,7 @@ export interface CriarConfiguracaoDto {
     descricao: string;
 }
 
-// RF11, RF13 — Atualizar parâmetro existente (todos opcionais)
+// RF11, RF13 — Atualizar parâmetro existente
 export interface AtualizarConfiguracaoDto {
     nome_parametro?: string;
     valor_limiar: number;
