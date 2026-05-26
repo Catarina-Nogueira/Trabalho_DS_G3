@@ -17,13 +17,10 @@ import exameUtenteRoutes from './routes/exameUtente.routes';
 import historiaFamiliarRoutes from './routes/historiaFamiliar.routes';
 import medicacaoRoutes from './routes/medicacao.routes';   
 import medicacaoUtenteRoutes from './routes/medicacaoUtente.routes';
-import opcaoRespostaRoutes from './routes/opcaoResposta.routes'; 
 import permissaoRoutes from './routes/permissao.routes';
 import planoAcompanhamentoRoutes from './routes/planoAcompanhamento.routes';
-import questaoCaratRoutes from './routes/questaoCarat.routes';
 import questionarioCaratRoutes from './routes/questionarioCarat.routes';
 import recomendacaoRoutes from './routes/recomendacao.routes';
-import respostaUtenteRoutes from './routes/respostaUtente.routes';
 import sintomaReportadoRoutes from './routes/sintomaReportado.routes';
 
 const app = express(); // Cria o objeto principal da aplicação Express
@@ -50,13 +47,10 @@ app.use('/exameUtente', exameUtenteRoutes);
 app.use('/historiaFamiliar', historiaFamiliarRoutes);
 app.use('/medicacao', medicacaoRoutes);
 app.use('/medicacaoUtente', medicacaoUtenteRoutes);
-app.use('/opcaoResposta', opcaoRespostaRoutes);
 app.use('/permissoes', permissaoRoutes);
 app.use('/planoAcompanhamento', planoAcompanhamentoRoutes);
-app.use('/questaoCarat', questaoCaratRoutes);
 app.use('/questionarioCarat', questionarioCaratRoutes);
 app.use('/recomendacoes', recomendacaoRoutes);
-app.use('/respostaUtente', respostaUtenteRoutes);
 app.use('/sintomaReportado', sintomaReportadoRoutes);
 
 // Inicializar a base de dados

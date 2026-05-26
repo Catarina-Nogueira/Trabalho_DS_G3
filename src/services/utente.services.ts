@@ -8,11 +8,24 @@ const utenteRepo  = () => AppDataSource.getRepository(Utente);
 const medicoRepo  = () => AppDataSource.getRepository(Medico);
 const utilizadorRepo = () => AppDataSource.getRepository(Utilizador);
 
+// Função auxiliar — calcula idade a partir da data de nascimento
+const calcularIdade = (data_nascimento: string): number => {
+    const hoje = new Date();
+    const nascimento = new Date(data_nascimento);
+    let idade = hoje.getFullYear() - nascimento.getFullYear();
+    const aindaNaoFezAnos =
+        hoje.getMonth() < nascimento.getMonth() ||
+        (hoje.getMonth() === nascimento.getMonth() && hoje.getDate() < nascimento.getDate());
+    if (aindaNaoFezAnos) idade--;
+    return idade;
+};
+
 // Converte entidade para DTO de resposta
 const toResposta = (u: Utente): UtenteRespostaDTO => ({
     id: u.id,
     nome: u.nome,
     data_nascimento: u.data_nascimento,
+    idade: calcularIdade(u.data_nascimento),
     sexo_biologico: u.sexo_biologico as any,
     utilizador: {
         id: u.utilizador.id,

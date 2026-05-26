@@ -15,6 +15,7 @@ export interface UtenteRespostaDTO {
     id: number;
     nome: string;
     data_nascimento: string;
+    idade: number;
     sexo_biologico: Sexo_Biologico;
     utilizador: { id: number; email: string };
     medico: { id: number; nome: string; especialidade: string };
