@@ -1,6 +1,6 @@
 import { AppDataSource } from '../database/database';
 import { Administrador } from '../models/administrador.entity';
-import { CriarAdministradorDTO, AdministradorRespostaDTO } from '../dtos/administrador.dto';
+import { CriarAdministradorDTO, AtualizarAdministradorDTO, AdministradorRespostaDTO } from '../dtos/administrador.dto';
 
 const administradorRepo = AppDataSource.getRepository(Administrador);
 
@@ -86,6 +86,25 @@ export const AdministradorService = {
         };
     },
 
+// Atualizar Administrador
+atualizar: async (id: number, dados: AtualizarAdministradorDTO) => {
+    if (!id || id <= 0) {
+        throw new Error('ID inválido');
+    }
+
+    const administrador = await administradorRepo.findOneBy({ id });
+    if (!administrador) {
+        throw new Error('Administrador não encontrado');
+    }
+
+    if (dados.nome) {
+        administrador.nome = dados.nome.trim();
+    }
+
+    return await administradorRepo.save(administrador);
+},
+
+// Eliminar Administrador
     eliminar: async (id: number) => {
         if (!id || id <= 0) {
             throw new Error('ID inválido');
@@ -107,4 +126,4 @@ export const AdministradorService = {
         };
 
     }
-};
+}
