@@ -36,7 +36,7 @@ export const MedicoController = {
             const { telemovel } = req.body;
             if (!telemovel) return res.status(400).json({ erro: 'Telemóvel obrigatório' });
             
-            const medico = await MedicoService.atualizarTelemovel(Number(req.params.id), telemovel);
+            const medico = await MedicoService.atualizar(Number(req.params.id), telemovel);
             if (!medico) return res.status(404).json({ erro: 'Médico não encontrado' });
             res.json(medico);
         } catch (err) {
