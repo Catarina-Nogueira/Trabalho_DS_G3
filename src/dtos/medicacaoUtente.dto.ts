@@ -7,13 +7,12 @@ export interface CriarMedicacaoUtenteDTO {
     medicacao: { id: number };
     frequencia: string;
     data_inicio: string;
-    duracao: number;
+    duracao: string;
 }
 
-// Atualizar dados da prescrição
 export interface AtualizarMedicacaoUtenteDTO {
     frequencia?: string;
-    duracao?: number;
+    duracao?: string;
 }
 
 // RF44 - Encerramento de prescrição
