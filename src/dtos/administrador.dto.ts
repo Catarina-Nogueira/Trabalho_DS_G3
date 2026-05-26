@@ -3,6 +3,10 @@ export interface CriarAdministradorDTO {
     utilizador: { id: number };
 }
 
+export interface AtualizarAdministradorDTO {
+    nome?: string;
+}
+
 export interface AdministradorRespostaDTO {
     id: number;
     nome: string;
