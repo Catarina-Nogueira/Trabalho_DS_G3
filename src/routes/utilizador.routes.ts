@@ -7,6 +7,7 @@ router.get('/', UtilizadorController.listarTodos);
 router.get('/:id', UtilizadorController.buscarPorId);
 router.post('/', UtilizadorController.criar);
 router.put('/:id', UtilizadorController.atualizar);
+router.patch('/:id/desativar', UtilizadorController.desativar);
 router.delete('/:id', UtilizadorController.eliminar);
 
 export default router;

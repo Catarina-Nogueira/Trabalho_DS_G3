@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'; //Pedido e resposta http
 import { UtilizadorService } from '../services/utilizador.services';
+import { Tipo_Utilizador } from '../models/utilizador.entity';
 
 export const UtilizadorController = {
     //cada método corresponde a uma operação CRUD
@@ -23,11 +24,26 @@ export const UtilizadorController = {
     },
 
     criar: async (req: Request, res: Response) => {
+        const { email, password, tipo_utilizador } = req.body;
+ 
+        // Validações de entrada
+        if (!email) return res.status(400).json({ erro: 'email é obrigatório.' });
+        if (!password) return res.status(400).json({ erro: 'password é obrigatória.' });
+        if (!tipo_utilizador) return res.status(400).json({ erro: 'tipo_utilizador é obrigatório.' });
+ 
+        // Verificar que o tipo é válido
+        const tiposValidos = Object.values(Tipo_Utilizador);
+        if (!tiposValidos.includes(tipo_utilizador)) {
+            return res.status(400).json({
+                erro: `tipo_utilizador inválido. Valores aceites: ${tiposValidos.join(', ')}.`,
+            });
+        }
+ 
         try {
-            const utilizador = await UtilizadorService.criar(req.body);
+            const utilizador = await UtilizadorService.criar({ email, password, tipo_utilizador });
             res.status(201).json(utilizador);
-        } catch (err) {
-            res.status(500).json({ erro: 'Erro ao criar utilizador' });
+        } catch (err: any) {
+            res.status(400).json({ erro: err.message });
         }
     },
 
@@ -38,6 +54,16 @@ export const UtilizadorController = {
             res.json(utilizador);
         } catch (err) {
             res.status(500).json({ erro: 'Erro ao atualizar utilizador' });
+        }
+    },
+
+    desativar: async (req: Request, res: Response) => {
+        try {
+            const utilizador = await UtilizadorService.desativar(Number(req.params.id));
+            if (!utilizador) return res.status(404).json({ erro: 'Utilizador não encontrado.' });
+            res.json(utilizador);
+        } catch (err: any) {
+            res.status(400).json({ erro: err.message });
         }
     },
 

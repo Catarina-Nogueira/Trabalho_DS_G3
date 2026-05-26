@@ -1,33 +1,84 @@
-import { AppDataSource } from '../database/database';
-import { Utilizador } from '../models/utilizador.entity';
+// src/services/utilizador.service.ts
 
-const utilizadorRepo = AppDataSource.getRepository(Utilizador);
+import { AppDataSource } from '../database/database';
+import { Utilizador, Estado } from '../models/utilizador.entity';
+import { CriarUtilizadorDTO, AtualizarUtilizadorDTO, UtilizadorRespostaDTO } from '../dtos/utilizador.dto';
+
+const utilizadorRepo = () => AppDataSource.getRepository(Utilizador);
+
+// Converte entidade para DTO de resposta (nunca expõe a password)
+const toResposta = (u: Utilizador): UtilizadorRespostaDTO => ({
+    id: u.id,
+    email: u.email,
+    tipo_utilizador: u.tipo_utilizador as any,
+    estado: u.estado as any,
+    data_criacao: u.data_criacao?.toISOString(),
+    data_ultimo_acesso: u.data_ultimo_acesso?.toISOString(),
+});
 
 export const UtilizadorService = {
 
-    //vai à base de dados e devolve todos os utilizadores
-    listarTodos: async () => {
-        return await utilizadorRepo.find();
+    // Devolve todos os utilizadores (sem password)
+    listarTodos: async (): Promise<UtilizadorRespostaDTO[]> => {
+        const utilizadores = await utilizadorRepo().find();
+        return utilizadores.map(toResposta);
     },
 
-    //vai à base de dados e devolve o utilizador com o id indicado. Se não existir devolve null
-    buscarPorId: async (id: number) => {
-        return await utilizadorRepo.findOneBy({ id });
+    // Devolve um utilizador pelo id (sem password)
+    buscarPorId: async (id: number): Promise<UtilizadorRespostaDTO | null> => {
+        const utilizador = await utilizadorRepo().findOneBy({ id });
+        if (!utilizador) return null;
+        return toResposta(utilizador);
     },
 
-    //cria um novo utilizador na base de dados com os dados recebidos. O create prepara o objeto e o save guarda-o
-    criar: async (dados: Partial<Utilizador>) => {
-        const utilizador = utilizadorRepo.create(dados);
-        return await utilizadorRepo.save(utilizador);
+    // Cria um novo utilizador — estado inicial sempre ATIVO (RF07)
+    criar: async (dados: CriarUtilizadorDTO): Promise<UtilizadorRespostaDTO> => {
+        // Verificar se o email já existe
+        const existe = await utilizadorRepo().findOneBy({ email: dados.email });
+        if (existe) throw new Error('Já existe um utilizador com este email.');
+
+        const utilizador = utilizadorRepo().create({
+            email: dados.email,
+            password: dados.password,
+            tipo_utilizador: dados.tipo_utilizador,
+            estado: Estado.ATIVO, // sempre começa como ativo
+        });
+
+        const guardado = await utilizadorRepo().save(utilizador);
+        return toResposta(guardado);
     },
-    //atualiza o utilizador com o id indicado com os novos dados. O update atualiza e depois o findOneBy devolve o utilizador já atualizado
-    atualizar: async (id: number, dados: Partial<Utilizador>) => {
-        await utilizadorRepo.update(id, dados);
-        return await utilizadorRepo.findOneBy({ id });
+
+    // Atualiza email, password ou estado (RF04, RF08)
+    atualizar: async (id: number, dados: AtualizarUtilizadorDTO): Promise<UtilizadorRespostaDTO | null> => {
+        const utilizador = await utilizadorRepo().findOneBy({ id });
+        if (!utilizador) return null;
+
+        // Se está a mudar o email, verificar que o novo não está em uso
+        if (dados.email && dados.email !== utilizador.email) {
+            const existe = await utilizadorRepo().findOneBy({ email: dados.email });
+            if (existe) throw new Error('Já existe um utilizador com este email.');
+        }
+
+        await utilizadorRepo().update(id, dados);
+        const atualizado = await utilizadorRepo().findOneBy({ id });
+        return atualizado ? toResposta(atualizado) : null;
     },
-    //elimina o utilizador com o id indicado da base de dados:
-    eliminar: async (id: number) => {
-        return await utilizadorRepo.delete(id);
-    }
+
+    // Desativa a conta sem eliminar os dados (RF08)
+    desativar: async (id: number): Promise<UtilizadorRespostaDTO | null> => {
+        const utilizador = await utilizadorRepo().findOneBy({ id });
+        if (!utilizador) return null;
+        if (utilizador.estado === Estado.INATIVO) throw new Error('A conta já está desativada.');
+
+        await utilizadorRepo().update(id, { estado: Estado.INATIVO });
+        const atualizado = await utilizadorRepo().findOneBy({ id });
+        return atualizado ? toResposta(atualizado) : null;
+    },
+
+    // Elimina permanentemente (só para admin — RF07)
+    eliminar: async (id: number): Promise<void> => {
+        const utilizador = await utilizadorRepo().findOneBy({ id });
+        if (!utilizador) throw new Error('Utilizador não encontrado.');
+        await utilizadorRepo().delete(id);
+    },
 };
-// O Partial<Utilizador> significa que não se precisa de enviar todos os campos do utilizador, apenas os que se quer criar ou atualizar.
