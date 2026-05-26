@@ -25,6 +25,7 @@ import { Dado_Administrativo } from '../models/dadoAdministrativo.entity';
 import { Permissao } from '../models/permissao.entity';
 import { Auditoria } from '../models/auditoria.entity';
 import { Configuracao } from '../models/configuracao.entity';
+import { Utilizador_Permissao } from '../models/utilizadorPermissao.entity';
 
 export const AppDataSource = new DataSource({
     type: 'better-sqlite3',
@@ -32,6 +33,6 @@ export const AppDataSource = new DataSource({
     entities: [Utilizador, Medico, Administrador, Utente, Avaliacao_Carat, Resposta_Utente, Opcao_Resposta, 
         Questao_Carat, Questionario_Carat, Recomendacao, Alerta, Plano_Acompanhamento, Medicacao_Utente,
         Medicacao, Exame_Utente, Exame, Sintoma_Reportado, Historia_Familiar, Comorbilidade, Dado_Administrativo,
-        Permissao,  Auditoria, Configuracao],
+        Permissao,  Auditoria, Configuracao, Utilizador_Permissao],
     synchronize: true,
 });
