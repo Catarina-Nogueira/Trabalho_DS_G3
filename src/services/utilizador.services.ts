@@ -1,8 +1,7 @@
-// src/services/utilizador.service.ts
-
 import { AppDataSource } from '../database/database';
 import { Utilizador, Estado } from '../models/utilizador.entity';
 import { CriarUtilizadorDTO, AtualizarUtilizadorDTO, UtilizadorRespostaDTO } from '../dtos/utilizador.dto';
+import { AutenticacaoService } from './autenticacao.services';
 
 const utilizadorRepo = () => AppDataSource.getRepository(Utilizador);
 
@@ -37,12 +36,14 @@ export const UtilizadorService = {
         const existe = await utilizadorRepo().findOneBy({ email: dados.email });
         if (existe) throw new Error('Já existe um utilizador com este email.');
 
+        const passwordEncriptada = await AutenticacaoService.encriptarPassword(dados.password);
+
         const utilizador = utilizadorRepo().create({
             email: dados.email,
-            password: dados.password,
             tipo_utilizador: dados.tipo_utilizador,
             estado: Estado.ATIVO, // sempre começa como ativo
-        });
+            password: passwordEncriptada,
+        });      
 
         const guardado = await utilizadorRepo().save(utilizador);
         return toResposta(guardado);

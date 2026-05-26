@@ -22,6 +22,8 @@ import planoAcompanhamentoRoutes from './routes/planoAcompanhamento.routes';
 import questionarioCaratRoutes from './routes/questionarioCarat.routes';
 import recomendacaoRoutes from './routes/recomendacao.routes';
 import sintomaReportadoRoutes from './routes/sintomaReportado.routes';
+import autenticacaoRoutes from './routes/autenticacao.routes';
+
 
 const app = express(); // Cria o objeto principal da aplicação Express
 const PORT = 3000;
@@ -52,6 +54,7 @@ app.use('/planoAcompanhamento', planoAcompanhamentoRoutes);
 app.use('/questionarioCarat', questionarioCaratRoutes);
 app.use('/recomendacoes', recomendacaoRoutes);
 app.use('/sintomaReportado', sintomaReportadoRoutes);
+app.use('/auth', autenticacaoRoutes);
 
 // Inicializar a base de dados
 AppDataSource.initialize()
