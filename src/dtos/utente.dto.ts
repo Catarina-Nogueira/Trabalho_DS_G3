@@ -1,14 +1,13 @@
+import { Sexo_Biologico } from "../models/utente.entity";
+
 export interface CriarUtenteDTO {
     nome: string;
     data_nascimento: string;
-    sexo_biologico: 'feminino' | 'masculino';
-    utilizador: { id: number };
-    medico: { id: number };
+    sexo_biologico: Sexo_Biologico;
 }
 
 export interface AtualizarUtenteDTO {
     nome?: string;
-    sexo_biologico?: 'feminino' | 'masculino';
     medico?: { id: number };  
 }
 
@@ -16,7 +15,7 @@ export interface UtenteRespostaDTO {
     id: number;
     nome: string;
     data_nascimento: string;
-    sexo_biologico: string;
+    sexo_biologico: Sexo_Biologico;
     utilizador: { id: number; email: string };
     medico: { id: number; nome: string; especialidade: string };
     data_atualizacao: Date;

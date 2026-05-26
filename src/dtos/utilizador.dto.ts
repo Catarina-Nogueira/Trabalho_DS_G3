@@ -1,21 +1,22 @@
+import { Tipo_Utilizador, Estado } from "../models/utilizador.entity";
+
 export interface CriarUtilizadorDTO {
     email: string;
     password: string;
-    tipo_utilizador: 'utente' | 'medico' | 'administrador';
-    estado: 'ativo' | 'inativo';
+    tipo_utilizador: Tipo_Utilizador;
 }
 
 export interface AtualizarUtilizadorDTO {
     email?: string;
     password?: string;
-    estado?: 'ativo' | 'inativo';
+    estado?: Estado;
 }
 
 export interface UtilizadorRespostaDTO {
     id: number;
     email: string;
-    tipo_utilizador: string;
-    estado: string;
-    data_criacao: Date;
-    data_ultimo_acesso: Date;
+    tipo_utilizador: Tipo_Utilizador;
+    estado: Estado;
+    data_criacao: string;
+    data_ultimo_acesso: string;
 }
