@@ -10,6 +10,7 @@ export interface RespostaItemDto {
 }
 
 export interface SubmeterAvaliacaoDto {
+    id_utente: number;
     id_questionario: number;
     respostas: RespostaItemDto[];
 }
@@ -20,8 +21,7 @@ export interface SubmeterAvaliacaoDto {
 
 export interface CriarQuestionarioDto {
     versao: string;
-    data_ativacao: string; // formato YYYY-MM-DD
-    data_desativacao: string; 
+    data_ativacao: string; // formato YYYY-MM-DD 
 }
 
 export interface CriarQuestaoDto {
@@ -33,13 +33,4 @@ export interface CriarOpcaoRespostaDto {
     id_questao: number;
     texto_opcao: string;
     score: number;
-}
-
-export interface AtualizarQuestaoDto {
-    texto_questao?: string;
-}
-
-export interface AtualizarOpcaoRespostaDto {
-    texto_opcao?: string;
-    score?: number;
 }

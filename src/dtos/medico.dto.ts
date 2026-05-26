@@ -3,7 +3,6 @@ export interface CriarMedicoDTO {
     especialidade: string;
     numero_medico: number;
     telemovel: string;
-    utilizador: { id: number };
 }
 
 export interface AtualizarMedicoDTO {
