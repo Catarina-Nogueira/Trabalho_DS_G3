@@ -8,7 +8,7 @@ export class Questionario_Carat {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column({ type: 'varchar2', unique: true })
+    @Column({ type: 'text', unique: true })
     versao!: string;
 
     @Column({type: 'date'})

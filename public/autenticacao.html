@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SaudINOB - Autenticação</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      /* Degradê de azul suave solicitado */
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #f5fcff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Container do formulário sem o retângulo branco */
+    .login-wrapper {
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    /* Títulos solicitados */
+    .login-wrapper h1 {
+      font-size: 4.2rem;
+      color: #092b4c;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .login-wrapper .subtitulo {
+      font-size: 1rem;
+      color: #092b4c;
+      margin-bottom: 40px;
+      line-height: 1.5;
+    }
+
+    /* Estrutura dos Campos de Input */
+    .grupo-input {
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .grupo-input label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #092b4c;
+      margin-bottom: 8px;
+    }
+
+    /* Container interno para alinhar o input e o botão do olho */
+    .input-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-container input {
+      width: 100%;
+      /* Padding normal sem espaço para ícones laterais */
+      padding: 14px 16px; 
+      border: 1.5px solid #b9d2f0;
+      border-radius: 12px;
+      background: rgba(247, 253, 255, 0.7); /* Ligeira transparência sobre o degradê */
+      font-size: 0.95rem;
+      color: #092b4c;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    /* Espaço extra à direita na password para o olho não sobrepor o texto */
+    .input-container input[type="password"],
+    .input-container input[type="text"].password-field {
+      padding-right: 44px;
+    }
+
+    .input-container input:focus {
+      background: #ffffff;
+      border-color: #0b75ff;
+      box-shadow: 0 0 0 4px rgba(11, 117, 255, 0.15);
+    }
+
+    /* Botão para ver a password */
+    .btn-toggle-password {
+      position: absolute;
+      right: 16px;
+      background: none;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+
+    .btn-toggle-password:hover {
+      color: #0b75ff;
+    }
+
+    /* Links auxiliares (Esqueceu-se da palavra-passe) */
+    .opcoes-auxiliares {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -10px;
+      margin-bottom: 32px;
+    }
+
+    .link-esqueceu {
+      font-size: 0.85rem;
+      color: #0b75ff;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .link-esqueceu:hover {
+      color: #0056cc;
+      text-decoration: underline;
+    }
+
+    /* Botão Entrar */
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: #0b75ff;
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(11, 117, 255, 0.2);
+      transition: all 0.2s;
+    }
+
+    .btn-login:hover {
+      background: #0056cc;
+      box-shadow: 0 6px 16px rgba(11, 117, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-wrapper">
+
+    <h1>SaudINOB</h1>
+    <div class="subtitulo">Sistema de Prevenção e Controlo de Doenças Respiratórias</div>
+
+    <form id="formLogin" onsubmit="lidarLogin(event)">
+      
+      <div class="grupo-input">
+        <label for="username">Nome de Utilizador</label>
+        <div class="input-container">
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            placeholder="Introduza o seu nome de utilizador" 
+            required 
+          />
+        </div>
+      </div>
+
+      <div class="grupo-input">
+        <label for="password">Palavra-passe</label>
+        <div class="input-container">
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            placeholder="Introduza a sua palavra-passe" 
+            required 
+          />
+          <button 
+            type="button" 
+            class="btn-toggle-password" 
+            onclick="alternarVisibilidadePassword()"
+            title="Mostrar/Esconder palavra-passe"
+          >
+            <i class="fa-solid fa-eye" id="iconeOlho"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="opcoes-auxiliares">
+        <a href="recuperar-password.html" class="link-esqueceu">
+          Esqueceu-se da palavra-passe?
+        </a>
+      </div>
+
+      <button type="submit" class="btn-login">
+        Iniciar Sessão
+      </button>
+
+    </form>
+
+  </div>
+
+  <script>
+    // Lógica para o Olhinho funcionar (Mudar entre texto e password)
+    function alternarVisibilidadePassword() {
+      const campoPassword = document.getElementById('password');
+      const iconeOlho = document.getElementById('iconeOlho');
+
+      if (campoPassword.type === 'password') {
+        campoPassword.type = 'text';
+        campoPassword.classList.add('password-field');
+        iconeOlho.className = 'fa-solid fa-eye-slash';
+      } else {
+        campoPassword.type = 'password';
+        campoPassword.classList.remove('password-field');
+        iconeOlho.className = 'fa-solid fa-eye';
+      }
+    }
+
+    // Evento de envio para a vossa API
+    function lidarLogin(event) {
+      event.preventDefault();
+      
+      const form = document.getElementById('formLogin');
+      const formData = new FormData(form);
+      
+      const payloadLogin = {
+        username: formData.get('username'),
+        password: formData.get('password')
+      };
+
+      console.log("Payload enviado para o Backend:", payloadLogin);
+      alert("A processar a autenticação...");
+    }
+  </script>
+</body>
+</html>

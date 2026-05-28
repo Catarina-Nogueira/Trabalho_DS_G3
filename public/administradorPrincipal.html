@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB - Painel do Administrador</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- 1) BARRA LATERAL DO ADMINISTRADOR --- */
+    .sidebar {
+      width: 260px;
+      background: #07213b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99, 179, 237, 0.15);
+    }
+
+    /* Bloco do Administrador Logado */
+    .perfil-admin {
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .perfil-foto {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #1a365d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      border: 3px solid #75d0fb;
+      font-size: 2.2rem;
+      color: #75d0fb;
+    }
+
+    .perfil-nome {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .perfil-tipo {
+      font-size: 0.8rem;
+      color: #75d0fb;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Menu Central Vazio para o Admin (Conforme solicitado, ações ficam nos blocos principais) */
+    .sidebar-menu-vazio {
+      flex: 1;
+    }
+
+    /* Bloco de Rodapé com apenas o Log Out */
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-logout:hover {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    /* --- 2) CONTEÚDO PRINCIPAL (Lado Direito) --- */
+    .main-conteudo {
+      margin-left: 260px;
+      padding: 48px;
+      width: calc(100% - 260px);
+      max-width: 1200px;
+    }
+
+    .cabecalho-pagina {
+      margin-bottom: 40px;
+    }
+
+    .cabecalho-pagina h1 {
+      font-size: 2.2rem;
+      color: #092b4c;
+    }
+
+    .cabecalho-pagina p {
+      color: #64748b;
+      margin-top: 4px;
+      font-size: 1.05rem;
+    }
+
+    /* --- GRELHA DE CONTENTORES (CARDS DE GESTÃO) --- */
+    .grelha-admin {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    .card-gestao {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      border: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card-gestao:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(7, 33, 59, 0.06);
+      border-color: #75d0fb;
+    }
+
+    .card-topo {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .icone-wrapper {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    /* Cores personalizadas para os wrappers de ícones do Administrador */
+    .cor-medicos { background: #e0f2fe; color: #0369a1; }
+    .cor-utentes { background: #dcfce7; color: #15803d; }
+    .cor-carat { background: #fef9c3; color: #a16207; }
+    .cor-sistema { background: #f3e8ff; color: #6b21a8; }
+    .cor-auditoria { background: #fee2e2; color: #991b1b; }
+
+    .card-titulo {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #092b4c;
+      margin-bottom: 8px;
+    }
+
+    .card-descricao {
+      font-size: 0.95rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .card-acao-link {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #0b75ff;
+    }
+
+    .card-gestao:hover .card-acao-link {
+      color: #0056cc;
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="perfil-admin">
+      <div class="perfil-foto"><i class="fa-solid fa-user-shield"></i></div>
+      <div class="perfil-nome">Administrador Sistema</div>
+      <div class="perfil-tipo">Administrador</div>
+    </div>
+    
+    <div class="sidebar-menu-vazio"></div>
+    
+    <div class="sidebar-footer">
+      <a href="#" class="btn-logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-conteudo">
+    
+    <div class="cabecalho-pagina">
+      <h1>Painel Geral de Administração</h1>
+      <p>Bem-vindo ao centro de controlo do ecossistema SaudINOB.</p>
+    </div>
+
+    <div class="grelha-admin">
+      
+      <a href="#" class="card-gestao">
+        <div>
+          <div class="card-topo">
+            <div class="icone-wrapper cor-medicos">
+              <i class="fa-solid fa-user-doctor"></i>
+            </div>
+          </div>
+          <div class="card-titulo">Gestão de Médicos</div>
+          <div class="card-descricao">
+            Registo de novos profissionais de saúde, atribuição de permissões, especialidades e controlo de acessos médicos ativos no sistema.
+          </div>
+        </div>
+        <div class="card-acao-link">
+          Gerir Corpo Clínico <i class="fa-solid fa-arrow-right"></i>
+        </div>
+      </a>
+
+      <a href="#" class="card-gestao">
+        <div>
+          <div class="card-topo">
+            <div class="icone-wrapper cor-utentes">
+              <i class="fa-solid fa-users"></i>
+            </div>
+          </div>
+          <div class="card-titulo">Gestão de Utentes</div>
+          <div class="card-descricao">
+            Monitorização de utilizadores registados, histórico de inscrições, vinculação com médicos de família e integridade de dados clínicos.
+          </div>
+        </div>
+        <div class="card-acao-link">
+          Gerir Utentes <i class="fa-solid fa-arrow-right"></i>
+        </div>
+      </a>
+
+      <a href="#" class="card-gestao">
+        <div>
+          <div class="card-topo">
+            <div class="icone-wrapper cor-carat">
+              <i class="fa-solid fa-sliders"></i>
+            </div>
+          </div>
+          <div class="card-titulo">Configuração CARAT</div>
+          <div class="card-descricao">
+            Parametrização do questionário médico, alteração de limiares de score, ajuste do seed de perguntas e controlo de versões ativas.
+          </div>
+        </div>
+        <div class="card-acao-link">
+          Configurar Parâmetros <i class="fa-solid fa-arrow-right"></i>
+        </div>
+      </a>
+
+      <a href="#" class="card-gestao">
+        <div>
+          <div class="card-topo">
+            <div class="icone-wrapper cor-sistema">
+              <i class="fa-solid fa-gear"></i>
+            </div>
+          </div>
+          <div class="card-titulo">Configuração Sistema</div>
+          <div class="card-descricao">
+            Gestão global das variáveis do ambiente, conexão a APIs externas de diagnósticos, backups de base de dados e manutenção de rotinas.
+          </div>
+        </div>
+        <div class="card-acao-link">
+          Definições Globais <i class="fa-solid fa-arrow-right"></i>
+        </div>
+      </a>
+
+      <a href="#" class="card-gestao">
+        <div>
+          <div class="card-topo">
+            <div class="icone-wrapper cor-auditoria">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+          </div>
+          <div class="card-titulo">Auditoria</div>
+          <div class="card-descricao">
+            Histórico completo de acessos e segurança (logs). Verificação de alterações críticas feitas por utilizadores ou equipas clínicas.
+          </div>
+        </div>
+        <div class="card-acao-link">
+          Consultar Logs <i class="fa-solid fa-arrow-right"></i>
+        </div>
+      </a>
+
+    </div>
+
+  </main>
+
+</body>
+</html>

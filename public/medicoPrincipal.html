@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB - Painel do Médico</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- 1) BARRA LATERAL DO MÉDICO --- */
+    .sidebar {
+      width: 260px;
+      background: #07213b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99, 179, 237, 0.15);
+    }
+
+    .perfil-medico {
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .perfil-foto {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #1a365d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      border: 3px solid #75d0fb;
+      font-size: 2.2rem;
+      color: #75d0fb;
+    }
+
+    .perfil-nome { font-size: 1.1rem; font-weight: 600; color: #ffffff; }
+    .perfil-tipo { font-size: 0.8rem; color: #75d0fb; margin-top: 2px; text-transform: uppercase; letter-spacing: 1px; }
+    .perfil-especialidade { font-size: 0.85rem; color: #dfe8f6; margin-top: 4px; font-style: italic; }
+
+    /* Bloco centralizado verticalmente para o botão */
+    .sidebar-menu-central {
+      margin: auto 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .btn-destaque-utentes {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: #0b75ff;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(11, 117, 255, 0.3);
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-destaque-utentes:hover {
+      background: #0056cc;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(11, 117, 255, 0.4);
+    }
+
+    .sidebar-footer {
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .btn-logout:hover { background: #ef4444; color: #ffffff; }
+
+    /* --- 2) CONTEÚDO PRINCIPAL --- */
+    .main-conteudo {
+      margin-left: 260px;
+      padding: 48px;
+      width: calc(100% - 260px);
+      max-width: 1200px;
+    }
+
+    .cabecalho-pagina { margin-bottom: 32px; }
+    .cabecalho-pagina h1 { font-size: 2.2rem; color: #092b4c; }
+    .cabecalho-pagina p { color: #64748b; margin-top: 4px; font-size: 1.05rem; }
+
+    /* --- TABELA E CLASSE DE BADGES --- */
+    .tabela-container {
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+      border: 1px solid #e2e8f0;
+    }
+
+    .tabela-alertas { width: 100%; border-collapse: collapse; text-align: left; }
+    .tabela-alertas th, .tabela-alertas td { padding: 18px 24px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+    
+    .tabela-alertas th {
+      background: #f8fafc;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+    }
+
+    .tabela-alertas tr:last-child td { border-bottom: none; }
+    .tabela-alertas tr:hover { background: #f8fcff; }
+
+    /* Classes auxiliares para quando injetares os dados por JS */
+    .nome-utente { font-weight: 600; color: #092b4c; }
+    .badge-prioridade { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+    .prio-critico { background: #fee2e2; color: #991b1b; }
+    .prio-moderado { background: #fef9c3; color: #a16207; }
+    .prio-ligeiro { background: #e0f2fe; color: #0369a1; }
+    .estado-alerta { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #475569; }
+    .ponto-estado { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .ponto-pendente { background: #ef4444; }
+    .ponto-revisao { background: #f59e0b; }
+    .ponto-resolvido { background: #10b981; }
+    .btn-detalhes { color: #0b75ff; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-detalhes:hover { color: #0056cc; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="perfil-medico">
+      <div class="perfil-foto"><i class="fa-solid fa-user-doctor"></i></div>
+      <div class="perfil-nome">Dr. X</div>
+      <div class="perfil-tipo">Médico</div>
+      <div class="perfil-especialidade">Pneumologia</div>
+    </div>
+    
+    <div class="sidebar-menu-central">
+      <a href="#" class="btn-destaque-utentes">
+        <i class="fa-solid fa-address-book"></i> Listagem de Utentes
+      </a>
+    </div>
+    
+    <div class="sidebar-footer">
+      <a href="#" class="btn-logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-conteudo">
+    
+    <div class="cabecalho-pagina">
+      <h1>Centro de Alertas Clínicos</h1>
+      <p>Alertas ordenados por prioridade clínica e ordem cronológica.</p>
+    </div>
+
+    <div class="tabela-container">
+      <table class="tabela-alertas">
+        <thead>
+          <tr>
+            <th>Utente</th>
+            <th>Tipo de Alerta</th>
+            <th>Prioridade</th>
+            <th>Data de Criação</th>
+            <th>Estado</th>
+            <th style="text-align: right;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="listaAlertas">
+          </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <script>
+    // Exemplo de integração futura com o teu Service
+    async function carregarAlertasDoService() {
+      try {
+        // const resposta = await fetch('URL_DA_TUA_API/alertas');
+        // const alertas = await resposta.json();
+        
+        const tbody = document.getElementById('listaAlertas');
+        tbody.innerHTML = ''; // Limpar tabela
+        
+        // Mapeamento/Ciclo dos dados viria aqui para gerar o HTML dinâmico
+      } catch (error) {
+        console.error("Erro ao carregar dados do service:", error);
+      }
+    }
+
+    // Inicializar quando a página carregar
+    window.onload = carregarAlertasDoService;
+  </script>
+</body>
+</html>
