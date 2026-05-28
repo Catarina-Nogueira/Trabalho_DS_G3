@@ -15,7 +15,7 @@ export class Opcao_Resposta {
     @JoinColumn({ name: 'id_questao' })
     questao!: Questao_Carat;
     
-    @Column()
+    @Column({ type: 'text' })
     texto_opcao!: string;
 
     @Column({ type: 'integer' })

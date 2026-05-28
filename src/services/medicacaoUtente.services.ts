@@ -47,6 +47,7 @@ criar: async (dados: CriarMedicacaoUtenteDTO) => {
         frequencia: dados.frequencia,
         data_inicio: dados.data_inicio,
         duracao: dados.duracao,
+        dosagem: dados.dosagem,
         ativo: true
     });
     return await medicacaoUtenteRepo.save(medicacaoUtente);
@@ -69,7 +70,9 @@ atualizar: async (id: number, dados: AtualizarMedicacaoUtenteDTO) => {
     if (dados.duracao) {
         medicacao.duracao = dados.duracao;
     }
-
+    if (dados.dosagem) {
+        medicacao.dosagem = dados.dosagem;
+    }
     return await medicacaoUtenteRepo.save(medicacao);
 },
 

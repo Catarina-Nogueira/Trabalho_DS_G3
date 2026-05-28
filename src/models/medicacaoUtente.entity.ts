@@ -34,6 +34,9 @@ export class Medicacao_Utente {
     @Column()
     duracao!: string;
 
+    @Column()
+    dosagem!: string;
+
     @Column({ default: true })
     ativo!: boolean;
 

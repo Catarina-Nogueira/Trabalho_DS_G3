@@ -24,9 +24,10 @@ export const UtilizadorController = {
     },
 
     criar: async (req: Request, res: Response) => {
-        const { email, password, tipo_utilizador } = req.body;
+        const { username, email, password, tipo_utilizador } = req.body;
  
         // Validações de entrada
+        if (!username) return res.status(400).json({ erro: 'username é obrigatório.' });
         if (!email) return res.status(400).json({ erro: 'email é obrigatório.' });
         if (!password) return res.status(400).json({ erro: 'password é obrigatória.' });
         if (!tipo_utilizador) return res.status(400).json({ erro: 'tipo_utilizador é obrigatório.' });
@@ -40,7 +41,7 @@ export const UtilizadorController = {
         }
  
         try {
-            const utilizador = await UtilizadorService.criar({ email, password, tipo_utilizador });
+            const utilizador = await UtilizadorService.criar({ username, email, password, tipo_utilizador });
             res.status(201).json(utilizador);
         } catch (err: any) {
             res.status(400).json({ erro: err.message });

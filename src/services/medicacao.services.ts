@@ -38,14 +38,6 @@ export const MedicacaoService = {
         });
     },
 
-    // Atualizar apenas a dosagem de um medicamento
-    atualizarDosagem: async (id: number, dosagem: string) => {
-        await medicacaoRepo.update(id, { dosagem });
-        return await medicacaoRepo.findOne({
-            where: { id }
-        });
-    },
-
     // Eliminar medicamento do catálogo
     eliminar: async (id: number) => {
         return await medicacaoRepo.delete(id);

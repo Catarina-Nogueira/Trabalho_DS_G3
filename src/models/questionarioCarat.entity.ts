@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column , OneToMany} from 'typeorm';
+import { Questao_Carat } from './questaoCarat.entity';
 
 @Entity()
 export class Questionario_Carat {
@@ -7,7 +8,7 @@ export class Questionario_Carat {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column({ unique: true })
+    @Column({ type: 'varchar2', unique: true })
     versao!: string;
 
     @Column({type: 'date'})
@@ -15,5 +16,8 @@ export class Questionario_Carat {
 
     @Column({type: 'date', nullable: true})
     data_desativacao!: string | null
+
+    @OneToMany(() => Questao_Carat, (questao) => questao.questionario, { cascade: true })
+    questoes!: Questao_Carat[];
 
 }

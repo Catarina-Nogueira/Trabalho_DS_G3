@@ -6,16 +6,16 @@ export const AutenticacaoController = {
     // POST /auth/login
     // RF01 — Autenticação do utilizador
     login: async (req: Request, res: Response) => {
-        const { email, password } = req.body;
+        const { username, password } = req.body;
 
-        if (!email) return res.status(400).json({ erro: 'email é obrigatório.' });
+        if (!username) return res.status(400).json({ erro: 'username é obrigatório.' });
         if (!password) return res.status(400).json({ erro: 'password é obrigatória.' });
 
         try {
-            const resultado = await AutenticacaoService.login({ email, password });
+            const resultado = await AutenticacaoService.login({ username, password });
             res.json(resultado);
         } catch (err: any) {
-            // Mensagem genérica para não revelar se o email existe (segurança)
+            // Mensagem genérica para não revelar se o username existe (segurança)
             res.status(401).json({ erro: err.message });
         }
     },

@@ -1,7 +1,7 @@
 import { Tipo_Utilizador } from "../models/utilizador.entity";
 
 export interface LoginDTO {
-    email: string;
+    username: string;
     password: string;
 }
 

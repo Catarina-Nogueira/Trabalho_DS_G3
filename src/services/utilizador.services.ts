@@ -8,6 +8,7 @@ const utilizadorRepo = () => AppDataSource.getRepository(Utilizador);
 // Converte entidade para DTO de resposta (nunca expõe a password)
 const toResposta = (u: Utilizador): UtilizadorRespostaDTO => ({
     id: u.id,
+    username: u.username,
     email: u.email,
     tipo_utilizador: u.tipo_utilizador as any,
     estado: u.estado as any,
@@ -36,9 +37,13 @@ export const UtilizadorService = {
         const existe = await utilizadorRepo().findOneBy({ email: dados.email });
         if (existe) throw new Error('Já existe um utilizador com este email.');
 
+        const usernameExiste = await utilizadorRepo().findOneBy({ username: dados.username });
+        if (usernameExiste) throw new Error('Já existe um utilizador com este username.');
+
         const passwordEncriptada = await AutenticacaoService.encriptarPassword(dados.password);
 
         const utilizador = utilizadorRepo().create({
+            username: dados.username,
             email: dados.email,
             tipo_utilizador: dados.tipo_utilizador,
             estado: Estado.ATIVO, // sempre começa como ativo

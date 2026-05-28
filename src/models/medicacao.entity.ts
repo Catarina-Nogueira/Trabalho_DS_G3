@@ -13,7 +13,13 @@ export class Medicacao {
 
     @Column()
     substancia_ativa!: string;
+
+    @Column()
+    tipo!: string;
+
+    @Column()
+    descricao!: string;
     
     @Column()
-    dosagem!: string;
+    objetivo!: string;
 }

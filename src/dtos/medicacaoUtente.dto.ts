@@ -8,11 +8,13 @@ export interface CriarMedicacaoUtenteDTO {
     frequencia: string;
     data_inicio: string;
     duracao: string;
+    dosagem: string;
 }
 
 export interface AtualizarMedicacaoUtenteDTO {
     frequencia?: string;
     duracao?: string;
+    dosagem?: string;
 }
 
 // RF44 - Encerramento de prescrição
@@ -25,6 +27,7 @@ export interface MedicacaoUtenteRespostaDTO {
     frequencia: string;
     data_inicio: string;
     duracao: string;
+    dosagem: string;
     ativo: boolean;
     utente: { id: number; nome: string };
     medico: { id: number; nome: string };

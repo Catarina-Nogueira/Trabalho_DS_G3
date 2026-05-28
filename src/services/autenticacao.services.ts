@@ -19,8 +19,8 @@ export const AutenticacaoService = {
 
     // RF01 — Autenticação do utilizador
     login: async (dto: LoginDTO) => {
-        // 1. Verificar que o utilizador existe pelo email
-        const utilizador = await utilizadorRepo().findOneBy({ email: dto.email });
+        // 1. Verificar que o utilizador existe pelo username
+        const utilizador = await utilizadorRepo().findOneBy({ username: dto.username });
         if (!utilizador) {
             throw new Error('Dados não coincidem.');
         }
