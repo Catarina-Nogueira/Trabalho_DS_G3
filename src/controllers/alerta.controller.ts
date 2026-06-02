@@ -5,19 +5,23 @@ import { EstadoAlerta, PrioridadeAlerta } from '../models/alerta.entity';
 export const AlertaController = {
 
     // RF36 - Listagem de alertas direcionados ao Médico autenticado
+    // src/controllers/alerta.controller.ts
+
     listarPorMedico: async (req: Request, res: Response) => {
         try {
-            const id_medico = req.user!.id; // Extraído da sessão de forma blindada
-            const { estado, prioridade } = req.query;
+            const id_medico = req.user!.id; // ID blindado vindo da sessão/token
+            const { estado, prioridade, id_utente } = req.query; // Captura o id_utente se vier da query string
 
             const alertas = await AlertaService.listarPorMedico(
                 id_medico,
                 estado as EstadoAlerta,
-                prioridade as PrioridadeAlerta
+                prioridade as PrioridadeAlerta,
+                id_utente ? Number(id_utente) : undefined // Passa para o serviço se existir
             );
+            
             return res.json(alertas);
         } catch (err: any) {
-            return res.status(500).json({ erro: err.message || 'Erro ao listar alertas do médico' });
+            return res.status(500).json({ erro: 'Erro ao listar alertas do médico' });
         }
     },
 

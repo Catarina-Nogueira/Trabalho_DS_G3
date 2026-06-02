@@ -136,8 +136,8 @@ export const CaratService = {
         const score_total = opcoes.reduce((acc, o) => acc + o.score, 0);
 
         // RF20 — Determinar nível de controlo com limiares configuráveis
-        const limiarControlado = await getLimiar('limiar_controlado', 12);
-        const limiarParcial    = await getLimiar('limiar_parcial', 6);
+        const limiarControlado = await getLimiar('limiar_controlado', 24);
+        const limiarParcial    = await getLimiar('limiar_parcial', 20);
 
         let nivel_controlo: NivelControlo;
         if (score_total >= limiarControlado) {
@@ -181,6 +181,24 @@ export const CaratService = {
                 `Aviso: Utente obteve score de ${score_total} no teste CARAT (Sintomas Parcialmente Controlados).`,
                 avaliacaoGuardada.id
             );
+
+        }
+
+        if (delta !== null) {
+            // Procura o limiar na tabela Configuração. Se não existir, assume 3 pontos por defeito.
+            const limiarDeterioracao = await getLimiar('limiar_deterioracao', 3);
+            
+            // Se o delta for negativo e a queda for igual ou superior ao limiar (ex: delta = -4 e limiar = 3)
+            if (delta <= -limiarDeterioracao) {
+                const pontosPerdidos = Math.abs(delta);
+                await AlertaService.gerarAlertaAutomatico(
+                    id_utente,
+                    utente.medico.id,
+                    TipoAlerta.SCORE_CARAT, // Pode ser SCORE_CARAT ou podes criar TipoAlerta.DETERIORACAO se preferires
+                    `Deterioração: Detetada uma queda abrupta de ${pontosPerdidos} pontos no score CARAT em comparação com a avaliação anterior.`,
+                    avaliacaoGuardada.id
+                );
+            }
         }
 
         // Guardar as respostas individuais
@@ -336,6 +354,38 @@ export const CaratService = {
             );
         }
         return CaratService.listarAvaliacoesUtente(id_utente);
+    },
+
+    //RF 38 - Evolução do score CARAT ao longo do tempo (gráfico)
+    obterHistoricoGrafico: async (id_utente: number) => {
+        // Obter o limiar atualizado definido pelo admin (ou usar 20 por defeito)
+        const limiarParcial = await getLimiar('limiar_parcial', 20);
+
+        const avaliacoes = await avaliacaoRepo().find({
+            where: { utente: { id: id_utente } },
+            order: { data_avaliacao: 'ASC' }, // Cronológico para o gráfico
+            select: {
+                id: true,
+                data_avaliacao: true,
+                score_total: true,
+                nivel_controlo: true
+            }
+        });
+
+        // Mapear os dados num formato ideal para gráficos no Frontend
+        const pontosGrafico = avaliacoes.map(av => ({
+            id_avaliacao: av.id,
+            data: av.data_avaliacao.toISOString().split('T')[0], // Formato YYYY-MM-DD
+            score: av.score_total,
+            nivel: av.nivel_controlo,
+            limiar_critico: limiarParcial // O frontend usa isto para desenhar a linha horizontal fixa
+        }));
+
+        return {
+            id_utente,
+            limiar_alerta: limiarParcial,
+            dados: pontosGrafico
+        };
     },
 
     // RF27, RF28 — Listar recomendações de uma avaliação

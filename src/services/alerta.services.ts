@@ -15,7 +15,12 @@ const fluxoValido: Record<EstadoAlerta, EstadoAlerta[]> = {
 export const AlertaService = {
     
     // RF36 - Listagem de alertas do médico com filtros
-    listarPorMedico: async (id_medico: number, estado?: EstadoAlerta, prioridade?: PrioridadeAlerta) => {
+    /**
+     * COBRE DOIS CENÁRIOS PARA O MÉDICO:
+     * 1. Listar TODOS os alertas do painel geral do médico (id_utente omitido)
+     * 2. Listar alertas de um UTENTE ESPECÍFICO quando o médico consulta os seus detalhes (id_utente preenchido)
+     */
+    listarPorMedico: async (id_medico: number, estado?: EstadoAlerta, prioridade?: PrioridadeAlerta, id_utente?: number) => {
         if (!id_medico || id_medico <= 0) throw new Error('ID do médico inválido');
 
         const query = alertaRepo.createQueryBuilder('alerta')
@@ -26,8 +31,14 @@ export const AlertaService = {
             .orderBy('alerta.prioridade', 'DESC')
             .addOrderBy('alerta.data_criacao', 'DESC');
 
+        // Filtros opcionais já existentes
         if (estado) query.andWhere('alerta.estado = :estado', { estado });
         if (prioridade) query.andWhere('alerta.prioridade = :prioridade', { prioridade });
+
+        // [NOVO FILTRO] Se o médico estiver na página de detalhes de um utente específico
+        if (id_utente && id_utente > 0) {
+            query.andWhere('alerta.utente.id = :id_utente', { id_utente });
+        }
 
         return await query.getMany();
     },
@@ -48,10 +59,10 @@ export const AlertaService = {
                 motivo: true,
                 data_criacao: true,
                 avaliacao: {
-                    id: true, // Adiciona aqui os campos que queres da avaliação
+                    id: true, 
                 },
                 sintoma: {
-                    id: true, // Adiciona aqui os campos que queres do sintoma
+                    id: true, 
                 }
             }
         });

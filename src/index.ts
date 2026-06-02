@@ -1,6 +1,7 @@
 import 'reflect-metadata'; //Necessário para o typeORM
 import express from 'express'; //Framework web que cria o servidor HTTP
 import { AppDataSource } from './database/database'; 
+import {rodarMedicacaoSeed } from './seeds/medicacao.seed';
 import path from 'path';
 
 import utilizadorRoutes from './routes/utilizador.routes';
@@ -58,8 +59,11 @@ app.use('/auth', autenticacaoRoutes);
 
 // Inicializar a base de dados
 AppDataSource.initialize()
-    .then(() => {
+    .then(async () => {
         console.log('Base de dados ligada com sucesso!');
+
+        //seeds
+        await rodarMedicacaoSeed(AppDataSource);
 
         // Iniciar o servidor só depois da base de dados estar ligada
         app.listen(PORT, () => {

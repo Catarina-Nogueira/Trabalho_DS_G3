@@ -1,3 +1,6 @@
+import { Medicacao } from "../models/medicacao.entity";
+import { DataSource } from 'typeorm';
+
 export const MedicacaoSeed = [
     {
         nome_medicamento: 'Beclometasona',
@@ -154,4 +157,20 @@ export const MedicacaoSeed = [
         descricao: 'É um spray nasal de dupla ação. A azelastina atua em 15 minutos para parar os espirros e a fluticasona trata a inflamação profunda de forma contínua. ',
         objetivo: 'Ação Rápida e Tratamento'
     },
+
 ];
+
+export const rodarMedicacaoSeed = async (dataSource: DataSource) => {
+    const repo = dataSource.getRepository(Medicacao);
+
+    // Verificar se o catálogo já tem dados para evitar duplicados
+    const total = await repo.count();
+    if (total > 0) {
+        console.log('Catálogo de medicamentos já contém dados. Seed saltada.');
+        return;
+    }
+
+    // Inserir os medicamentos no catálogo
+    await repo.save(MedicacaoSeed);
+    console.log(`Seed executada com sucesso! ${MedicacaoSeed.length} medicamentos adicionados ao catálogo.`);
+};

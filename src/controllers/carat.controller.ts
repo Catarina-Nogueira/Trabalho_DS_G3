@@ -43,6 +43,29 @@ export const CaratController = {
         }
     },
 
+    obterDadosGrafico: async (req: Request, res: Response) => {
+        try {
+            const utilizadorLogado = req.user!;
+            let idUtenteAlvo: number;
+
+            if (utilizadorLogado.tipo_utilizador === 'utente') {
+                // Se for utente, ignora qualquer ID da URL e usa o seu próprio ID da sessão
+                idUtenteAlvo = utilizadorLogado.id;
+            } else if (utilizadorLogado.tipo_utilizador === 'medico') {
+                // Se for médico, vai buscar o ID do utente aos parâmetros da rota
+                idUtenteAlvo = Number(req.params.id_utente);
+                if (!idUtenteAlvo) return res.status(400).json({ erro: 'ID do utente em falta.' });
+            } else {
+                return res.status(403).json({ erro: 'Não autorizado.' });
+            }
+
+            const dadosGrafico = await CaratService.obterHistoricoGrafico(idUtenteAlvo);
+            return res.json(dadosGrafico);
+        } catch (err: any) {
+            return res.status(500).json({ erro: err.message || 'Erro ao gerar dados do gráfico.' });
+        }
+    },
+
     // RF22 — Histórico de avaliações do utente
     getAvaliacoesUtente: async (req: Request, res: Response) => {
         try {
