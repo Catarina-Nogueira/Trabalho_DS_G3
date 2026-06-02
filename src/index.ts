@@ -66,10 +66,11 @@ AppDataSource.initialize()
     .then(async () => {
         console.log('Base de dados ligada com sucesso!');
 
-        //seeds
+        /*//seeds
         await rodarMedicacaoSeed();
         await rodarExameSeed();
-        await QuestionarioCaratSeed();
+        await QuestionarioCaratSeed();*/
+        
         // Iniciar o servidor só depois da base de dados estar ligada
         app.listen(PORT, () => {
             console.log(`Servidor a correr em http://localhost:${PORT}`);
