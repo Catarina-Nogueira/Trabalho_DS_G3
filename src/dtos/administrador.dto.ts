@@ -1,6 +1,5 @@
 export interface CriarAdministradorDTO {
     nome: string;
-    utilizador: { id: number };
 }
 
 export interface AtualizarAdministradorDTO {
@@ -10,5 +9,5 @@ export interface AtualizarAdministradorDTO {
 export interface AdministradorRespostaDTO {
     id: number;
     nome: string;
-    utilizador: { id: number; email: string };
+    utilizador: { id: number; email: string, username: string; data_criacao: string };
 }

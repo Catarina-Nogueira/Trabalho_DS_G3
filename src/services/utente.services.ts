@@ -87,28 +87,28 @@ export const UtenteService = {
     // RF07 — Criar utente (Administrador)
     // Recebe id_utilizador e id_medico porque o utente já tem um Utilizador criado antes
     criar: async (dados: CriarUtenteDTO, id_utilizador: number, id_medico: number): Promise<UtenteRespostaDTO> => {
-        // Verificar que o utilizador existe e ainda não tem utente associado
+        if (!id_utilizador || id_utilizador <= 0) throw new Error('ID de utilizador inválido ou não fornecido.');
+        if (!id_medico || id_medico <= 0) throw new Error('ID de médico inválido ou não fornecido.');
+
         const utilizador = await utilizadorRepo().findOneBy({ id: id_utilizador });
         if (!utilizador) throw new Error('Utilizador não encontrado.');
 
         const jaExiste = await utenteRepo().findOne({ where: { utilizador: { id: id_utilizador } } });
         if (jaExiste) throw new Error('Este utilizador já tem um utente associado.');
 
-        // Verificar que o médico existe
         const medico = await medicoRepo().findOneBy({ id: id_medico });
         if (!medico) throw new Error('Médico não encontrado.');
 
         const utente = utenteRepo().create({
-            nome: dados.nome,
+            nome: dados.nome.trim(),
             data_nascimento: dados.data_nascimento,
-            sexo_biologico: dados.sexo_biologico,
+            sexo_biologico: dados.sexo_biologico.toLowerCase(),
             utilizador,
             medico,
         });
 
         const guardado = await utenteRepo().save(utente);
 
-        // Recarregar com relações para devolver resposta completa
         const completo = await utenteRepo().findOne({
             where: { id: guardado.id },
             relations: ['medico', 'utilizador'],
@@ -116,25 +116,22 @@ export const UtenteService = {
         return toResposta(completo!);
     },
 
-    // --- RF05 — Atualizar dados pessoais permitidos (nome e/ou médico atribuído) ---
-    atualizar: async (id: number, dados: AtualizarUtenteDTO, utilizador:{id: number, tipo_utilizador: string}): Promise<UtenteRespostaDTO | null> => {
+    atualizar: async (id: number, dados: AtualizarUtenteDTO, utilizadorSession: {id: number, tipo_utilizador: string}): Promise<UtenteRespostaDTO | null> => {
         const utente = await utenteRepo().findOne({
             where: { id },
             relations: ['medico', 'utilizador'],
         });
         if (!utente) return null;
 
-        // Atualizar nome 
         if (dados.nome) {
-            if (utilizador.id !== utente.utilizador.id && utilizador.tipo_utilizador !== 'administrador') {
+            if (utilizadorSession.id !== utente.utilizador.id && utilizadorSession.tipo_utilizador.toLowerCase() !== 'administrador') {
                 throw new Error('Apenas o próprio utente ou um administrador podem atualizar o nome.');
             } 
-            utente.nome = dados.nome;
+            utente.nome = dados.nome.trim();
         } 
 
-        // Atualizar médico pelo administrador 
         if (dados.medico) {
-            if (utilizador.tipo_utilizador !== 'administrador') {
+            if (utilizadorSession.tipo_utilizador.toLowerCase() !== 'administrador') {
                 throw new Error('Apenas um administrador pode atualizar o médico atribuído.');
             }
             const medico = await medicoRepo().findOneBy({ id: dados.medico.id });
@@ -146,7 +143,6 @@ export const UtenteService = {
         return toResposta(atualizado);
     },
 
-    // RF08 — Eliminar utente (Administrador)
     eliminar: async (id: number): Promise<void> => {
         const utente = await utenteRepo().findOneBy({ id });
         if (!utente) throw new Error('Utente não encontrado.');

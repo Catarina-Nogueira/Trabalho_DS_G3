@@ -5,11 +5,11 @@ import { autorizarSessao } from '../middleware.autorizar';
 
 const router = Router();
 
-router.get('/', autenticarSessao, autorizarSessao('Administrador'), UtilizadorController.listarTodos);
-router.get('/:id', autenticarSessao, autorizarSessao('Administrador', 'medico', 'utente'), UtilizadorController.buscarPorId);
-router.post('/', autenticarSessao, autorizarSessao('Administrador'), UtilizadorController.criar);
-router.put('/:id', autenticarSessao, autorizarSessao('Administrador', 'medico', 'utente'), UtilizadorController.atualizar);
-router.patch('/:id/desativar', autenticarSessao, autorizarSessao('Administrador'), UtilizadorController.desativar);
-router.delete('/:id', autenticarSessao, autorizarSessao('Administrador'), UtilizadorController.eliminar);
+router.get('/', autenticarSessao, autorizarSessao('administrador'), UtilizadorController.listarTodos);
+router.get('/:id', autenticarSessao, autorizarSessao('administrador'), UtilizadorController.buscarPorId);
+router.post('/', autenticarSessao, autorizarSessao('administrador'), UtilizadorController.criar);
+router.put('/:id', autenticarSessao, autorizarSessao('administrador', 'medico', 'utente'), UtilizadorController.atualizar);
+router.patch('/:id/desativar', autenticarSessao, autorizarSessao('administrador'), UtilizadorController.desativar);
+router.delete('/:id', autenticarSessao, autorizarSessao('administrador'), UtilizadorController.eliminar);
 
 export default router;

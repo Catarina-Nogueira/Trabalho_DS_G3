@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'; // Pedido e resposta http
 import { UtilizadorService } from '../services/utilizador.services';
 import { Tipo_Utilizador } from '../models/utilizador.entity';
+import { CriarUtilizadorDTO } from '../dtos/utilizador.dto';
 
 export const UtilizadorController = {
     
@@ -27,25 +28,23 @@ export const UtilizadorController = {
 
     // POST /utilizadores
     criar: async (req: Request, res: Response) => {
-        // ALTERADO: Removido o campo email daqui
-        const { username, password, tipo_utilizador } = req.body;
+        const { username, email, password, tipo_utilizador } = req.body;
  
-        // Validações de entrada (Sem email)
-        if (!username) return res.status(400).json({ erro: 'username é obrigatório.' });
-        if (!password) return res.status(400).json({ erro: 'password é obrigatória.' });
-        if (!tipo_utilizador) return res.status(400).json({ erro: 'tipo_utilizador é obrigatório.' });
+        if (!username) return res.status(400).json({ erro: 'O username é obrigatório.' });
+        if (!email) return res.status(400).json({ erro: 'O email é obrigatório.' });
+        if (!password) return res.status(400).json({ erro: 'A password é obrigatória.' });
+        if (!tipo_utilizador) return res.status(400).json({ erro: 'O tipo_utilizador é obrigatório.' });
  
-        // Verificar que o tipo é válido
         const tiposValidos = Object.values(Tipo_Utilizador);
-        if (!tiposValidos.includes(tipo_utilizador)) {
+        if (!tiposValidos.includes(tipo_utilizador.toLowerCase() as Tipo_Utilizador)) {
             return res.status(400).json({
                 erro: `tipo_utilizador inválido. Valores aceites: ${tiposValidos.join(', ')}.`,
             });
         }
  
         try {
-            // Chamada ao serviço atualizada (sem email)
-            const utilizador = await UtilizadorService.criar({ username, password, tipo_utilizador } as any);
+            const dadosDTO: CriarUtilizadorDTO = { username, email, password, tipo_utilizador };
+            const utilizador = await UtilizadorService.criar(dadosDTO);
             return res.status(201).json(utilizador);
         } catch (err: any) {
             return res.status(400).json({ erro: err.message });
@@ -58,15 +57,12 @@ export const UtilizadorController = {
             const id = Number(req.params.id);
             const dados = req.body;
             
-            // ALTERADO: Vai buscar a sessão injetada pelo teu middleware de headers
             const utilizadorSessao = req.user;
             if (!utilizadorSessao) {
                 return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
             }
 
-            // Passa os dados e a sessão para validar a permissão no serviço
             const utilizador = await UtilizadorService.atualizar(id, dados, utilizadorSessao);
-            
             if (!utilizador) return res.status(404).json({ erro: 'Utilizador não encontrado' });
             return res.json(utilizador);
         } catch (err: any) {
@@ -79,7 +75,6 @@ export const UtilizadorController = {
         try {
             const id = Number(req.params.id);
             
-            // ALTERADO: Capta a sessão para garantir que só administradores desativam contas
             const utilizadorSessao = req.user;
             if (!utilizadorSessao) {
                 return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
@@ -93,12 +88,10 @@ export const UtilizadorController = {
         }
     },
 
-    // DELETE /utilizadores/:id
     eliminar: async (req: Request, res: Response) => {
         try {
             const id = Number(req.params.id);
             
-            // ALTERADO: Capta a sessão para o serviço bloquear se não for Administrador
             const utilizadorSessao = req.user;
             if (!utilizadorSessao) {
                 return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });

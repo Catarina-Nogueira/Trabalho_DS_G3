@@ -33,7 +33,8 @@ export const UtilizadorService = {
 
     // Cria um novo utilizador — estado inicial sempre ATIVO (RF07)
     criar: async (dados: CriarUtilizadorDTO): Promise<UtilizadorRespostaDTO> => {
-        // Verificar se o email já existe
+        if (!dados.email) throw new Error('O email do utilizador é obrigatório.');
+
         const existe = await utilizadorRepo().findOneBy({ email: dados.email });
         if (existe) throw new Error('Já existe um utilizador com este email.');
 
@@ -45,8 +46,8 @@ export const UtilizadorService = {
         const utilizador = utilizadorRepo().create({
             username: dados.username,
             email: dados.email,
-            tipo_utilizador: dados.tipo_utilizador,
-            estado: Estado.ATIVO, // sempre começa como ativo
+            tipo_utilizador: dados.tipo_utilizador.toLowerCase(),
+            estado: Estado.ATIVO,
             password: passwordEncriptada,
         });      
 
@@ -66,7 +67,6 @@ export const UtilizadorService = {
             throw new Error('Acesso negado. Não pode alterar dados de outros utilizadores.');
         }
 
-        // Se está a mudar o email, verificar que o novo não está em uso
         if (dados.email && dados.email !== utilizadoralvo.email) {
             const existe = await utilizadorRepo().findOneBy({ email: dados.email });
             if (existe) throw new Error('Já existe um utilizador com este email.');
@@ -77,7 +77,6 @@ export const UtilizadorService = {
             if (existe) throw new Error('Já existe um utilizador com este username.');
         }
 
-        // Se enviou uma nova password, encripta-a primeiro
         if (dados.password) {
             dados.password = await AutenticacaoService.encriptarPassword(dados.password);
         }
@@ -89,7 +88,6 @@ export const UtilizadorService = {
 
     // Desativa a conta sem eliminar os dados (RF08)
     desativar: async (id: number, utilizadorSessao: { id: number; tipo_utilizador: string }): Promise<UtilizadorRespostaDTO | null> => {
-        
         if (utilizadorSessao.tipo_utilizador.toLowerCase() !== 'administrador') {
             throw new Error('Acesso negado. Apenas administradores podem desativar contas.');
         }
@@ -103,12 +101,7 @@ export const UtilizadorService = {
         return atualizado ? toResposta(atualizado) : null;
     },
 
-    eliminar: async (
-        id: number, 
-        utilizadorSessao: { id: number; tipo_utilizador: string }
-    ): Promise<void> => {
-        
-        // Regra de Permissão: Segurança dupla na remoção física da BD
+    eliminar: async (id: number, utilizadorSessao: { id: number; tipo_utilizador: string }): Promise<void> => {
         if (utilizadorSessao.tipo_utilizador.toLowerCase() !== 'administrador') {
             throw new Error('Acesso negado. Apenas administradores podem eliminar contas do sistema.');
         }
