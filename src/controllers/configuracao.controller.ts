@@ -1,67 +1,67 @@
 import { Request, Response } from 'express';
 import { ConfiguracaoService } from '../services/configuracao.services';
+import { CriarConfiguracaoDTO, AtualizarConfiguracaoDTO } from '../dtos/configuracao.dto';
 
 export const ConfiguracaoController = {
 
-    listarTodos: async (req: Request, res: Response) => {
+    listarTodas: async (req: Request, res: Response) => {
         try {
-            const configuracoes = await ConfiguracaoService.listarTodos();
-            res.json(configuracoes);
-        } catch (err) {
-            res.status(500).json({ erro: 'Erro ao listar configurações' });
+            const configs = await ConfiguracaoService.listarTodas();
+            return res.json(configs);
+        } catch (err: any) {
+            return res.status(500).json({ erro: 'Erro ao listar parâmetros de configuração.' });
         }
     },
 
     buscarPorId: async (req: Request, res: Response) => {
         try {
-            const configuracao = await ConfiguracaoService.buscarPorId(Number(req.params.id));
-            if (!configuracao) return res.status(404).json({ erro: 'Configuração não encontrada' });
-            res.json(configuracao);
-        } catch (err) {
-            res.status(500).json({ erro: 'Erro ao buscar configuração' });
-        }
-    },
-
-    buscarPorNome: async (req: Request, res: Response) => {
-        try {
-            const nome_parametro = req.params.nome_parametro as string;
-            const configuracao = await ConfiguracaoService.buscarPorNome(nome_parametro);
-            if (!configuracao) return res.status(404).json({ erro: 'Parâmetro não encontrado' });
-            res.json(configuracao);
-        } catch (err) {
-            res.status(500).json({ erro: 'Erro ao buscar parâmetro' });
+            const config = await ConfiguracaoService.buscarPorId(Number(req.params.id));
+            if (!config) return res.status(404).json({ erro: 'Configuração não encontrada.' });
+            return res.json(config);
+        } catch (err: any) {
+            return res.status(500).json({ erro: 'Erro ao buscar configuração.' });
         }
     },
 
     criar: async (req: Request, res: Response) => {
         try {
-            const configuracao = await ConfiguracaoService.criar(req.body);
-            res.status(201).json(configuracao);
-        } catch (err) {
-            res.status(500).json({ erro: 'Erro ao criar configuração' });
+            const { nome_parametro, valor_limiar, descricao } = req.body;
+            const id_utilizador_sessao = req.user?.id; // Capturado do middleware de sessão
+
+            if (!nome_parametro) return res.status(400).json({ erro: 'O campo nome_parametro é obrigatório.' });
+            if (valor_limiar === undefined) return res.status(400).json({ erro: 'O campo valor_limiar é obrigatório.' });
+            if (!descricao) return res.status(400).json({ erro: 'O campo descricao é obrigatório.' });
+            if (!id_utilizador_sessao) return res.status(401).json({ erro: 'Sessão inválida ou utilizador não identificado.' });
+
+            const dadosDTO: CriarConfiguracaoDTO = { nome_parametro, valor_limiar: Number(valor_limiar), descricao };
+            const novaConfig = await ConfiguracaoService.criar(dadosDTO, id_utilizador_sessao);
+            
+            return res.status(201).json(novaConfig);
+        } catch (err: any) {
+            const status = err.message.includes('já existe') ? 409 : 400;
+            return res.status(status).json({ erro: err.message });
         }
     },
 
     atualizar: async (req: Request, res: Response) => {
         try {
-            const configuracao = await ConfiguracaoService.atualizar(Number(req.params.id), req.body);
-            if (!configuracao) return res.status(404).json({ erro: 'Configuração não encontrada' });
-            res.json(configuracao);
-        } catch (err) {
-            // RF13 - Devolve o erro de validação com 400 em vez de 500
-            if (err instanceof Error) {
-                return res.status(400).json({ erro: err.message });
-            }
-            res.status(500).json({ erro: 'Erro ao atualizar configuração' });
-        }
-    },
+            const id = Number(req.params.id);
+            const { valor_limiar, descricao } = req.body;
+            const id_utilizador_sessao = req.user?.id;
 
-    eliminar: async (req: Request, res: Response) => {
-        try {
-            await ConfiguracaoService.eliminar(Number(req.params.id));
-            res.status(204).send();
-        } catch (err) {
-            res.status(500).json({ erro: 'Erro ao eliminar configuração' });
+            if (!id_utilizador_sessao) return res.status(401).json({ erro: 'Sessão inválida ou utilizador não identificado.' });
+
+            const dadosDTO: AtualizarConfiguracaoDTO = { 
+                valor_limiar: valor_limiar !== undefined ? Number(valor_limiar) : undefined, 
+                descricao 
+            };
+
+            const configAtualizada = await ConfiguracaoService.atualizar(id, dadosDTO, id_utilizador_sessao);
+            if (!configAtualizada) return res.status(404).json({ erro: 'Parâmetro de configuração não encontrado.' });
+            
+            return res.json(configAtualizada);
+        } catch (err: any) {
+            return res.status(400).json({ erro: err.message });
         }
     }
 };

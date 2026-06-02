@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import { SintomaReportadoController } from '../controllers/sintomaReportado.controller';
+import { autorizarSessao } from '../middleware.autorizar';
 
 const router = Router();
 
-router.get('/', SintomaReportadoController.listarTodos);
-router.get('/:id', SintomaReportadoController.buscarPorId);
-router.get('/utente/:id_utente', SintomaReportadoController.listarPorUtente);
-router.post('/', SintomaReportadoController.reportar);
-router.patch('/:id', SintomaReportadoController.atualizar);
-router.delete('/:id', SintomaReportadoController.eliminar);
+
+router.post('/', autorizarSessao('utente'), SintomaReportadoController.reportar);
+router.get('/meu-historico', autorizarSessao('utente'), SintomaReportadoController.listarMeuHistorico);
+router.get('/', autorizarSessao('administrador', 'medico'), SintomaReportadoController.listarTodos);
+router.get('/:id', autorizarSessao('administrador', 'medico'), SintomaReportadoController.buscarPorId);
+
 
 export default router;

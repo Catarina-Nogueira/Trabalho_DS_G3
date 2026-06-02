@@ -9,5 +9,5 @@ export interface AtualizarAdministradorDTO {
 export interface AdministradorRespostaDTO {
     id: number;
     nome: string;
-    utilizador: { id: number; email: string, username: string; data_criacao: string };
+    utilizador: { id: number; email: string, username: string; data_criacao: string};
 }

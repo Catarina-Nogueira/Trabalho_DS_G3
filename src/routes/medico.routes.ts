@@ -1,15 +1,14 @@
 import { Router } from 'express';
 import { MedicoController } from '../controllers/medico.controller';
+import { autenticarSessao } from '../middleware.sessao';
+import { autorizarSessao } from '../middleware.autorizar';
 
 const router = Router();
 
-router.get('/', MedicoController.listarTodos);
-router.get('/:id', MedicoController.buscarPorId);
-router.post('/', MedicoController.criar);
-router.patch('/:id/telemovel', MedicoController.atualizarTelemovel);
-router.delete('/:id', MedicoController.eliminar);
+router.get('/', autenticarSessao, autorizarSessao('administrador', 'medico', 'utente'), MedicoController.listarTodos);
+router.get('/:id', autenticarSessao, autorizarSessao('administrador'), MedicoController.buscarPorId);
+router.post('/utilizador/:id_utilizador', autenticarSessao, autorizarSessao('administrador'), MedicoController.criar);
+router.patch('/:id/telemovel', autenticarSessao, autorizarSessao('administrador', 'medico'), MedicoController.atualizarTelemovel);
+router.delete('/:id', autenticarSessao, autorizarSessao('administrador'), MedicoController.eliminar);
 
 export default router;
-
-
-

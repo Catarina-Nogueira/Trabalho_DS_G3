@@ -1,3 +1,5 @@
+import { Tipo_Utilizador } from "../models/utilizador.entity";
+
 export interface CriarMedicoDTO {
     nome: string;
     especialidade: string;
@@ -16,5 +18,5 @@ export interface MedicoRespostaDTO {
     especialidade: string;
     numero_medico: number;
     telemovel: string;
-    utilizador: { id: number; email: string; tipo_utilizador: string };
+    utilizador: { id: number; email: string; tipo_utilizador: Tipo_Utilizador };
 }
