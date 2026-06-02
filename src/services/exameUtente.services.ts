@@ -1,6 +1,7 @@
 import { IsNull } from 'typeorm';
 import { AppDataSource } from '../database/database';
 import { Exame_Utente } from '../models/exameUtente.entity';
+import { CriarExameUtenteDTO } from '../dtos/exameUtente.dto';
 
 const exameUtenteRepo = AppDataSource.getRepository(Exame_Utente);
 
@@ -41,9 +42,14 @@ export const ExameUtenteService = {
         });
     },
 
-    // RF46 - Prescrição de exame pelo médico
-    criar: async (dados: Partial<Exame_Utente>) => {
-        const exameUtente = exameUtenteRepo.create(dados);
+    // RF46 - Prescrição de exame pelo médico (Ajustado para usar o DTO explicitamente)
+    criar: async (dados: CriarExameUtenteDTO) => {
+        const exameUtente = exameUtenteRepo.create({
+            utente: { id: dados.utente.id },
+            medico: { id: dados.medico.id },
+            exame: { id: dados.exame.id },
+            data_exame: new Date(dados.data_exame)
+        });
         return await exameUtenteRepo.save(exameUtente);
     },
 

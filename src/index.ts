@@ -1,7 +1,6 @@
 import 'reflect-metadata'; //Necessário para o typeORM
 import express from 'express'; //Framework web que cria o servidor HTTP
 import { AppDataSource } from './database/database'; 
-import {rodarMedicacaoSeed } from './seeds/medicacao.seed';
 import path from 'path';
 
 import utilizadorRoutes from './routes/utilizador.routes';
@@ -24,6 +23,11 @@ import questionarioCaratRoutes from './routes/questionarioCarat.routes';
 import recomendacaoRoutes from './routes/recomendacao.routes';
 import sintomaReportadoRoutes from './routes/sintomaReportado.routes';
 import autenticacaoRoutes from './routes/autenticacao.routes';
+
+import {rodarMedicacaoSeed } from './seeds/medicacao.seed';
+import { rodarExameSeed } from './seeds/exame.seed';
+import { QuestionarioCaratSeed } from './seeds/questionarioCarat.seed';
+
 
 
 const app = express(); // Cria o objeto principal da aplicação Express
@@ -55,7 +59,7 @@ app.use('/planoAcompanhamento', planoAcompanhamentoRoutes);
 app.use('/questionarioCarat', questionarioCaratRoutes);
 app.use('/recomendacoes', recomendacaoRoutes);
 app.use('/sintomaReportado', sintomaReportadoRoutes);
-app.use('/auth', autenticacaoRoutes);
+app.use('/autenticacao', autenticacaoRoutes);
 
 // Inicializar a base de dados
 AppDataSource.initialize()
@@ -63,8 +67,9 @@ AppDataSource.initialize()
         console.log('Base de dados ligada com sucesso!');
 
         //seeds
-        await rodarMedicacaoSeed(AppDataSource);
-
+        await rodarMedicacaoSeed();
+        await rodarExameSeed();
+        await QuestionarioCaratSeed();
         // Iniciar o servidor só depois da base de dados estar ligada
         app.listen(PORT, () => {
             console.log(`Servidor a correr em http://localhost:${PORT}`);

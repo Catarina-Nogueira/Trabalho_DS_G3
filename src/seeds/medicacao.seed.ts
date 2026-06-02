@@ -1,5 +1,5 @@
 import { Medicacao } from "../models/medicacao.entity";
-import { DataSource } from 'typeorm';
+import { AppDataSource } from "../database/database";  
 
 export const MedicacaoSeed = [
     {
@@ -160,8 +160,8 @@ export const MedicacaoSeed = [
 
 ];
 
-export const rodarMedicacaoSeed = async (dataSource: DataSource) => {
-    const repo = dataSource.getRepository(Medicacao);
+export const rodarMedicacaoSeed = async () => {
+    const repo = AppDataSource.getRepository(Medicacao);
 
     // Verificar se o catálogo já tem dados para evitar duplicados
     const total = await repo.count();

@@ -1,4 +1,5 @@
-import { TipoExame } from '../models/exame.entity';
+import { AppDataSource } from '../database/database';
+import { Exame, TipoExame } from '../models/exame.entity';
 
 export const ExamesSeed = [
     {
@@ -62,3 +63,17 @@ export const ExamesSeed = [
         tipo: TipoExame.FUNCIONAL
     }
 ];
+
+export const rodarExameSeed = async () => {
+    const repo = AppDataSource.getRepository(Exame);
+
+    // Controlo para nunca duplicar registos se o servidor reiniciar
+    const total = await repo.count();
+    if (total > 0) {
+        console.log('Catálogo de exames já contém dados. Seed de exames saltada.');
+        return;
+    }
+
+    await repo.save(ExamesSeed);
+    console.log(`Seed executada com sucesso! ${ExamesSeed.length} exames adicionados ao catálogo.`);
+};

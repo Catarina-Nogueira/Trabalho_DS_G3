@@ -20,6 +20,4 @@ export class Opcao_Resposta {
 
     @Column({ type: 'integer' })
     score!: number;
-
-
 }

@@ -155,8 +155,7 @@ export const CaratController = {
             const { id_questao, texto_opcao, score } = req.body;
             if (!id_questao || !texto_opcao || score === undefined) return res.status(400).json({ erro: 'id_questao, texto_opcao e score são obrigatórios.' });
 
-            const { id_questao: iq, texto_opcao: to, score: sc } = req.body;
-            const opcao = await CaratService.criarOpcaoResposta({ id_questao: iq, texto_opcao: to, score: sc });
+            const opcao = await CaratService.criarOpcaoResposta({ id_questao, texto_opcao, score });
             return res.status(201).json(opcao);
         } catch (err: any) {
             return res.status(400).json({ erro: err.message });
