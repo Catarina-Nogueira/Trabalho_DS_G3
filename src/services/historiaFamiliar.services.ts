@@ -1,43 +1,61 @@
 import { AppDataSource } from '../database/database';
 import { Historia_Familiar } from '../models/historiaFamiliar.entity';
+import { CriarHistoriaFamiliarDTO, AtualizarHistoriaFamiliarDTO } from '../dtos/historiaFamiliar.dto';
 
-const historiaFamiliarRepo = AppDataSource.getRepository(Historia_Familiar);
+const historiaRepo = AppDataSource.getRepository(Historia_Familiar);
 
 export const HistoriaFamiliarService = {
 
-    // RF52 - Listar toda a história familiar de um utente
+    // Listar todas as histórias familiares de um utente
     listarPorUtente: async (id_utente: number) => {
-        return await historiaFamiliarRepo.find({
+        return await historiaRepo.find({
             where: { utente: { id: id_utente } },
             relations: ['utente']
         });
     },
 
-    // RF52 - Consultar detalhe de um registo de história familiar
+    // Buscar um registo específico por ID
     buscarPorId: async (id: number) => {
-        return await historiaFamiliarRepo.findOne({
+        return await historiaRepo.findOne({
             where: { id },
             relations: ['utente']
         });
     },
 
-    // RF52 - Adicionar registo de história familiar
-    criar: async (dados: Partial<Historia_Familiar>) => {
-        const historiaFamiliar = historiaFamiliarRepo.create(dados);
-        return await historiaFamiliarRepo.save(historiaFamiliar);
+    // Adicionar histórico familiar associado ao ID da URL
+    criar: async (id_utente: number, dados: CriarHistoriaFamiliarDTO) => {
+        const novaHistoria = historiaRepo.create({
+            nome: dados.nome,
+            descricao: dados.descricao,
+            utente: { id: id_utente } // Vincula à chave estrangeira do utente
+        });
+        
+        const guardado = await historiaRepo.save(novaHistoria);
+        
+        return await historiaRepo.findOne({
+            where: { id: guardado.id },
+            relations: ['utente']
+        });
     },
 
-    // RF52 - Editar registo de história familiar
-    atualizar: async (id: number, dados: Partial<Historia_Familiar>) => {
-        await historiaFamiliarRepo.update(id, dados);
-        return await historiaFamiliarRepo.findOne({
+    // Editar registo existente
+    atualizar: async (id: number, dados: AtualizarHistoriaFamiliarDTO) => {
+        const existe = await historiaRepo.findOneBy({ id });
+        if (!existe) return null;
+
+        await historiaRepo.update(id, dados);
+        
+        return await historiaRepo.findOne({
             where: { id },
             relations: ['utente']
         });
     },
 
-    // RF52 - Remover registo de história familiar
+    // Remover registo de história familiar
     eliminar: async (id: number) => {
-        return await historiaFamiliarRepo.delete(id);
+        const existe = await historiaRepo.findOneBy({ id });
+        if (!existe) throw new Error('Registo de história familiar não encontrado.');
+        
+        await historiaRepo.delete(id);
     }
 };

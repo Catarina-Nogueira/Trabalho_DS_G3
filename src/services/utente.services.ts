@@ -29,6 +29,7 @@ const toResposta = (u: Utente): UtenteRespostaDTO => ({
     sexo_biologico: u.sexo_biologico as any,
     utilizador: {
         id: u.utilizador.id,
+        username: u.utilizador.username,
         email: u.utilizador.email,
     },
     medico: {
@@ -115,19 +116,27 @@ export const UtenteService = {
         return toResposta(completo!);
     },
 
-    // RF05 — Atualizar dados pessoais permitidos (nome e/ou médico atribuído)
-    atualizar: async (id: number, dados: AtualizarUtenteDTO): Promise<UtenteRespostaDTO | null> => {
+    // --- RF05 — Atualizar dados pessoais permitidos (nome e/ou médico atribuído) ---
+    atualizar: async (id: number, dados: AtualizarUtenteDTO, utilizador:{id: number, tipo_utilizador: string}): Promise<UtenteRespostaDTO | null> => {
         const utente = await utenteRepo().findOne({
             where: { id },
             relations: ['medico', 'utilizador'],
         });
         if (!utente) return null;
 
-        // Atualizar nome se fornecido
-        if (dados.nome) utente.nome = dados.nome;
+        // Atualizar nome 
+        if (dados.nome) {
+            if (utilizador.id !== utente.utilizador.id && utilizador.tipo_utilizador !== 'administrador') {
+                throw new Error('Apenas o próprio utente ou um administrador podem atualizar o nome.');
+            } 
+            utente.nome = dados.nome;
+        } 
 
-        // Atualizar médico se fornecido — verificar que existe
+        // Atualizar médico pelo administrador 
         if (dados.medico) {
+            if (utilizador.tipo_utilizador !== 'administrador') {
+                throw new Error('Apenas um administrador pode atualizar o médico atribuído.');
+            }
             const medico = await medicoRepo().findOneBy({ id: dados.medico.id });
             if (!medico) throw new Error('Médico não encontrado.');
             utente.medico = medico;

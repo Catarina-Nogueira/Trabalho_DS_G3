@@ -1,34 +1,37 @@
-import { Request, Response } from 'express'; //Pedido e resposta http
+import { Request, Response } from 'express'; // Pedido e resposta http
 import { UtilizadorService } from '../services/utilizador.services';
 import { Tipo_Utilizador } from '../models/utilizador.entity';
 
 export const UtilizadorController = {
-    //cada método corresponde a uma operação CRUD
+    
+    // GET /utilizadores
     listarTodos: async (req: Request, res: Response) => {
         try {
             const utilizadores = await UtilizadorService.listarTodos();
-            res.json(utilizadores);
+            return res.json(utilizadores);
         } catch (err) {
-            res.status(500).json({ erro: 'Erro ao listar utilizadores' });
+            return res.status(500).json({ erro: 'Erro ao listar utilizadores' });
         }
     },
 
+    // GET /utilizadores/:id
     buscarPorId: async (req: Request, res: Response) => {
         try {
             const utilizador = await UtilizadorService.buscarPorId(Number(req.params.id));
             if (!utilizador) return res.status(404).json({ erro: 'Utilizador não encontrado' });
-            res.json(utilizador);
+            return res.json(utilizador);
         } catch (err) {
-            res.status(500).json({ erro: 'Erro ao buscar utilizador' });
+            return res.status(500).json({ erro: 'Erro ao buscar utilizador' });
         }
     },
 
+    // POST /utilizadores
     criar: async (req: Request, res: Response) => {
-        const { username, email, password, tipo_utilizador } = req.body;
+        // ALTERADO: Removido o campo email daqui
+        const { username, password, tipo_utilizador } = req.body;
  
-        // Validações de entrada
+        // Validações de entrada (Sem email)
         if (!username) return res.status(400).json({ erro: 'username é obrigatório.' });
-        if (!email) return res.status(400).json({ erro: 'email é obrigatório.' });
         if (!password) return res.status(400).json({ erro: 'password é obrigatória.' });
         if (!tipo_utilizador) return res.status(400).json({ erro: 'tipo_utilizador é obrigatório.' });
  
@@ -41,39 +44,70 @@ export const UtilizadorController = {
         }
  
         try {
-            const utilizador = await UtilizadorService.criar({ username, email, password, tipo_utilizador });
-            res.status(201).json(utilizador);
+            // Chamada ao serviço atualizada (sem email)
+            const utilizador = await UtilizadorService.criar({ username, password, tipo_utilizador } as any);
+            return res.status(201).json(utilizador);
         } catch (err: any) {
-            res.status(400).json({ erro: err.message });
+            return res.status(400).json({ erro: err.message });
         }
     },
 
+    // PUT /utilizadores/:id
     atualizar: async (req: Request, res: Response) => {
         try {
-            const utilizador = await UtilizadorService.atualizar(Number(req.params.id), req.body);
+            const id = Number(req.params.id);
+            const dados = req.body;
+            
+            // ALTERADO: Vai buscar a sessão injetada pelo teu middleware de headers
+            const utilizadorSessao = req.user;
+            if (!utilizadorSessao) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+
+            // Passa os dados e a sessão para validar a permissão no serviço
+            const utilizador = await UtilizadorService.atualizar(id, dados, utilizadorSessao);
+            
             if (!utilizador) return res.status(404).json({ erro: 'Utilizador não encontrado' });
-            res.json(utilizador);
-        } catch (err) {
-            res.status(500).json({ erro: 'Erro ao atualizar utilizador' });
+            return res.json(utilizador);
+        } catch (err: any) {
+            return res.status(400).json({ erro: err.message });
         }
     },
 
+    // PUT /utilizadores/:id/desativar
     desativar: async (req: Request, res: Response) => {
         try {
-            const utilizador = await UtilizadorService.desativar(Number(req.params.id));
+            const id = Number(req.params.id);
+            
+            // ALTERADO: Capta a sessão para garantir que só administradores desativam contas
+            const utilizadorSessao = req.user;
+            if (!utilizadorSessao) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+
+            const utilizador = await UtilizadorService.desativar(id, utilizadorSessao);
             if (!utilizador) return res.status(404).json({ erro: 'Utilizador não encontrado.' });
-            res.json(utilizador);
+            return res.json(utilizador);
         } catch (err: any) {
-            res.status(400).json({ erro: err.message });
+            return res.status(400).json({ erro: err.message });
         }
     },
 
+    // DELETE /utilizadores/:id
     eliminar: async (req: Request, res: Response) => {
         try {
-            await UtilizadorService.eliminar(Number(req.params.id));
-            res.status(204).send();
-        } catch (err) {
-            res.status(500).json({ erro: 'Erro ao eliminar utilizador' });
+            const id = Number(req.params.id);
+            
+            // ALTERADO: Capta a sessão para o serviço bloquear se não for Administrador
+            const utilizadorSessao = req.user;
+            if (!utilizadorSessao) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+
+            await UtilizadorService.eliminar(id, utilizadorSessao);
+            return res.status(204).send();
+        } catch (err: any) {
+            return res.status(400).json({ erro: err.message });
         }
     }
 };

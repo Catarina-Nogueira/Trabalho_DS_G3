@@ -55,14 +55,31 @@ export const UtilizadorService = {
     },
 
     // Atualiza email, password ou estado (RF04, RF08)
-    atualizar: async (id: number, dados: AtualizarUtilizadorDTO): Promise<UtilizadorRespostaDTO | null> => {
-        const utilizador = await utilizadorRepo().findOneBy({ id });
-        if (!utilizador) return null;
+    atualizar: async (id: number, dados: AtualizarUtilizadorDTO, utilizadorSessao: {id: number; tipo_utilizador: string }): Promise<UtilizadorRespostaDTO | null> => {
+        const utilizadoralvo = await utilizadorRepo().findOneBy({ id });
+        if (!utilizadoralvo) return null;
+
+        const ehOProprio = utilizadorSessao.id === utilizadoralvo.id;
+        const ehAdmin = utilizadorSessao.tipo_utilizador.toLowerCase() === 'administrador';
+
+        if (!ehOProprio && !ehAdmin) {
+            throw new Error('Acesso negado. Não pode alterar dados de outros utilizadores.');
+        }
 
         // Se está a mudar o email, verificar que o novo não está em uso
-        if (dados.email && dados.email !== utilizador.email) {
+        if (dados.email && dados.email !== utilizadoralvo.email) {
             const existe = await utilizadorRepo().findOneBy({ email: dados.email });
             if (existe) throw new Error('Já existe um utilizador com este email.');
+        }
+
+        if (dados.username && dados.username !== utilizadoralvo.username) {
+            const existe = await utilizadorRepo().findOneBy({ username: dados.username });
+            if (existe) throw new Error('Já existe um utilizador com este username.');
+        }
+
+        // Se enviou uma nova password, encripta-a primeiro
+        if (dados.password) {
+            dados.password = await AutenticacaoService.encriptarPassword(dados.password);
         }
 
         await utilizadorRepo().update(id, dados);
@@ -71,7 +88,12 @@ export const UtilizadorService = {
     },
 
     // Desativa a conta sem eliminar os dados (RF08)
-    desativar: async (id: number): Promise<UtilizadorRespostaDTO | null> => {
+    desativar: async (id: number, utilizadorSessao: { id: number; tipo_utilizador: string }): Promise<UtilizadorRespostaDTO | null> => {
+        
+        if (utilizadorSessao.tipo_utilizador.toLowerCase() !== 'administrador') {
+            throw new Error('Acesso negado. Apenas administradores podem desativar contas.');
+        }
+        
         const utilizador = await utilizadorRepo().findOneBy({ id });
         if (!utilizador) return null;
         if (utilizador.estado === Estado.INATIVO) throw new Error('A conta já está desativada.');
@@ -81,10 +103,19 @@ export const UtilizadorService = {
         return atualizado ? toResposta(atualizado) : null;
     },
 
-    // Elimina permanentemente (só para admin — RF07)
-    eliminar: async (id: number): Promise<void> => {
+    eliminar: async (
+        id: number, 
+        utilizadorSessao: { id: number; tipo_utilizador: string }
+    ): Promise<void> => {
+        
+        // Regra de Permissão: Segurança dupla na remoção física da BD
+        if (utilizadorSessao.tipo_utilizador.toLowerCase() !== 'administrador') {
+            throw new Error('Acesso negado. Apenas administradores podem eliminar contas do sistema.');
+        }
+
         const utilizador = await utilizadorRepo().findOneBy({ id });
         if (!utilizador) throw new Error('Utilizador não encontrado.');
+        
         await utilizadorRepo().delete(id);
     },
 };

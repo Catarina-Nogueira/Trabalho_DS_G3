@@ -1,15 +1,17 @@
 import { Router } from 'express';
 import { UtenteController } from '../controllers/utente.controller';
-import { autenticar, autorizar } from '../autenticacao.middleware';
+import { autenticarSessao } from '../middleware.sessao'; // Ajustado o caminho para barra '/'
+import { autorizarSessao } from '../middleware.autorizar'; // Novo middleware de autorização
 
 const router = Router();
 
-router.get('/', autenticar, autorizar ('administrador', 'medico'), UtenteController.listarTodos);
-router.get('/medico/:id_medico', autenticar, autorizar ('administrador', 'medico'), UtenteController.listarPorMedico);
-router.get('/:id', autenticar, autorizar ('administrador', 'medico'), UtenteController.buscarPorId);                    // RF50
-router.get('/:id/dados-permitidos', autenticar, autorizar ('administrador', 'medico'), UtenteController.buscarDadosPermitidos); // RF06
-router.post('/', autenticar, autorizar ('administrador', 'medico'), UtenteController.criar);
-router.put('/:id', autenticar, autorizar ('administrador', 'medico'), UtenteController.atualizar);                      // RF05
-router.delete('/:id', autenticar, autorizar ('administrador', 'medico'), UtenteController.eliminar);
+// Todas as rotas agora usam autenticarSessao e autorizarSessao
+router.get('/', autenticarSessao, autorizarSessao('Administrador', 'medico'), UtenteController.listarTodos);
+router.get('/medico/:id_medico', autenticarSessao, autorizarSessao('Administrador', 'medico'), UtenteController.listarPorMedico);
+router.get('/:id', autenticarSessao, autorizarSessao('Administrador', 'medico'), UtenteController.buscarPorId);
+router.get('/:id/dados-permitidos', autenticarSessao, autorizarSessao('Administrador', 'medico', 'utente'), UtenteController.buscarDadosPermitidos);
+router.post('/', autenticarSessao, autorizarSessao('Administrador'), UtenteController.criar);
+router.put('/:id', autenticarSessao, autorizarSessao('Administrador', 'medico', 'utente'), UtenteController.atualizar);
+router.delete('/:id', autenticarSessao, autorizarSessao('Administrador'), UtenteController.eliminar);
 
 export default router;

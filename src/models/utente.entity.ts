@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, CreateDateColumn, OneToOne, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, OneToOne, ManyToOne } from 'typeorm';
 import { Utilizador } from './utilizador.entity';
 import { Medico } from './medico.entity';
 
@@ -25,7 +25,7 @@ export class Utente {
     @JoinColumn({ name: 'id_medico' })
     medico!: Medico;
 
-    @Column()
+    @Column({type: 'text', })
     nome!: string;
 
     @Column({ type: 'date' })

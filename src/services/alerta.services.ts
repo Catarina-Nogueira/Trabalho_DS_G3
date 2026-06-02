@@ -70,12 +70,30 @@ export const AlertaService = {
         return alerta;
     },
 
-    /*// RF29, RF30, RF31, RF32, RF33 - Gerar alerta automático
-    gerarAlerta: async () => {
-        
+    // RF29 a RF33 - Gerar alerta automático integrado com módulos do sistema
+    gerarAlertaAutomatico: async (
+        id_utente: number,
+        id_medico: number,
+        tipo: TipoAlerta,
+        motivo: string,
+        id_avaliacao: number | null = null,
+        id_sintoma: number | null = null
+    ) => {
+        const prioridade = AlertaService.calcularPrioridade(tipo);
 
-        return await alertaRepo.save(alerta);
-    },*/
+        const novoAlerta = alertaRepo.create({
+            utente: { id: id_utente },
+            medico: { id: id_medico },
+            avaliacao: id_avaliacao ? { id: id_avaliacao } : null,
+            sintoma: id_sintoma ? { id: id_sintoma } : null,
+            tipo,
+            prioridade,
+            motivo,
+            estado: EstadoAlerta.NOVO
+        });
+
+        return await alertaRepo.save(novoAlerta);
+    },
 
     // RF33 - Calcular prioridade automaticamente com base no tipo
     calcularPrioridade: (tipo: TipoAlerta): PrioridadeAlerta => {

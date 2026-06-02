@@ -1,11 +1,9 @@
-// src/controllers/utente.controller.ts
-
 import { Request, Response } from 'express';
 import { UtenteService } from '../services/utente.services';
+import { Utilizador } from '../models/utilizador.entity';
 
 export const UtenteController = {
 
-    // GET /utentes
     // RF51 — Listar todos os utentes (Administrador)
     listarTodos: async (req: Request, res: Response) => {
         try {
@@ -80,7 +78,15 @@ export const UtenteController = {
     // RF05 — Atualizar dados pessoais permitidos (nome e/ou médico)
     atualizar: async (req: Request, res: Response) => {
         try {
-            const utente = await UtenteService.atualizar(Number(req.params.id), req.body);
+            const id = Number(req.params.id);
+            const dados = req.body;
+            const utilizadorSessao = req.user;
+            
+            if (!utilizadorSessao) {
+            return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+             
+            const utente = await UtenteService.atualizar(id, dados, utilizadorSessao);
             if (!utente) return res.status(404).json({ erro: 'Utente não encontrado.' });
             res.json(utente);
         } catch (err: any) {

@@ -10,6 +10,8 @@ import { Recomendacao, TipoRecomendacao } from '../models/recomendacao.entity';
 import { Utente } from '../models/utente.entity';
 import { Configuracao } from '../models/configuracao.entity';
 import { SubmeterAvaliacaoDto, CriarQuestionarioDto, CriarQuestaoDto, CriarOpcaoRespostaDto } from '../dtos/carat.dto';
+import { AlertaService } from './alerta.services';
+import { TipoAlerta } from '../models/alerta.entity';
 
 // Repositórios
 const avaliacaoRepo    = () => AppDataSource.getRepository(Avaliacao_Carat);
@@ -162,6 +164,24 @@ export const CaratService = {
             nivel_controlo,
         });
         const avaliacaoGuardada = await avaliacaoRepo().save(novaAvaliacao);
+
+        if (nivel_controlo === NivelControlo.NAO_CONTROLADO) {
+            await AlertaService.gerarAlertaAutomatico(
+                id_utente,
+                utente.medico.id,
+                TipoAlerta.SCORE_CARAT,
+                `Crítico: Utente obteve score de ${score_total} no teste CARAT (Sintomas Não Controlados).`,
+                avaliacaoGuardada.id
+            );
+        } else if (nivel_controlo === NivelControlo.PARCIALMENTE_CONTROLADO) {
+            await AlertaService.gerarAlertaAutomatico(
+                id_utente,
+                utente.medico.id,
+                TipoAlerta.SCORE_CARAT,
+                `Aviso: Utente obteve score de ${score_total} no teste CARAT (Sintomas Parcialmente Controlados).`,
+                avaliacaoGuardada.id
+            );
+        }
 
         // Guardar as respostas individuais
         const respostasEntidades = dto.respostas.map((r) =>
