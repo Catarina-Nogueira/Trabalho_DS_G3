@@ -57,10 +57,6 @@ export const QuestionarioCaratSeed = async () => {
                 opcoes: opcoesPadraoFrequencia
             },
             {
-                texto_questao: 'Cansaço/dificuldade em fazer as atividades ou tarefas do dia-a-dia?',
-                opcoes: opcoesPadraoFrequencia
-            },
-            {
                 texto_questao: 'Acordou durante a noite por causa da sua asma / rinite / alergia?',
                 opcoes: opcoesPadraoFrequencia
             },

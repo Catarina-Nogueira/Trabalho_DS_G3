@@ -13,6 +13,7 @@ import alertaRoutes from './routes/alerta.routes';
 import auditoriaRoutes from './routes/auditoria.routes';
 import comorbilidadeRoutes from './routes/comorbilidades.routes';
 import configuracaoRoutes from './routes/configuracao.routes';
+import caratRoutes from './routes/carat.routes';
 import dadoAdministrativoRoutes from './routes/dadoAdministrativo.routes';
 import exameRoutes from './routes/exame.routes';
 import exameUtenteRoutes from './routes/exameUtente.routes';
@@ -29,6 +30,7 @@ import autenticacaoRoutes from './routes/autenticacao.routes';
 import {rodarMedicacaoSeed } from './seeds/medicacao.seed';
 import { rodarExameSeed } from './seeds/exame.seed';
 import { QuestionarioCaratSeed } from './seeds/questionarioCarat.seed';
+import { rodarUtilizadoresSeed } from './seeds/utilizador.seed';
 
 
 
@@ -43,15 +45,15 @@ app.use(express.json());
 
 
 // Rotas
+app.use('/autenticacao', autenticacaoRoutes);
 app.use('/utilizadores', utilizadorRoutes);
 app.use('/utentes', utenteRoutes);
 app.use('/medicos', medicoRoutes);
 app.use('/administradores', administradorRoutes);
 app.use('/alertas', alertaRoutes);
-app.use(auditoriaAutomaticaMiddleware);
-app.use('/auditorias', auditoriaRoutes);
 app.use('/comorbilidades', comorbilidadeRoutes);
 app.use('/configuracao', configuracaoRoutes);
+app.use('/carat', caratRoutes);
 app.use('/dadoAdministrativos', dadoAdministrativoRoutes);
 app.use('/exames', exameRoutes);
 app.use('/exameUtente', exameUtenteRoutes);
@@ -63,7 +65,9 @@ app.use('/planoAcompanhamento', planoAcompanhamentoRoutes);
 app.use('/questionarioCarat', questionarioCaratRoutes);
 app.use('/recomendacoes', recomendacaoRoutes);
 app.use('/sintomaReportado', sintomaReportadoRoutes);
-app.use('/autenticacao', autenticacaoRoutes);
+app.use(auditoriaAutomaticaMiddleware);
+app.use('/auditorias', auditoriaRoutes);
+
 
 // Inicializar a base de dados
 AppDataSource.initialize()
@@ -72,8 +76,9 @@ AppDataSource.initialize()
 
         /*//seeds
         await rodarMedicacaoSeed();
-        await rodarExameSeed();
-        await QuestionarioCaratSeed();*/
+        await rodarExameSeed();*/
+        await QuestionarioCaratSeed();
+        /*await rodarUtilizadoresSeed();*/
 
         // Iniciar o servidor só depois da base de dados estar ligada
         app.listen(PORT, () => {
@@ -85,3 +90,5 @@ AppDataSource.initialize()
     });
 
 export default app;
+
+

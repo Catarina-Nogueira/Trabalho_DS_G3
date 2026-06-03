@@ -9,12 +9,33 @@ const utenteRepo = AppDataSource.getRepository(Utente);
 export const SintomaReportadoService = {
 
     // RF55 - Listar todos os sintomas reportados
-    listarTodos: async () => {
+    listarTodos: async (idExecutor: number, tipoExecutor: string) => {
+    const perfil = tipoExecutor.toLowerCase();
+
+    // 1. Se for Administrador, mantém a regra antiga: vê TUDO de toda a gente
+    if (perfil === 'administrador') {
         return await sintomaReportadoRepo.find({
             relations: ['utente'],
             order: { data_registo: 'DESC' }
         });
-    },
+    }
+
+    // 2. Se for Médico, filtra apenas os sintomas dos utentes associados a este médico
+    if (perfil === 'medico') {
+        return await sintomaReportadoRepo.find({
+            where: {
+                utente: {
+                    medico: { id: idExecutor } // Faz a ligação automática através do relacionamento
+                }
+            },
+            relations: ['utente'],
+            order: { data_registo: 'DESC' }
+        });
+    }
+
+    // 3. Se um Utente ou outro perfil tentar aceder por engano a esta rota geral
+    throw new Error('Acesso proibido. O seu perfil não tem permissões para listar todos os registos.');
+},
 
     // RF55 - Listar sintomas reportados de um utente específico (ordenados do mais recente para o mais antigo)
     listarPorUtilizadorSessao: async (id_utilizador_sessao: number) => {

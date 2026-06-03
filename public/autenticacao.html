@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SaudINOB - Autenticação</title>
+  <title>Autenticação</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   
   <style>
@@ -149,6 +149,15 @@
       background: #0056cc;
       box-shadow: 0 6px 16px rgba(11, 117, 255, 0.3);
     }
+
+    footer {
+      margin-top: auto;
+      text-align: center;
+      padding: 24px;
+      font-size: 0.7rem;
+      color: #334155;
+      border-top: 1px solid rgba(99, 179, 237, 0.08);
+    }
   </style>
 </head>
 <body>
@@ -209,7 +218,7 @@
   </div>
 
   <script>
-    // Lógica para o Olhinho funcionar (Mudar entre texto e password)
+    // 1. Lógica para o Olhinho funcionar (Mudar entre texto e password)
     function alternarVisibilidadePassword() {
       const campoPassword = document.getElementById('password');
       const iconeOlho = document.getElementById('iconeOlho');
@@ -225,21 +234,66 @@
       }
     }
 
-    // Evento de envio para a vossa API
-    function lidarLogin(event) {
+    // 2. Conexão Real com o teu Backend Express
+    async function lidarLogin(event) {
       event.preventDefault();
       
       const form = document.getElementById('formLogin');
       const formData = new FormData(form);
       
+      // Criamos o objeto com os dados dos inputs
       const payloadLogin = {
-        username: formData.get('username'),
+        username: formData.get('username'), // Mapeia o campo do input
         password: formData.get('password')
       };
 
-      console.log("Payload enviado para o Backend:", payloadLogin);
-      alert("A processar a autenticação...");
+      try {
+        // Altera para o URL correto da tua API (ex: http://localhost:3000)
+        const URL_BACKEND = 'http://localhost:3000/autenticacao/login';
+
+        const resposta = await fetch(URL_BACKEND, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payloadLogin)
+        });
+
+        const dados = await resposta.json();
+
+        // Se o backend devolver um erro (ex: status 400 ou 401)
+        if (!resposta.ok) {
+          throw new Error(dados.erro || 'Falha ao iniciar sessão.');
+        }
+
+        // Se o login for um sucesso:
+        // Guardamos o Token de segurança e os dados do utilizador no navegador
+        localStorage.setItem('token', dados.token);
+        localStorage.setItem('user', JSON.stringify(dados.utilizador));
+
+        // O POLÍCIA DE TRÂNSITO: Redireciona conforme o tipo_utilizador recebido
+        const perfil = dados.utilizador.tipo_utilizador;
+
+        if (perfil === 'administrador') {
+          window.location.href = 'administradorPrincipal.html'; // Altera para o nome real do teu HTML de Admin
+        } else if (perfil === 'medico') {
+          window.location.href = 'medicoPrincipal.html'; // Altera para o nome real do teu HTML de Médico
+        } else if (perfil === 'utente') {
+          window.location.href = 'utentePrincipal.html'; // Altera para o nome real do teu HTML de Utente
+        } else {
+          alert('Perfil não reconhecido pelo sistema.');
+        }
+
+      } catch (err) {
+        // Mostra o erro devolvido pelo teu backend (ex: "Password incorreta")
+        alert('Erro no Login: ' + err.message);
+      }
     }
   </script>
+  
+  <footer>
+    SaudINOB © 2026 — Saúde Digital e Inovação Biomédica
+  </footer>
+
 </body>
 </html>

@@ -82,27 +82,32 @@ export const CaratService = {
     },
 
     // RF17, RF18, RF19, RF20, RF21, RF25, RF26 — Submeter avaliação CARAT
-    submeterAvaliacao: async (id_utente: number, dto: SubmeterAvaliacaoDto) => {
+    // RF17, RF18, RF19, RF20, RF21, RF25, RF26 — Submeter avaliação CARAT
+    submeterAvaliacao: async (id_utente: number, dto: { respostas: { id_questao: number; id_opcao: number }[] }) => {
 
-        // Verificar que o utente existe
+        // 1. Verificar que o utente existe
         const utente = await utenteRepo().findOne({
             where: { id: id_utente },
             relations: ['medico'],
         });
         if (!utente) throw new Error('Utente não encontrado.');
 
-        // Verificar que o questionário existe e está ativo
-        const hoje = new Date().toISOString().split('T')[0]!;
-        const questionario = await questionarioRepo().findOne({ where: { id: dto.id_questionario } });
-        if (!questionario) throw new Error('Questionário CARAT não encontrado.');
-        if (questionario.data_ativacao > hoje) throw new Error('O questionário ainda não está ativo.');
-        if (questionario.data_desativacao && questionario.data_desativacao <= hoje) {
-            throw new Error('O questionário já não está ativo.');
+        // 2. Descobrir AUTOMATICAMENTE o questionário CARAT ativo neste momento
+        const hoje = new Date().toISOString().split('T')[0];
+        const questionarioActive = await questionarioRepo()
+            .createQueryBuilder('q')
+            .where('q.data_ativacao <= :hoje', { hoje })
+            .andWhere('(q.data_desativacao IS NULL OR q.data_desativacao > :hoje)', { hoje })
+            .orderBy('q.data_ativacao', 'DESC')
+            .getOne();
+
+        if (!questionarioActive) {
+            throw new Error('Não é possível submeter a avaliação porque não existe nenhum questionário CARAT ativo no sistema.');
         }
 
-        // RF18 — Verificar que todas as questões foram respondidas
+        // 3. RF18 — Verificar que todas as questões DO QUESTIONÁRIO ATIVO foram respondidas
         const todasQuestoes = await questaoRepo().find({
-            where: { questionario: { id: dto.id_questionario } },
+            where: { questionario: { id: questionarioActive.id } },
         });
 
         const questoesRespondidas = new Set(dto.respostas.map((r) => r.id_questao));
@@ -117,7 +122,7 @@ export const CaratService = {
             );
         }
 
-        // Carregar as opções escolhidas e verificar que pertencem às questões corretas
+        // 4. Carregar as opções escolhidas e verificar que pertencem às questões corretas
         const opcoes = await opcaoRepo().find({
             where: dto.respostas.map((r) => ({ id: r.id_opcao })),
             relations: ['questao'],
@@ -132,10 +137,10 @@ export const CaratService = {
             }
         }
 
-        // RF19 — Calcular score total
+        // 5. RF19 — Calcular score total
         const score_total = opcoes.reduce((acc, o) => acc + o.score, 0);
 
-        // RF20 — Determinar nível de controlo com limiares configuráveis
+        // 6. RF20 — Determinar nível de controlo com limiares configuráveis
         const limiarControlado = await getLimiar('limiar_controlado', 24);
         const limiarParcial    = await getLimiar('limiar_parcial', 20);
 
@@ -148,23 +153,24 @@ export const CaratService = {
             nivel_controlo = NivelControlo.NAO_CONTROLADO;
         }
 
-        // RF21 — Calcular delta face à avaliação anterior
+        // 7. RF21 — Calcular delta face à avaliação anterior
         const avaliacaoAnterior = await avaliacaoRepo().findOne({
             where: { utente: { id: id_utente } },
             order: { data_avaliacao: 'DESC' },
         });
         const delta = avaliacaoAnterior ? score_total - avaliacaoAnterior.score_total : null;
 
-        // Guardar a avaliação
+        // 8. Guardar a avaliação ligada ao questionário ativo descoberto
         const novaAvaliacao = avaliacaoRepo().create({
             utente,
             medico: utente.medico,
-            questionario,
+            questionario: questionarioActive, // Injetado aqui de forma automática
             score_total,
             nivel_controlo,
         });
         const avaliacaoGuardada = await avaliacaoRepo().save(novaAvaliacao);
 
+        // Alertas automáticos por nível de controlo
         if (nivel_controlo === NivelControlo.NAO_CONTROLADO) {
             await AlertaService.gerarAlertaAutomatico(
                 id_utente,
@@ -181,20 +187,17 @@ export const CaratService = {
                 `Aviso: Utente obteve score de ${score_total} no teste CARAT (Sintomas Parcialmente Controlados).`,
                 avaliacaoGuardada.id
             );
-
         }
 
+        // Alerta automático por deterioração
         if (delta !== null) {
-            // Procura o limiar na tabela Configuração. Se não existir, assume 3 pontos por defeito.
             const limiarDeterioracao = await getLimiar('limiar_deterioracao', 3);
-            
-            // Se o delta for negativo e a queda for igual ou superior ao limiar (ex: delta = -4 e limiar = 3)
             if (delta <= -limiarDeterioracao) {
                 const pontosPerdidos = Math.abs(delta);
                 await AlertaService.gerarAlertaAutomatico(
                     id_utente,
                     utente.medico.id,
-                    TipoAlerta.SCORE_CARAT, // Pode ser SCORE_CARAT ou podes criar TipoAlerta.DETERIORACAO se preferires
+                    TipoAlerta.SCORE_CARAT,
                     `Deterioração: Detetada uma queda abrupta de ${pontosPerdidos} pontos no score CARAT em comparação com a avaliação anterior.`,
                     avaliacaoGuardada.id
                 );
@@ -217,6 +220,7 @@ export const CaratService = {
                 score_total,
                 nivel_controlo,
                 delta,
+                id_questionario_utilizado: questionarioActive.id // Confirmar qual usou na resposta
             },
             recomendacoes: recomendacoes.map((r) => ({
                 id: r.id,

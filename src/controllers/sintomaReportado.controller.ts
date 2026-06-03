@@ -5,13 +5,18 @@ import { CriarSintomaReportadoDTO } from '../dtos/sintomaReportado.dto';
 export const SintomaReportadoController = {
 
     listarTodos: async (req: Request, res: Response) => {
-        try {
-            const sintomas = await SintomaReportadoService.listarTodos();
-            return res.json(sintomas);
-        } catch (err: any) {
-            return res.status(500).json({ erro: 'Erro ao listar todos os sintomas.' });
-        }
-    },
+    try {
+        // 1. Pegamos nos dados de quem está autenticado no Postman
+        const id_utilizador_sessao = req.user!.id;
+        const tipo_utilizador_sessao = req.user!.tipo_utilizador;
+
+        const sintomas = await SintomaReportadoService.listarTodos(id_utilizador_sessao, tipo_utilizador_sessao);
+        
+        return res.json(sintomas);
+    } catch (err: any) {
+        return res.status(500).json({ erro: err.message || 'Erro ao listar os sintomas.' });
+    }
+},
 
     // GET /sintomas/meu-historico
     listarMeuHistorico: async (req: Request, res: Response) => {

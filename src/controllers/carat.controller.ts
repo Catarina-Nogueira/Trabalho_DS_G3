@@ -16,21 +16,34 @@ export const CaratController = {
     // POST /carat/avaliacoes
     // RF17, RF18, RF19, RF20, RF21, RF25, RF26 — Utente submete respostas
     submeterAvaliacao: async (req: Request, res: Response) => {
-        
-        const id_utente = req.user!.id; // O ID do utente deve vir da sessão autenticada, não do body
-        const {respostas, id_questionario } = req.body;
+        const id_utilizador_sessao = req.user!.id; // ID da tabela Utilizador
+        const { respostas } = req.body; // Removemos o id_questionario daqui
 
         // Validações básicas de entrada
-        if (!id_questionario || typeof id_questionario !== 'number') {
-            return res.status(400).json({ erro: 'id_questionario é obrigatório e deve ser um número.' });
-        }
         if (!Array.isArray(respostas) || respostas.length === 0) {
             return res.status(400).json({ erro: 'respostas deve ser um array não vazio.' });
         }
         
         try {
-            const resultado = await CaratService.submeterAvaliacao(id_utente, { id_questionario, respostas });
-             return res.status(201).json(resultado);
+            // 1. Ir buscar o repositório de Utente para descobrir o ID clínico real dele
+            const { AppDataSource } = require('../database/database');
+            const { Utente } = require('../models/utente.entity');
+            const utenteRepo = AppDataSource.getRepository(Utente);
+
+            const utenteDados = await utenteRepo.findOne({ 
+                where: { utilizador: { id: id_utilizador_sessao } } 
+            });
+
+            if (!utenteDados) {
+                return res.status(404).json({ erro: 'Perfil de utente não associado a este utilizador.' });
+            }
+
+            const id_utente_real = utenteDados.id;
+
+            // 2. Chamar o serviço (repara que o DTO agora já não leva o id_questionario)
+            const resultado = await CaratService.submeterAvaliacao(id_utente_real, { respostas });
+            return res.status(201).json(resultado);
+
         } catch (err: any) {
             // RF18 — Questões por responder
             if (err.code === 'RESPOSTAS_INCOMPLETAS') {
