@@ -3,12 +3,14 @@ import express from 'express'; //Framework web que cria o servidor HTTP
 import { AppDataSource } from './database/database'; 
 import path from 'path';
 
+import { auditoriaAutomaticaMiddleware } from './auditoria/middleware.auditoria';
+
 import utilizadorRoutes from './routes/utilizador.routes';
 import utenteRoutes from './routes/utente.routes';
 import medicoRoutes from './routes/medico.routes';
 import administradorRoutes from './routes/administrador.routes';
 import alertaRoutes from './routes/alerta.routes';
-//import auditoriaRoutes from './routes/auditoria.routes';
+import auditoriaRoutes from './routes/auditoria.routes';
 import comorbilidadeRoutes from './routes/comorbilidades.routes';
 import configuracaoRoutes from './routes/configuracao.routes';
 import dadoAdministrativoRoutes from './routes/dadoAdministrativo.routes';
@@ -30,6 +32,7 @@ import { QuestionarioCaratSeed } from './seeds/questionarioCarat.seed';
 
 
 
+
 const app = express(); // Cria o objeto principal da aplicação Express
 const PORT = 3000;
 
@@ -45,7 +48,8 @@ app.use('/utentes', utenteRoutes);
 app.use('/medicos', medicoRoutes);
 app.use('/administradores', administradorRoutes);
 app.use('/alertas', alertaRoutes);
-//app.use('/auditoria', auditoriaRoutes);
+app.use(auditoriaAutomaticaMiddleware);
+app.use('/auditorias', auditoriaRoutes);
 app.use('/comorbilidades', comorbilidadeRoutes);
 app.use('/configuracao', configuracaoRoutes);
 app.use('/dadoAdministrativos', dadoAdministrativoRoutes);
@@ -70,7 +74,7 @@ AppDataSource.initialize()
         await rodarMedicacaoSeed();
         await rodarExameSeed();
         await QuestionarioCaratSeed();*/
-        
+
         // Iniciar o servidor só depois da base de dados estar ligada
         app.listen(PORT, () => {
             console.log(`Servidor a correr em http://localhost:${PORT}`);
