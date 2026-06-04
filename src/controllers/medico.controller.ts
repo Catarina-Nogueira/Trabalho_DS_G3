@@ -15,7 +15,12 @@ export const MedicoController = {
 
     buscarPorId: async (req: Request, res: Response) => {
         try {
-            const utilizadorLogado = req.user!;
+            
+            if (!req.user) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+
+            const utilizadorLogado = req.user;
             const id_medico = Number(req.params.id);
 
             const medico = await MedicoService.buscarPorId(id_medico);
@@ -35,7 +40,11 @@ export const MedicoController = {
 
     criar: async (req: Request, res: Response) => {
         try {
-            const id_utilizador_logado = req.user!.id; 
+            if (!req.user) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+
+            const id_utilizador_logado = req.user.id; 
             const id_utilizador = Number(req.params.id_utilizador);
             const dadosDTO: CriarMedicoDTO = req.body;
 
@@ -52,36 +61,59 @@ export const MedicoController = {
         }
     },
 
-    atualizarTelemovel: async (req: Request, res: Response) => {
+    atualizar: async (req: Request, res: Response) => {
         try {
-            const utilizadorLogado = req.user!;
-            const id = Number(req.params.id);
-            const { telemovel } = req.body;
-            
-            if (!telemovel) return res.status(400).json({ erro: 'O campo telemóvel é obrigatório.' });
-            
-            // Primeiro buscamos o médico para avaliar o utilizador dono do perfil
-            const medicoAlvo = await MedicoService.buscarPorId(id);
-
-            // Bloqueia atualizações de telemóvel de terceiros
-            if (utilizadorLogado.tipo_utilizador === 'medico' && medicoAlvo.utilizador.id !== utilizadorLogado.id) {
-                return res.status(403).json({ erro: 'Acesso negado. Não pode alterar dados de outros médicos.' });
+            if (!req.user) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
             }
 
-            const dadosDTO: AtualizarMedicoDTO = { telemovel };
-            const medico = await MedicoService.atualizar(id, dadosDTO, utilizadorLogado.id);
-            
+            const utilizadorLogado = req.user;
+            const id = Number(req.params.id);
+
+            const { nome, telemovel } = req.body;
+
+            if (!nome && !telemovel) {
+                return res.status(400).json({ erro: 'Nenhum dado para atualizar.' });
+            }
+
+            const medicoAlvo = await MedicoService.buscarPorId(id);
+
+            if (utilizadorLogado.tipo_utilizador === 'medico' &&
+                medicoAlvo.utilizador.id !== utilizadorLogado.id) {
+                return res.status(403).json({
+                    erro: 'Acesso negado. Não pode alterar dados de outros médicos.'
+                });
+            }
+
+            const dadosDTO: AtualizarMedicoDTO = {
+                nome,
+                telemovel
+            };
+
+            const medico = await MedicoService.atualizar(
+                id,
+                dadosDTO,
+                utilizadorLogado.id
+            );
+
             return res.json(medico);
+
         } catch (err: any) {
-            const status = err.message === 'Médico não encontrado' ? 404 :
-                           err.message === 'ID inválido' ? 400 : 500;
+            const status =
+                err.message === 'Médico não encontrado' ? 404 :
+                err.message === 'ID inválido' ? 400 : 500;
+
             return res.status(status).json({ erro: err.message });
         }
     },
 
     eliminar: async (req: Request, res: Response) => {
         try {
-            const id_utilizador_logado = req.user!.id;
+            if (!req.user) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+
+            const id_utilizador_logado = req.user.id;
             const id = Number(req.params.id);
 
             const resultado = await MedicoService.eliminar(id, id_utilizador_logado);

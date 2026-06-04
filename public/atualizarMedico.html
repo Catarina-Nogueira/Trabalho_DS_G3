@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB - Atualizar Médico</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- 1) BARRA LATERAL --- */
+    .sidebar {
+      width: 260px;
+      background: #07213b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99, 179, 237, 0.15);
+    }
+
+    .perfil-admin {
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .perfil-foto {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #1a365d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      border: 3px solid #75d0fb;
+      font-size: 2.2rem;
+      color: #75d0fb;
+    }
+
+    .perfil-nome {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .perfil-tipo {
+      font-size: 0.8rem;
+      color: #75d0fb;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu-vazio {
+      flex: 1;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-logout:hover {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    /* --- 2) CONTEÚDO PRINCIPAL --- */
+    .main-conteudo {
+      margin-left: 260px;
+      padding: 48px;
+      width: calc(100% - 260px);
+      max-width: 900px;
+    }
+
+    .btn-voltar {
+      color: #0b75ff;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+
+    .btn-voltar:hover {
+      color: #0056cc;
+    }
+
+    .titulo-pagina {
+      font-size: 1.8rem;
+      font-weight: 400;
+      margin-bottom: 8px;
+      color: #092b4c;
+    }
+
+    .subtitulo-pagina {
+      font-size: 0.95rem;
+      color: #64748b;
+      margin-bottom: 32px;
+    }
+
+    /* Formulário */
+    .cartao-formulario {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      border: 1px solid #e2e8f0;
+    }
+
+    .seccao-form {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .seccao-form:last-of-type {
+      border-bottom: none;
+      margin-bottom: 16px;
+      padding-bottom: 0;
+    }
+
+    .seccao-titulo {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #0b75ff;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .grelha-campos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+    }
+
+    .grupo-input {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .grupo-input.totalw {
+      grid-column: 1 / -1;
+    }
+
+    .grupo-input label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .grupo-input input {
+      padding: 12px 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 1rem;
+      color: #092b4c;
+      background: #ffffff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    /* Foco nos campos editáveis */
+    .grupo-input input:not(:disabled):focus {
+      outline: none;
+      border-color: #0b75ff;
+      box-shadow: 0 0 0 3px rgba(11, 117, 255, 0.15);
+    }
+
+    /* Estilo visual para campos bloqueados (Leitura) */
+    .grupo-input input:disabled {
+      background: #f8fafc;
+      color: #64748b;
+      border-color: #e2e8f0;
+      cursor: not-allowed;
+    }
+
+    .aviso-bloqueado {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      font-style: italic;
+      margin-top: -4px;
+    }
+
+    /* Ações */
+    .bloco-botoes {
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .btn-cancelar {
+      padding: 14px 28px;
+      background: #f1f5f9;
+      color: #475569;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-cancelar:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-guardar {
+      padding: 14px 32px;
+      background: #0b75ff;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(11, 117, 255, 0.2);
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-guardar:hover {
+      background: #0056cc;
+    }
+
+    .btn-guardar:active {
+      transform: scale(0.98);
+    }
+
+    .btn-guardar:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="perfil-admin">
+      <div class="perfil-foto"><i class="fa-solid fa-user-shield"></i></div>
+      <div class="perfil-nome">Administrador Sistema</div>
+      <div class="perfil-tipo">Administrador</div>
+    </div>
+    
+    <div class="sidebar-menu-vazio"></div>
+    
+    <div class="sidebar-footer">
+      <a href="#" class="btn-logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-conteudo">
+    
+    <a href="#" id="btn-voltar-dinamico" class="btn-voltar">
+      <i class="fa-solid fa-arrow-left"></i> Cancelar e Voltar
+    </a>
+
+    <h1 class="titulo-pagina">Atualizar Dados do Médico</h1>
+    <p class="subtitulo-pagina">Modifique os dados operacionais permitidos para este perfil clínico.</p>
+
+    <div class="cartao-formulario">
+      <form id="form-atualizar">
+        
+        <div class="seccao-form">
+          <div class="seccao-titulo">
+            <i class="fa-solid fa-lock"></i> 1. Identificação da Conta (Não Editável)
+          </div>
+          <div class="grelha-campos">
+            <div class="grupo-input">
+              <label>Nome de Utilizador</label>
+              <input type="text" id="username" disabled />
+              <span class="aviso-bloqueado">Alterável apenas via base de dados</span>
+            </div>
+            
+            <div class="grupo-input">
+              <label>Email de Sistema</label>
+              <input type="email" id="email" disabled />
+              <span class="aviso-bloqueado">Identificador único do utilizador</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="seccao-form">
+          <div class="seccao-titulo">
+            <i class="fa-solid fa-user-doctor"></i> 2. Ficha Médica & Contacto
+          </div>
+          <div class="grelha-campos">
+            <div class="grupo-input totalw">
+              <label for="nome">Nome Clínico Completo</label>
+              <input type="text" id="nome" required placeholder="Insira o nome completo do médico" />
+            </div>
+            
+            <div class="grupo-input">
+              <label>Especialidade Médica</label>
+              <input type="text" id="especialidade" disabled />
+              <span class="aviso-bloqueado">Requer validação da Ordem</span>
+            </div>
+
+            <div class="grupo-input">
+              <label>Nº da Cédula Profissional</label>
+              <input type="text" id="numero_medico" disabled />
+              <span class="aviso-bloqueado">Número de registo fixo</span>
+            </div>
+
+            <div class="grupo-input">
+              <label for="telemovel">Contacto de Telemóvel</label>
+              <input type="tel" id="telemovel" required placeholder="ex: 9xxxxxxxx" />
+            </div>
+          </div>
+        </div>
+
+        <div class="bloco-botoes">
+          <a href="#" id="btn-cancelar-dinamico" class="btn-cancelar">Cancelar</a>
+          <button type="submit" class="btn-guardar" id="btn-submeter">Gravar Alterações</button>
+        </div>
+
+      </form>
+    </div>
+
+  </main>
+
+  <script>
+    let idMedicoAtual = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      verificarSessao();
+      extrairIdECarregarDados();
+      configurarFormulario();
+      configurarLogout();
+    });
+
+    // 1. Validar Sessão do Admin
+    function verificarSessao() {
+        const token = localStorage.getItem('token');
+        const userRaw = localStorage.getItem('user');
+
+        if (!token || !userRaw) {
+            window.location.href = 'autenticacao.html';
+            return;
+        }
+
+        const utilizadorSessao = JSON.parse(userRaw);
+        const tipo = utilizadorSessao.tipo_utilizador || utilizadorSessao.tipo;
+
+        if (!tipo || tipo.toLowerCase() !== 'administrador') {
+            window.location.href = 'autenticacao.html';
+            return;
+        }
+
+        const elementoNome = document.querySelector('.perfil-nome');
+        if (elementoNome) {
+            elementoNome.textContent = utilizadorSessao.username || utilizadorSessao.nome || "Administrador";
+        }
+    }
+
+    // 2. Procurar o ID na URL e pré-preencher o formulário
+    async function extrairIdECarregarDados() {
+      const token = localStorage.getItem('token');
+      const parametrosUrl = new URLSearchParams(window.location.search);
+      idMedicoAtual = parametrosUrl.get('id');
+
+      if (!idMedicoAtual) {
+        alert("Erro: Nenhum ID de médico foi detetado.");
+        window.location.href = 'gestaoMedicos.html';
+        return;
+      }
+
+      // Configurar os botões de voltar para regressarem exatamente à ficha deste médico
+      document.getElementById('btn-voltar-dinamico').href = `detalhesMedico.html?id=${idMedicoAtual}`;
+      document.getElementById('btn-cancelar-dinamico').href = `detalhesMedico.html?id=${idMedicoAtual}`;
+
+      try {
+        const resposta = await fetch(`http://localhost:3000/medicos/${idMedicoAtual}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!resposta.ok) throw new Error('Falha ao ler dados atuais do médico.');
+
+        const medico = await resposta.json();
+        const utilizador = medico.utilizador || {};
+
+        // Injetar nos campos desativados (Apenas leitura)
+        document.getElementById('username').value = utilizador.username || 'Não definido';
+        document.getElementById('email').value = utilizador.email || 'Não definido';
+        document.getElementById('especialidade').value = medico.especialidade || '';
+        document.getElementById('numero_medico').value = medico.numero_medico || '';
+
+        // Injetar nos campos editáveis (O Admin pode alterar)
+        document.getElementById('nome').value = medico.nome || '';
+        document.getElementById('telemovel').value = medico.telemovel || '';
+
+      } catch (err) {
+        alert(`Erro ao preparar formulário: ${err.message}`);
+        window.location.href = 'gestaoMedicos.html';
+      }
+    }
+
+    // 3. Submeter a Atualização (Fazer a chamada PUT / PATCH)
+    function configurarFormulario() {
+      const formulario = document.getElementById('form-atualizar');
+      const btnSubmeter = document.getElementById('btn-submeter');
+      const token = localStorage.getItem('token');
+
+      formulario.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        btnSubmeter.disabled = true;
+        btnSubmeter.textContent = "A atualizar...";
+
+        const nome = document.getElementById('nome').value.trim();
+        const telemovel = document.getElementById('telemovel').value.trim();
+
+        try {
+          // Faz o pedido para a tua rota de atualização de médicos (normalmente PUT ou PATCH /medicos/:id)
+          const resposta = await fetch(`http://localhost:3000/medicos/${idMedicoAtual}`, {
+            method: 'PATCH', // Substitui por PATCH se o teu backend estiver desenhado com PATCH
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              nome,
+              telemovel
+            })
+          });
+
+          if (!resposta.ok) {
+            const erro = await resposta.json().catch(() => ({}));
+            throw new Error(erro.erro || JSON.stringify(erro));
+        }
+
+          alert('Dados do médico atualizados com sucesso!');
+          // Redireciona de volta para a página de detalhes do médico atualizado
+          window.location.href = `detalhesMedico.html?id=${idMedicoAtual}`;
+
+        } catch (err) {
+          alert(`Erro na atualização: ${err.message}`);
+          console.error(err);
+          btnSubmeter.disabled = false;
+          btnSubmeter.textContent = "Gravar Alterações";
+        }
+      });
+    }
+
+    function configurarLogout() {
+      const btnLogout = document.querySelector('.btn-logout');
+      if (btnLogout) {
+        btnLogout.addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.clear();
+          window.location.href = 'autenticacao.html';
+        });
+      }
+    }
+  </script>
+</body>
+</html>

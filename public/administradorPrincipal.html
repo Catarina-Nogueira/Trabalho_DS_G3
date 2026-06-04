@@ -227,7 +227,7 @@
 
     <div class="grelha-admin">
       
-      <a href="#" class="card-gestao">
+      <a href="gestaoMedicos.html" class="card-gestao">
         <div>
           <div class="card-topo">
             <div class="icone-wrapper cor-medicos">
@@ -244,7 +244,7 @@
         </div>
       </a>
 
-      <a href="#" class="card-gestao">
+      <a href="gestaoUtentes.html" class="card-gestao">
         <div>
           <div class="card-topo">
             <div class="icone-wrapper cor-utentes">
@@ -261,7 +261,7 @@
         </div>
       </a>
 
-      <a href="#" class="card-gestao">
+      <a href="configuracaoCarat.html" class="card-gestao">
         <div>
           <div class="card-topo">
             <div class="icone-wrapper cor-carat">
@@ -278,7 +278,7 @@
         </div>
       </a>
 
-      <a href="#" class="card-gestao">
+      <a href="configSistema.html" class="card-gestao">
         <div>
           <div class="card-topo">
             <div class="icone-wrapper cor-sistema">
@@ -295,7 +295,7 @@
         </div>
       </a>
 
-      <a href="#" class="card-gestao">
+      <a href="auditoria.html" class="card-gestao">
         <div>
           <div class="card-topo">
             <div class="icone-wrapper cor-auditoria">
@@ -315,6 +315,80 @@
     </div>
 
   </main>
+
+  <script>
+    // Executa assim que a página é carregada
+    document.addEventListener("DOMContentLoaded", () => {
+      verificarEConfigurarSessao();
+      configurarLogout();
+    });
+
+    function verificarEConfigurarSessao() {
+      // 1. Recuperar os dados que guardámos no ecrã de Login
+      const token = localStorage.getItem('token');
+      const userRaw = localStorage.getItem('user');
+
+      // 2. Bloqueio de Segurança (Guarda de Rota)
+      if (!token || !userRaw) {
+        alert("Acesso negado. Por favor, inicie sessão.");
+        window.location.href = 'login.html'; // Altera para o nome do teu ficheiro de login
+        return;
+      }
+
+      const utilizador = JSON.parse(userRaw);
+
+      // 3. Garantir que apenas Administradores entram aqui
+      // O backend envia o Enum (ex: "ADMINISTRADOR"). Convertemos para lowercase para prevenir erros
+      if (utilizador.tipo.toLowerCase() !== 'administrador') {
+        alert("Não tem permissões de administrador para aceder a esta página.");
+        
+        // Redireciona o utilizador para o seu painel correto por segurança
+        if (utilizador.tipo.toLowerCase() === 'medico') {
+          window.location.href = 'medicoPrincipal.html';
+        } else {
+          window.location.href = 'utentePrincipal.html';
+        }
+        return;
+      }
+
+      // 4. Injeção de Dados Dinâmicos no HTML
+      // Vamos buscar o elemento do nome através da classe correspondente
+      const elementoNome = document.querySelector('.perfil-nome');
+      if (elementoNome && utilizador.nome) {
+        elementoNome.textContent = utilizador.nome;
+      }
+    }
+
+    function configurarLogout() {
+      const btnLogout = document.querySelector('.btn-logout');
+      
+      if (btnLogout) {
+        btnLogout.addEventListener('click', async (event) => {
+          event.preventDefault(); // Evita que o link tente navegar para "#"
+
+          try {
+            // Chamada opcional ao endpoint de logout do teu backend
+            // Útil caso queiras registar em base de dados que o administrador saiu
+            await fetch('http://localhost:3000/autenticacao/logout', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              }
+            });
+          } catch (err) {
+            console.warn("Não foi possível notificar o backend do logout, a limpar localmente...", err);
+          } finally {
+            // Destruição local da sessão (Crítico para Stateless JWT)
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+
+            // Redirecionamento final
+            window.location.href = 'login.html';
+          }
+        });
+      }
+    }
+  </script>
 
 </body>
 </html>

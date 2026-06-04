@@ -69,13 +69,12 @@ export const UtenteService = {
     buscarDadosPermitidos: async (id: number) => {
         const utente = await utenteRepo().findOne({
             where: { id },
-            relations: ['medico', 'utilizador'] // Carrega relações para validação de segurança no controller
+            relations: ['medico', 'utilizador']
         });
         if (!utente) return null;
         return utente;
     },
 
-    
     criar: async (dados: CriarUtenteDTO, id_utilizador: number, id_medico: number, idUtilizadorLogado: number): Promise<UtenteRespostaDTO> => {
         if (!id_utilizador || id_utilizador <= 0) throw new Error('ID de utilizador inválido ou não fornecido.');
         if (!id_medico || id_medico <= 0) throw new Error('ID de médico inválido ou não fornecido.');
@@ -99,11 +98,11 @@ export const UtenteService = {
 
         const guardado = await utenteRepo().save(utente);
 
-        // REGISTO DE AUDITORIA
+        // 🚨 CORREÇÃO: Utilização direta do Enum nativo mapeado sem casts redundantes
         await AuditoriaService.registar({
             id_utilizador: idUtilizadorLogado,
-            entidade_afetada: 'UTENTE' as EntidadeAuditoria,
-            acao: 'CRIAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.UTENTE,
+            acao: AcaoAuditoria.CRIAR
         });
 
         const completo = await utenteRepo().findOne({
@@ -113,7 +112,6 @@ export const UtenteService = {
         return toResposta(completo!);
     },
 
-    
     atualizar: async (id: number, dados: AtualizarUtenteDTO, utilizadorSession: {id: number, tipo_utilizador: string}): Promise<UtenteRespostaDTO | null> => {
         const utente = await utenteRepo().findOne({
             where: { id },
@@ -139,11 +137,11 @@ export const UtenteService = {
 
         const atualizado = await utenteRepo().save(utente);
 
-        // REGISTO DE AUDITORIA
+        
         await AuditoriaService.registar({
             id_utilizador: utilizadorSession.id,
-            entidade_afetada: 'UTENTE' as EntidadeAuditoria,
-            acao: 'ATUALIZAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.UTENTE,
+            acao: AcaoAuditoria.ATUALIZAR
         });
 
         return toResposta(atualizado);
@@ -155,11 +153,11 @@ export const UtenteService = {
         
         await utenteRepo().remove(utente);
 
-        // REGISTO DE AUDITORIA
+       
         await AuditoriaService.registar({
             id_utilizador: idUtilizadorLogado,
-            entidade_afetada: 'UTENTE' as EntidadeAuditoria,
-            acao: 'ELIMINAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.UTENTE,
+            acao: AcaoAuditoria.ELIMINAR
         });
     },
 };

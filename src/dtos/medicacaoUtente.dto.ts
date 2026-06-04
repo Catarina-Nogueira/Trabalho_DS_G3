@@ -1,6 +1,3 @@
-import { Medicacao_Utente } from '../models/medicacaoUtente.entity';
-
-// RF43 - Prescrição de medicação pelo médico
 export interface CriarMedicacaoUtenteDTO {
     utente: { id: number };
     medico: { id: number };
@@ -12,12 +9,11 @@ export interface CriarMedicacaoUtenteDTO {
 }
 
 export interface AtualizarMedicacaoUtenteDTO {
-    frequencia?: string;
-    duracao?: string;
-    dosagem?: string;
+    frequencia?: string | undefined; 
+    duracao?: string | undefined;    
+    dosagem?: string | undefined;    
 }
 
-// RF44 - Encerramento de prescrição
 export interface EncerrarMedicacaoUtenteDTO {
     ativo: false;
 }

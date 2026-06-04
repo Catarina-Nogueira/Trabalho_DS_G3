@@ -4,14 +4,18 @@ import { AppDataSource } from '../database/database';
 import { Utilizador, Estado, Tipo_Utilizador } from '../models/utilizador.entity';
 import { Utente } from '../models/utente.entity';
 import { Medico } from '../models/medico.entity';
-import { LoginDTO, LoginRespostaDTO, TokenPayload } from '../dtos/autenticacao.dto';
+import { LoginDTO, LoginRespostaDTO } from '../dtos/autenticacao.dto';
+import { Administrador } from '../models/administrador.entity';
 
 const utilizadorRepo = () => AppDataSource.getRepository(Utilizador);
 const utenteRepo     = () => AppDataSource.getRepository(Utente);
 const medicoRepo     = () => AppDataSource.getRepository(Medico);
+const administradorRepo = () => AppDataSource.getRepository(Administrador);
+
+
 
 // Chave secreta para assinar o token (Num ambiente real, usar process.env.JWT_SECRET)
-const JWT_SECRET = 'sua_chave_secreta_super_segura_123';
+const JWT_SECRET = 'chave_segura';
 
 export const AutenticacaoService = {
 
@@ -39,7 +43,7 @@ export const AutenticacaoService = {
         });
 
         // 5. Obter ID do perfil específico
-        let id_especifico: number | undefined;
+        let id_especifico: number | undefined = undefined;
 
         if (utilizador.tipo_utilizador === Tipo_Utilizador.UTENTE) {
             const utente = await utenteRepo().findOne({
@@ -56,9 +60,9 @@ export const AutenticacaoService = {
         const nome = await AutenticacaoService.obterNomePerfil(utilizador.id, utilizador.tipo_utilizador);
 
         // 6. Gerar Token JWT com as credenciais encriptadas
-        const payload: TokenPayload = {
+        const payload = {
             id_utilizador: utilizador.id,
-            tipo_utilizador: utilizador.tipo_utilizador ,
+            tipo_utilizador: utilizador.tipo_utilizador as Tipo_Utilizador,
             id_perfil_especifico: id_especifico
         };
 
@@ -73,15 +77,30 @@ export const AutenticacaoService = {
     },
 
     obterNomePerfil: async (id_utilizador: number, tipo: Tipo_Utilizador): Promise<string> => {
+
         if (tipo === Tipo_Utilizador.UTENTE) {
-            const utente = await utenteRepo().findOne({ where: { utilizador: { id: id_utilizador } } });
+            const utente = await utenteRepo().findOne({
+                where: { utilizador: { id: id_utilizador } }
+            });
             return utente?.nome ?? 'Utente';
         }
+
         if (tipo === Tipo_Utilizador.MEDICO) {
-            const medico = await medicoRepo().findOne({ where: { utilizador: { id: id_utilizador } } });
+            const medico = await medicoRepo().findOne({
+                where: { utilizador: { id: id_utilizador } }
+            });
             return medico?.nome ?? 'Médico';
         }
-        return 'Administrador';
+
+        if (tipo === Tipo_Utilizador.ADMINISTRADOR) {
+            const administrador = await administradorRepo().findOne({
+                where: { utilizador: { id: id_utilizador } }
+            });
+
+            return administrador?.nome ?? 'Administrador';
+        }
+
+        return 'Utilizador';
     },
 
     encriptarPassword: async (password: string): Promise<string> => {

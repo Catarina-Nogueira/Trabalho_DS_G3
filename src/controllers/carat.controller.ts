@@ -1,5 +1,10 @@
 import { Request, Response } from 'express';
 import { CaratService } from '../services/carat.service';
+import { AppDataSource } from '../database/database';
+import { Utente } from '../models/utente.entity';
+import { Tipo_Utilizador } from '../models/utilizador.entity';
+
+const utenteRepo = AppDataSource.getRepository(Utente);
 
 export const CaratController = {
 
@@ -26,20 +31,14 @@ export const CaratController = {
     // POST /carat/avaliacoes
     // RF17, RF18, RF19, RF20, RF21, RF25, RF26 — Utente submete respostas
     submeterAvaliacao: async (req: Request, res: Response) => {
-        const id_utilizador_sessao = req.user!.id; // ID da tabela Utilizador
-        const { respostas } = req.body; // Removemos o id_questionario daqui
+        const id_utilizador_sessao = req.user!.id; 
+        const { respostas } = req.body; 
 
-        // Validações básicas de entrada
         if (!Array.isArray(respostas) || respostas.length === 0) {
-            return res.status(400).json({ erro: 'respostas deve ser um array não vazio.' });
+            return res.status(400).json({ erro: 'O campo respostas deve ser um array não vazio.' });
         }
         
         try {
-            // 1. Ir buscar o repositório de Utente para descobrir o ID clínico real dele
-            const { AppDataSource } = require('../database/database');
-            const { Utente } = require('../models/utente.entity');
-            const utenteRepo = AppDataSource.getRepository(Utente);
-
             const utenteDados = await utenteRepo.findOne({ 
                 where: { utilizador: { id: id_utilizador_sessao } } 
             });
@@ -48,21 +47,17 @@ export const CaratController = {
                 return res.status(404).json({ erro: 'Perfil de utente não associado a este utilizador.' });
             }
 
-            const id_utente_real = utenteDados.id;
-
-            // 2. Chamar o serviço (repara que o DTO agora já não leva o id_questionario)
-            const resultado = await CaratService.submeterAvaliacao(id_utente_real, { respostas });
+            const resultado = await CaratService.submeterAvaliacao(utenteDados.id, { respostas });
             return res.status(201).json(resultado);
 
         } catch (err: any) {
-            // RF18 — Questões por responder
             if (err.code === 'RESPOSTAS_INCOMPLETAS') {
                 return res.status(422).json({
                     erro: err.message,
                     questoesPorResponder: err.questoesPorResponder,
                 });
             }
-            return res.status(400).json({ erro: err.message });
+            return res.status(400).json({ erro: err.message || 'Erro ao submeter avaliação.' });
         }
     },
 
@@ -71,10 +66,10 @@ export const CaratController = {
             const utilizadorLogado = req.user!;
             let idUtenteAlvo: number;
 
-            if (utilizadorLogado.tipo_utilizador === 'utente') {
+            if (utilizadorLogado.tipo_utilizador == Tipo_Utilizador.UTENTE) {
                 // Se for utente, ignora qualquer ID da URL e usa o seu próprio ID da sessão
                 idUtenteAlvo = utilizadorLogado.id;
-            } else if (utilizadorLogado.tipo_utilizador === 'medico') {
+            } else if (utilizadorLogado.tipo_utilizador === Tipo_Utilizador.MEDICO) {
                 // Se for médico, vai buscar o ID do utente aos parâmetros da rota
                 idUtenteAlvo = Number(req.params.id_utente);
                 if (!idUtenteAlvo) return res.status(400).json({ erro: 'ID do utente em falta.' });
@@ -93,10 +88,12 @@ export const CaratController = {
     getAvaliacoesUtente: async (req: Request, res: Response) => {
         try {
             const id_utente = Number(req.params.id_utente);
+            if (!id_utente) return res.status(400).json({ erro: 'ID do utente inválido.' });
+
             const avaliacoes = await CaratService.listarAvaliacoesUtente(id_utente);
             return res.json(avaliacoes);
         } catch (err: any) {
-            res.status(500).json({ erro: 'Erro ao listar avaliações do utente.' });
+            return res.status(500).json({ erro: 'Erro ao listar avaliações do utente.' });
         }
     },
 
@@ -104,15 +101,10 @@ export const CaratController = {
     // RF22, RF27 — Detalhe de uma avaliação (score + respostas + recomendações)
     getDetalheAvaliacao: async (req: Request, res: Response) => {
         try {
-            const { AppDataSource } = require('../database/database');
-            const { Utente } = require('../models/utente.entity');
-            const utenteRepo = AppDataSource.getRepository(Utente);
-
             const utilizadorLogado = req.user!;
             let id_utente_sessao: number | undefined = undefined;
 
-            // 1. SE FOR UTENTE: Traduz o ID de utilizador para o ID de utente clínico
-            if (utilizadorLogado.tipo_utilizador === 'utente') {
+            if (utilizadorLogado.tipo_utilizador === Tipo_Utilizador.UTENTE) {
                 const utenteDados = await utenteRepo.findOne({ 
                     where: { utilizador: { id: utilizadorLogado.id } } 
                 });
@@ -123,30 +115,23 @@ export const CaratController = {
                 id_utente_sessao = utenteDados.id;
             }
 
-            // 2. Procurar primeiro a avaliação para saber de quem ela é
             const detalhe = await CaratService.detalheAvaliacao(Number(req.params.id), id_utente_sessao);
-            
             if (!detalhe) {
-                return res.status(404).json({ erro: 'Avaliação não encontrada ou não tem permissão.' });
+                return res.status(404).json({ erro: 'Avaliação não encontrada ou sem permissão de acesso.' });
             }
 
-            // 3. SE FOR MÉDICO: Validar se ele é o médico responsável por este utente
-            if (utilizadorLogado.tipo_utilizador === 'medico') {
-                // Vamos buscar o utente dono desta avaliação para ver quem é o seu médico
-                const idUtenteDono = detalhe.utente.id; // Ajusta conforme a estrutura que o teu service devolve
-                
+            if (utilizadorLogado.tipo_utilizador === Tipo_Utilizador.MEDICO) {
+                const idUtenteDono = detalhe.id_utente; 
                 const utenteClinico = await utenteRepo.findOne({
                     where: { id: idUtenteDono },
-                    relations: ['medico'] // Carrega o relacionamento do médico responsável
+                    relations: ['medico'] 
                 });
 
-                // Se o ID do médico responsável for diferente do ID do médico logado, bloqueia!
                 if (!utenteClinico || utenteClinico.medico.id !== utilizadorLogado.id) {
                     return res.status(403).json({ erro: 'Acesso negado. Não é o médico responsável por este utente.' });
                 }
             }
 
-            // Se passou todas as barreiras (Dono ou Médico Responsável), devolve os dados!
             return res.json(detalhe);
 
         } catch (err: any) {

@@ -8,8 +8,8 @@ export interface CriarMedicoDTO {
 }
 
 export interface AtualizarMedicoDTO {
-    nome?: string;
-    telemovel?: string;
+    nome?: string | undefined;
+    telemovel?: string | undefined;
 }
 
 export interface MedicoRespostaDTO {

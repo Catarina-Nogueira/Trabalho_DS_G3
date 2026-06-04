@@ -9,10 +9,8 @@ const router = Router();
 router.get('/', autenticarSessao, autorizarSessao('medico', 'administrador'), ExameController.listarTodos);
 router.get('/nome/:nome_exame', autenticarSessao, autorizarSessao('medico', 'administrador'), ExameController.buscarPorNome);
 router.get('/:id', autenticarSessao, autorizarSessao('medico', 'administrador'), ExameController.buscarPorId);
-
-// Gestão de Infraestrutura do Catálogo (Apenas Administrador)
-router.post('/', autenticarSessao, autorizarSessao('administrador'), ExameController.criar); // Se for o catálogo de exames base
-router.put('/:id', autenticarSessao, autorizarSessao('administrador'), ExameController.atualizar);
+router.post('/', autenticarSessao, autorizarSessao('administrador'), ExameController.criar);
+router.patch('/:id', autenticarSessao, autorizarSessao('administrador'), ExameController.atualizar);
 router.delete('/:id', autenticarSessao, autorizarSessao('administrador'), ExameController.eliminar);
 
 export default router;

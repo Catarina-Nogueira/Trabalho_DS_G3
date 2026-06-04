@@ -2,6 +2,7 @@ import { AppDataSource } from '../database/database';
 import { Questionario_Carat } from '../models/questionarioCarat.entity';
 import { Questao_Carat } from '../models/questaoCarat.entity';
 import { Opcao_Resposta } from '../models/opcaoResposta.entity';
+import { IsNull } from 'typeorm';
 
 const questionarioCaratRepo = AppDataSource.getRepository(Questionario_Carat);
 const questaoCaratRepo = AppDataSource.getRepository(Questao_Carat);
@@ -24,7 +25,7 @@ export const QuestionarioCaratService = {
     // RF16 - Obter o questionário CARAT ativo com todas as questões e opções de resposta
     obterAtivo: async () => {
         const questionario = await questionarioCaratRepo.findOne({
-            where: { data_desativacao: null as any }
+            where: { data_desativacao: IsNull() }
         });
 
         if (!questionario) return null;
@@ -63,7 +64,7 @@ export const QuestionarioCaratService = {
     // RF24 - Ativar um questionário (desativa o atual e ativa o novo)
     ativar: async (id: number) => {
         const ativo = await questionarioCaratRepo.findOne({
-            where: { data_desativacao: null as any }
+            where: { data_desativacao: IsNull() }
         });
 
         if (ativo && ativo.id !== id) {

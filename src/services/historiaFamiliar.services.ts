@@ -6,15 +6,14 @@ const historiaRepo = AppDataSource.getRepository(Historia_Familiar);
 
 export const HistoriaFamiliarService = {
 
-    // Listar todas as histórias familiares de um utente
     listarPorUtente: async (id_utente: number) => {
         return await historiaRepo.find({
             where: { utente: { id: id_utente } },
-            relations: ['utente']
+            relations: ['utente'],
+            order: { id: 'DESC' }
         });
     },
 
-    // Buscar um registo específico por ID
     buscarPorId: async (id: number) => {
         return await historiaRepo.findOne({
             where: { id },
@@ -22,12 +21,11 @@ export const HistoriaFamiliarService = {
         });
     },
 
-    // Adicionar histórico familiar associado ao ID da URL
     criar: async (id_utente: number, dados: CriarHistoriaFamiliarDTO) => {
         const novaHistoria = historiaRepo.create({
-            nome: dados.nome,
-            descricao: dados.descricao,
-            utente: { id: id_utente } // Vincula à chave estrangeira do utente
+            nome: dados.nome.trim(),
+            descricao: dados.descricao.trim(),
+            utente: { id: id_utente }
         });
         
         const guardado = await historiaRepo.save(novaHistoria);
@@ -38,24 +36,25 @@ export const HistoriaFamiliarService = {
         });
     },
 
-    // Editar registo existente
     atualizar: async (id: number, dados: AtualizarHistoriaFamiliarDTO) => {
-        const existe = await historiaRepo.findOneBy({ id });
-        if (!existe) return null;
+        const historia = await historiaRepo.findOne({ where: { id }, relations: ['utente'] });
+        if (!historia) return null;
 
-        await historiaRepo.update(id, dados);
-        
-        return await historiaRepo.findOne({
-            where: { id },
-            relations: ['utente']
-        });
+        // Type Narrowing cirúrgico em conformidade com exactOptionalPropertyTypes
+        if (dados.nome !== undefined) {
+            historia.nome = dados.nome !== null ? dados.nome.trim() : null;
+        }
+        if (dados.descricao !== undefined) {
+            historia.descricao = dados.descricao !== null ? dados.descricao.trim() : null;
+        }
+
+        return await historiaRepo.save(historia);
     },
 
-    // Remover registo de história familiar
     eliminar: async (id: number) => {
-        const existe = await historiaRepo.findOneBy({ id });
-        if (!existe) throw new Error('Registo de história familiar não encontrado.');
+        const historia = await historiaRepo.findOne({ where: { id } });
+        if (!historia) throw new Error('Registo de história familiar não encontrado.');
         
-        await historiaRepo.delete(id);
+        await historiaRepo.remove(historia);
     }
 };

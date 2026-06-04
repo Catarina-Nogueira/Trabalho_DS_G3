@@ -26,15 +26,17 @@ const mapeamentoAcoes: Record<string, AcaoAuditoria> = {
 };
 
 export const obterDadosAuditoria = (url: string, metodo: string) => {
-    // Encontra qual a entidade com base no início do caminho da rota
-    const rotaBase = Object.keys(mapeamentoEntidades).find(rota => url.startsWith(rota));
+    // Remove parâmetros de query (?ativo=true) para não corromper o match do URL
+    const urlLimpo = url.split('?')[0] || url; // Garante que temos uma string mesmo que split retorne undefined
+
+    // Encontra a rota base permitindo sub-rotas ou prefixos como /api/utentes
+    const rotaBase = Object.keys(mapeamentoEntidades).find(rota => urlLimpo.includes(rota));
     
     const entidade = rotaBase ? mapeamentoEntidades[rotaBase] : null;
     let acao = mapeamentoAcoes[metodo] || null;
 
-    // Ajuste específico para rotas de Login/Logout
-    if (url.includes('/autenticacao/login')) acao = AcaoAuditoria.LOGIN;
-    if (url.includes('/autenticacao/logout')) acao = AcaoAuditoria.LOGOUT;
+    if (urlLimpo.includes('/autenticacao/login')) acao = AcaoAuditoria.LOGIN;
+    if (urlLimpo.includes('/autenticacao/logout')) acao = AcaoAuditoria.LOGOUT;
 
     return { entidade, acao };
 };

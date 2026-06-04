@@ -6,7 +6,6 @@ const dadoAdministrativoRepo = AppDataSource.getRepository(Dado_Administrativo);
 
 export const DadoAdministrativoService = {
 
-    // RF06 - Consultar dados administrativos de um utente
     buscarPorUtente: async (id_utente: number) => {
         return await dadoAdministrativoRepo.findOne({
             where: { utente: { id: id_utente } },
@@ -14,7 +13,6 @@ export const DadoAdministrativoService = {
         });
     },
 
-    // RF06 - Consultar detalhe de um registo administrativo por id
     buscarPorId: async (id: number) => {
         return await dadoAdministrativoRepo.findOne({
             where: { id },
@@ -22,10 +20,8 @@ export const DadoAdministrativoService = {
         });
     },
 
-    // RF06 - Criar dados administrativos vinculados à URL
     criar: async (id_utente: number, dados: CriarDadoAdministrativoDTO) => {
-        // Validar se o utente já tem dados administrativos criados (relação OneToOne)
-        const existe = await dadoAdministrativoRepo.findOneBy({ utente: { id: id_utente } });
+        const existe = await dadoAdministrativoRepo.findOne({ where: { utente: { id: id_utente } } });
         if (existe) throw new Error('Este utente já possui dados administrativos registados.');
 
         const dadoAdministrativo = dadoAdministrativoRepo.create({
@@ -38,22 +34,25 @@ export const DadoAdministrativoService = {
         return await dadoAdministrativoRepo.save(dadoAdministrativo);
     },
 
-    // RF05 - Atualizar dados administrativos
     atualizar: async (id: number, dados: AtualizarDadoAdministrativoDTO) => {
-        const existe = await dadoAdministrativoRepo.findOneBy({ id });
-        if (!existe) return null;
+        const dado = await dadoAdministrativoRepo.findOne({ where: { id }, relations: ['utente'] });
+        if (!dado) return null;
 
-        await dadoAdministrativoRepo.update(id, dados);
-        return await dadoAdministrativoRepo.findOne({
-            where: { id },
-            relations: ['utente']
-        });
+        if (dados.morada !== undefined) {
+            dado.morada = dados.morada.trim();
+        }
+       
+        if (dados.telemovel !== undefined) {
+            dado.telemovel = dados.telemovel.trim();
+        }
+
+        // O save() garante o disparo automático do @UpdateDateColumn
+        return await dadoAdministrativoRepo.save(dado);
     },
 
-    // Eliminar dados administrativos
     eliminar: async (id: number) => {
-        const existe = await dadoAdministrativoRepo.findOneBy({ id });
-        if (!existe) throw new Error('Registo administrativo não encontrado.');
-        await dadoAdministrativoRepo.delete(id);
+        const dado = await dadoAdministrativoRepo.findOne({ where: { id } });
+        if (!dado) throw new Error('Registo administrativo não encontrado.');
+        await dadoAdministrativoRepo.remove(dado);
     }
 };

@@ -5,14 +5,11 @@ import { autorizarSessao } from '../middleware.autorizar';
 
 const router = Router();
 
-// Rotas de listagem contextualizadas (Protegidas)
-router.get('/historico/:id_utente', autenticarSessao, autorizarSessao('medico', 'utente'), MedicacaoUtenteController.listarPorUtente); // RF45
-router.get('/ativas/:id_utente', autenticarSessao, autorizarSessao('medico', 'utente'), MedicacaoUtenteController.listarAtivasPorUtente); // RF45
+router.get('/historico/:id_utente', autenticarSessao, autorizarSessao('medico', 'utente'), MedicacaoUtenteController.listarPorUtente);
+router.get('/ativas/:id_utente', autenticarSessao, autorizarSessao('medico', 'utente'), MedicacaoUtenteController.listarAtivasPorUtente);
 router.get('/emitidas/:id_medico', autenticarSessao, autorizarSessao('medico'), MedicacaoUtenteController.listarPorMedico);
-
-// Detalhes, Criação e Fluxo Clínico
-router.post('/:id_utente', autenticarSessao, autorizarSessao('medico'), MedicacaoUtenteController.criar); // RF43
-router.put('/:id', autenticarSessao, autorizarSessao('medico'), MedicacaoUtenteController.atualizar);
-router.patch('/:id/encerrar', autenticarSessao, autorizarSessao('medico'), MedicacaoUtenteController.encerrar); // RF44
+router.post('/:id_utente', autenticarSessao, autorizarSessao('medico'), MedicacaoUtenteController.criar);
+router.patch('/:id', autenticarSessao, autorizarSessao('medico'), MedicacaoUtenteController.atualizar);
+router.patch('/:id/encerrar', autenticarSessao, autorizarSessao('medico'), MedicacaoUtenteController.encerrar);
 
 export default router;

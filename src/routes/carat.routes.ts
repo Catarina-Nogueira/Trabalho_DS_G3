@@ -9,7 +9,7 @@ router.get('/questionario-ativo', autenticarSessao, autorizarSessao('administrad
 router.post('/avaliacoes', autenticarSessao, autorizarSessao('utente'), CaratController.submeterAvaliacao);
 router.get('/utentes/:id_utente/avaliacoes', autenticarSessao, autorizarSessao('medico', 'utente'), CaratController.getAvaliacoesUtente);
 router.get('/avaliacoes/:id', autenticarSessao, autorizarSessao('medico', 'utente'), CaratController.getDetalheAvaliacao);
-router.get('/avaliacoes/:id/recomendacoes', autenticarSessao, autorizarSessao('medico', 'utente'), CaratController.getRecomendacoes);
+router.get('/avaliacoes/recomendacoes', autenticarSessao, autorizarSessao('medico', 'utente'), CaratController.getRecomendacoes);
 router.get('/medico/utentes/:id_utente/avaliacoes', autenticarSessao, autorizarSessao('medico'), CaratController.getAvaliacoesMedico);
 router.get('/grafico', autenticarSessao, autorizarSessao('utente'), CaratController.obterDadosGrafico);
 router.get('/grafico/utente/:id_utente', autenticarSessao, autorizarSessao('medico'), CaratController.obterDadosGrafico);

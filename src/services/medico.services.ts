@@ -1,6 +1,6 @@
 import { AppDataSource } from '../database/database';
 import { Medico } from '../models/medico.entity';
-import { CriarMedicoDTO, AtualizarMedicoDTO }   from '../dtos/medico.dto';
+import { CriarMedicoDTO, AtualizarMedicoDTO } from '../dtos/medico.dto';
 import { Utilizador } from '../models/utilizador.entity';
 import { AuditoriaService } from './auditoria.services';
 import { EntidadeAuditoria, AcaoAuditoria } from '../models/auditoria.entity';
@@ -42,8 +42,11 @@ export const MedicoService = {
                 telemovel: true,
                 utilizador: {
                     id: true,
+                    username: true,
                     email: true,
-                    tipo_utilizador: true
+                    tipo_utilizador: true, 
+                    data_criacao: true,
+                    estado: true
                 }
             }
         });
@@ -52,7 +55,6 @@ export const MedicoService = {
         return medico;
     },
 
-    
     criar: async (id_utilizador: number, dados: CriarMedicoDTO, idUtilizadorLogado: number) => {
         if (!id_utilizador || id_utilizador <= 0) throw new Error('ID de utilizador inválido ou não fornecido.');
         if (!dados.nome) throw new Error('O nome é obrigatório.');
@@ -82,11 +84,11 @@ export const MedicoService = {
 
         const guardado = await medicoRepo.save(novoMedico);
 
-        
+        // 🚨 CORREÇÃO: Utilização direta do Enum mapeado no ficheiro de auditoria
         await AuditoriaService.registar({
             id_utilizador: idUtilizadorLogado,
-            entidade_afetada: 'MEDICO' as EntidadeAuditoria,
-            acao: 'CRIAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.MEDICO,
+            acao: AcaoAuditoria.CRIAR
         });
 
         return await medicoRepo.findOne({
@@ -107,7 +109,6 @@ export const MedicoService = {
         });
     },
 
-    
     atualizar: async (id: number, dados: AtualizarMedicoDTO, idUtilizadorLogado: number) => {
         if (!id || id <= 0) throw new Error('ID inválido');
 
@@ -124,17 +125,16 @@ export const MedicoService = {
 
         const atualizado = await medicoRepo.save(medico);
 
-       
+        
         await AuditoriaService.registar({
             id_utilizador: idUtilizadorLogado,
-            entidade_afetada: 'MEDICO' as EntidadeAuditoria,
-            acao: 'ATUALIZAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.MEDICO,
+            acao: AcaoAuditoria.ATUALIZAR
         });
 
         return atualizado;
     },
 
-    
     eliminar: async (id: number, idUtilizadorLogado: number) => {
         if (!id || id <= 0) throw new Error('ID inválido');
 
@@ -143,11 +143,11 @@ export const MedicoService = {
 
         await medicoRepo.remove(medico);
 
-        
+       
         await AuditoriaService.registar({
             id_utilizador: idUtilizadorLogado,
-            entidade_afetada: 'MEDICO' as EntidadeAuditoria,
-            acao: 'ELIMINAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.MEDICO,
+            acao: AcaoAuditoria.ELIMINAR
         });
 
         return { mensagem: 'Médico eliminado com sucesso' };

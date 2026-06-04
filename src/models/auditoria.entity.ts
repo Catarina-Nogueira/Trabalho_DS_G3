@@ -51,10 +51,10 @@ export class Auditoria {
     utilizador!: Utilizador;
 
     @Column({ type: 'simple-enum', enum: EntidadeAuditoria })
-    entidade_afetada!: string;
+    entidade_afetada!: EntidadeAuditoria
 
     @Column({ type: 'simple-enum', enum: AcaoAuditoria })
-    acao!: string;
+    acao!: AcaoAuditoria;
 
     // Atalho do TypeORM para criação automática
     @CreateDateColumn()

@@ -7,8 +7,8 @@ export interface CriarUtenteDTO {
 }
 
 export interface AtualizarUtenteDTO {
-    nome?: string;
-    medico?: { id: number };  
+    nome?: string | undefined;
+    medico?: { id: number } | undefined;  
 }
 
 export interface UtenteRespostaDTO {

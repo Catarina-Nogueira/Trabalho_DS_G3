@@ -52,10 +52,11 @@ export const MedicacaoUtenteService = {
 
         const resultado = await medicacaoUtenteRepo.save(medicacaoUtente);
 
+        // 🚨 CORREÇÃO: Uso de Enums nativos sem casting artificial de texto
         await AuditoriaService.registar({
             id_utilizador: idUtilizadorLogado,
-            entidade_afetada: 'MEDICACAO_UTENTE' as EntidadeAuditoria,
-            acao: 'CRIAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.MEDICACAO_UTENTE,
+            acao: AcaoAuditoria.CRIAR
         });
 
         return resultado;
@@ -63,19 +64,25 @@ export const MedicacaoUtenteService = {
 
     atualizar: async (id: number, dados: AtualizarMedicacaoUtenteDTO, idUtilizadorLogado: number) => {
         const medicacao = await medicacaoUtenteRepo.findOne({ where: { id } });
+        if (!medicacao) throw new Error('Prescrição não encontrada.');
 
-        if (!medicacao) throw new Error('Prescrição não encontrada');
-
-        if (dados.frequencia) medicacao.frequencia = dados.frequencia.trim();
-        if (dados.duracao) medicacao.duracao = dados.duracao.trim();
-        if (dados.dosagem) medicacao.dosagem = dados.dosagem.trim();
+        // 🚨 CORREÇÃO: Verificação estrita contra undefined para blindar a flag exactOptionalPropertyTypes
+        if (dados.frequencia !== undefined) {
+            medicacao.frequencia = dados.frequencia.trim();
+        }
+        if (dados.duracao !== undefined) {
+            medicacao.duracao = dados.duracao.trim();
+        }
+        if (dados.dosagem !== undefined) {
+            medicacao.dosagem = dados.dosagem.trim();
+        }
 
         const resultado = await medicacaoUtenteRepo.save(medicacao);
 
         await AuditoriaService.registar({
             id_utilizador: idUtilizadorLogado,
-            entidade_afetada: 'MEDICACAO_UTENTE' as EntidadeAuditoria,
-            acao: 'ATUALIZAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.MEDICACAO_UTENTE,
+            acao: AcaoAuditoria.ATUALIZAR
         });
 
         return resultado;
@@ -83,16 +90,15 @@ export const MedicacaoUtenteService = {
 
     encerrar: async (id: number, idUtilizadorLogado: number) => {
         const medicacao = await medicacaoUtenteRepo.findOne({ where: { id } });
-
-        if (!medicacao) throw new Error('Prescrição não encontrada');
+        if (!medicacao) throw new Error('Prescrição não encontrada.');
 
         medicacao.ativo = false;
         const resultado = await medicacaoUtenteRepo.save(medicacao);
 
         await AuditoriaService.registar({
             id_utilizador: idUtilizadorLogado,
-            entidade_afetada: 'MEDICACAO_UTENTE' as EntidadeAuditoria,
-            acao: 'ATUALIZAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.MEDICACAO_UTENTE,
+            acao: AcaoAuditoria.ATUALIZAR
         });
 
         return resultado;

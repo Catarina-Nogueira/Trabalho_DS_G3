@@ -3,7 +3,7 @@ export interface CriarAdministradorDTO {
 }
 
 export interface AtualizarAdministradorDTO {
-    nome?: string;
+    nome?: string | undefined;
 }
 
 export interface AdministradorRespostaDTO {

@@ -8,10 +8,10 @@ export interface CriarUtilizadorDTO {
 }
 
 export interface AtualizarUtilizadorDTO {
-    username?: string;
-    email?: string;
-    password?: string;
-    estado?: Estado;
+    username?: string | undefined;
+    email?: string | undefined;
+    password?: string | undefined;
+    estado?: Estado | undefined;
 }
 
 export interface UtilizadorRespostaDTO {

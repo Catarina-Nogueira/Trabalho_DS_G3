@@ -25,7 +25,12 @@ export const UtilizadorController = {
     },
 
     criar: async (req: Request, res: Response) => {
-        const id_utilizador_logado = req.user!.id; // 🔑 Administrador autenticado
+        // Garantia de segurança para o TypeScript
+        if (!req.user) {
+            return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+        }
+
+        const id_utilizador_logado = req.user.id; 
         const { username, email, password, tipo_utilizador } = req.body;
  
         if (!username) return res.status(400).json({ erro: 'O username é obrigatório.' });
@@ -41,8 +46,13 @@ export const UtilizadorController = {
         }
  
         try {
-            const dadosDTO: CriarUtilizadorDTO = { username, email, password, tipo_utilizador };
-            // 🚨 Correção: Passagem do executor adicionada
+            const dadosDTO: CriarUtilizadorDTO = { 
+                username, 
+                email, 
+                password, 
+                tipo_utilizador: tipo_utilizador.toLowerCase() as Tipo_Utilizador 
+            };
+            
             const utilizador = await UtilizadorService.criar(dadosDTO, id_utilizador_logado);
             return res.status(201).json(utilizador);
         } catch (err: any) {
@@ -60,7 +70,12 @@ export const UtilizadorController = {
                 return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
             }
 
-            const utilizador = await UtilizadorService.atualizar(id, dados, utilizadorSessao);
+            // Enviamos o utilizadorSessao com a estrutura exata que o service pede
+            const utilizador = await UtilizadorService.atualizar(id, dados, {
+                id: utilizadorSessao.id,
+                tipo_utilizador: utilizadorSessao.tipo_utilizador
+            });
+            
             if (!utilizador) return res.status(404).json({ erro: 'Utilizador não encontrado' });
             return res.json(utilizador);
         } catch (err: any) {
@@ -77,7 +92,11 @@ export const UtilizadorController = {
                 return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
             }
 
-            const utilizador = await UtilizadorService.desativar(id, utilizadorSessao);
+            const utilizador = await UtilizadorService.desativar(id, {
+                id: utilizadorSessao.id,
+                tipo_utilizador: utilizadorSessao.tipo_utilizador
+            });
+            
             if (!utilizador) return res.status(404).json({ erro: 'Utilizador não encontrado.' });
             return res.json(utilizador);
         } catch (err: any) {
@@ -94,7 +113,11 @@ export const UtilizadorController = {
                 return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
             }
 
-            await UtilizadorService.eliminar(id, utilizadorSessao);
+            await UtilizadorService.eliminar(id, {
+                id: utilizadorSessao.id,
+                tipo_utilizador: utilizadorSessao.tipo_utilizador
+            });
+            
             return res.status(204).send();
         } catch (err: any) {
             return res.status(400).json({ erro: err.message });

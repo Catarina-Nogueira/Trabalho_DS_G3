@@ -1,10 +1,9 @@
 import { AppDataSource } from '../database/database';
 import { Alerta, EstadoAlerta, PrioridadeAlerta, TipoAlerta } from '../models/alerta.entity';
-import { AtualizarAlertaDTO} from '../dtos/alerta.dto';
+import { AtualizarAlertaDTO } from '../dtos/alerta.dto';
 
 const alertaRepo = AppDataSource.getRepository(Alerta);
 
-// Validação do fluxo de estados
 const fluxoValido: Record<EstadoAlerta, EstadoAlerta[]> = {
     [EstadoAlerta.NOVO]: [EstadoAlerta.VISTO],
     [EstadoAlerta.VISTO]: [EstadoAlerta.EM_SEGUIMENTO, EstadoAlerta.FECHADO],
@@ -14,12 +13,7 @@ const fluxoValido: Record<EstadoAlerta, EstadoAlerta[]> = {
 
 export const AlertaService = {
     
-    // RF36 - Listagem de alertas do médico com filtros
-    /**
-     * COBRE DOIS CENÁRIOS PARA O MÉDICO:
-     * 1. Listar TODOS os alertas do painel geral do médico (id_utente omitido)
-     * 2. Listar alertas de um UTENTE ESPECÍFICO quando o médico consulta os seus detalhes (id_utente preenchido)
-     */
+    // RF36 - Listagem de alertas do médico com filtros via QueryBuilder
     listarPorMedico: async (id_medico: number, estado?: EstadoAlerta, prioridade?: PrioridadeAlerta, id_utente?: number) => {
         if (!id_medico || id_medico <= 0) throw new Error('ID do médico inválido');
 
@@ -28,23 +22,24 @@ export const AlertaService = {
             .leftJoinAndSelect('alerta.utente', 'utente')
             .leftJoinAndSelect('alerta.avaliacao', 'avaliacao')
             .leftJoinAndSelect('alerta.sintoma', 'sintoma')
-            .where('alerta.medico.id = :id_medico', { id_medico })
-            .orderBy('alerta.prioridade', 'DESC')
-            .addOrderBy('alerta.data_criacao', 'DESC');
+            .where('alerta.medico.id = :id_medico', { id_medico });
 
-        // Filtros opcionais já existentes
         if (estado) query.andWhere('alerta.estado = :estado', { estado });
         if (prioridade) query.andWhere('alerta.prioridade = :prioridade', { prioridade });
+        if (id_utente && id_utente > 0) query.andWhere('alerta.utente.id = :id_utente', { id_utente });
 
-        // [NOVO FILTRO] Se o médico estiver na página de detalhes de um utente específico
-        if (id_utente && id_utente > 0) {
-            query.andWhere('alerta.utente.id = :id_utente', { id_utente });
-        }
+        // Ordenação por Peso de Prioridade (ALTA -> MEDIA -> BAIXA) e data de registo
+        query.orderBy(`CASE alerta.prioridade 
+                        WHEN '${PrioridadeAlerta.ALTA}' THEN 1 
+                        WHEN '${PrioridadeAlerta.MEDIA}' THEN 2 
+                        WHEN '${PrioridadeAlerta.BAIXA}' THEN 3 
+                       END`, 'ASC')
+             .addOrderBy('alerta.data_criacao', 'DESC');
 
         return await query.getMany();
     },
 
-    // RF38 - Consulta de alertas pelo utente
+    // RF38 - Consulta de alertas simplificada pelo utente
     listarPorUtente: async (id_utente: number) => {
         if (!id_utente || id_utente <= 0) throw new Error('ID do utente inválido');
 
@@ -59,23 +54,19 @@ export const AlertaService = {
                 estado: true,
                 motivo: true,
                 data_criacao: true,
-                avaliacao: {
-                    id: true, 
-                },
-                sintoma: {
-                    id: true, 
-                }
+                avaliacao: { id: true },
+                sintoma: { id: true }
             }
         });
     },
 
-    // Buscar alerta por id
+    // Procura atómica por ID (Relações limpas e diretas à raiz)
     buscarPorId: async (id: number) => {
         if (!id || id <= 0) throw new Error('ID inválido');
 
         const alerta = await alertaRepo.findOne({
             where: { id },
-            relations: ['utente', 'medico', 'avaliacao', 'sintoma', 'avaliacao.utente.medico', 'avaliacao.utente', 'sintoma.utente.medico']
+            relations: ['utente', 'medico', 'avaliacao', 'sintoma']
         });
 
         if (!alerta) throw new Error('Alerta não encontrado');
@@ -107,7 +98,7 @@ export const AlertaService = {
         return await alertaRepo.save(novoAlerta);
     },
 
-    // RF33 - Calcular prioridade automaticamente com base no tipo
+    // RF33 - Determinação automática da severidade do gatilho clínico
     calcularPrioridade: (tipo: TipoAlerta): PrioridadeAlerta => {
         switch (tipo) {
             case TipoAlerta.SCORE_CARAT:
@@ -121,7 +112,7 @@ export const AlertaService = {
         }
     },
 
-    // RF34 - Atualização do estado do alerta pelo médico
+    // RF34 - Máquina de Estados Finita e Controlada para Transição Clínica
     atualizarEstado: async (id: number, dados: AtualizarAlertaDTO) => {
         if (!id || id <= 0) throw new Error('ID inválido');
 
@@ -135,18 +126,16 @@ export const AlertaService = {
         const possiveisEstados = fluxoValido[alerta.estado as EstadoAlerta];
 
         if (!possiveisEstados || !possiveisEstados.includes(dados.estado)) {
-            throw new Error(`Transição inválida: ${alerta.estado} → ${dados.estado}`
-        );
-    }
+            throw new Error(`Transição de estado inválida para o fluxo clínico: ${alerta.estado} → ${dados.estado}`);
+        }
 
-    alerta.estado = dados.estado;
-    alerta.data_atualizacao = new Date();
-
-     return await alertaRepo.save(alerta);
-    
+        alerta.estado = dados.estado;
+        
+        // Deixa que o @UpdateDateColumn trate do timestamp de mutação de forma nativa!
+        return await alertaRepo.save(alerta);
     },
 
-    // Eliminar alerta
+    // Eliminar alerta física do sistema
     eliminar: async (id: number) => {
         if (!id || id <= 0) throw new Error('ID inválido');
 
@@ -157,4 +146,3 @@ export const AlertaService = {
         return { mensagem: 'Alerta eliminado com sucesso' };
     }
 };
-

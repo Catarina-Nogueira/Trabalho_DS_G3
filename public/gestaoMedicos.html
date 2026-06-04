@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB - Gestão de Médicos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- 1) BARRA LATERAL --- */
+    .sidebar {
+      width: 260px;
+      background: #07213b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99, 179, 237, 0.15);
+    }
+
+    .perfil-admin {
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .perfil-foto {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #1a365d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      border: 3px solid #75d0fb;
+      font-size: 2.2rem;
+      color: #75d0fb;
+    }
+
+    .perfil-nome {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #ffffff;
+    }
+
+    .perfil-tipo {
+      font-size: 0.8rem;
+      color: #75d0fb;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      margin-top: 30px;
+    }
+
+    .btn-acao-sidebar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 16px;
+      background: #0b75ff;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 590;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-acao-sidebar:hover {
+      background: #0056cc;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-logout:hover {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    /* --- 2) CONTEÚDO PRINCIPAL --- */
+    .main-conteudo {
+      margin-left: 260px;
+      padding: 48px;
+      width: calc(100% - 260px);
+      max-width: 1200px;
+    }
+
+    .cabecalho-pagina {
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-voltar {
+      color: #0b75ff;
+      text-decoration: none;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cabecalho-pagina h1 {
+      font-size: 2.2rem;
+      color: #092b4c;
+      margin-top: 8px;
+    }
+
+    /* --- BARRA DE FILTROS E ORDENAÇÃO --- */
+    .barra-filtros {
+      display: flex;
+      gap: 16px;
+      background: #ffffff;
+      padding: 16px 24px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      border: 1px solid #e2e8f0;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .grupo-filtro {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .grupo-filtro label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .grupo-filtro select {
+      padding: 10px 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      color: #092b4c;
+      background-color: #ffffff;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      min-width: 200px;
+    }
+
+    .grupo-filtro select:focus {
+      border-color: #0b75ff;
+    }
+
+    /* --- TABELA DE MÉDICOS --- */
+    .contentor-tabela {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      border: 1px solid #e2e8f0;
+    }
+
+    .tabela-medicos {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .tabela-medicos th {
+      padding: 16px;
+      border-bottom: 2px solid #e2e8f0;
+      color: #64748b;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .tabela-medicos td {
+      padding: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #092b4c;
+      font-size: 1rem;
+      font-weight: 360;
+    }
+
+    .tabela-medicos tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge-especialidade {
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .btn-detalhes {
+      background: none;
+      border: 1px solid #0b75ff;
+      color: #0b75ff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 550;
+      font-size: 0.87rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-detalhes:hover {
+      background: #0b75ff;
+      color: #ffffff;
+    }
+
+    .msg-vazia {
+      text-align: center;
+      color: #64748b;
+      padding: 40px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="perfil-admin">
+      <div class="perfil-foto"><i class="fa-solid fa-user-shield"></i></div>
+      <div class="perfil-nome">Administrador Sistema</div>
+      <div class="perfil-tipo">Administrador</div>
+    </div>
+    
+    <div class="sidebar-menu">
+      <button class="btn-acao-sidebar" onclick="abrirModalAdicionar()">
+        <i class="fa-solid fa-user-plus"></i> Adicionar Médico
+      </button>
+    </div>
+    
+    <div class="sidebar-footer">
+      <a href="#" class="btn-logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-conteudo">
+    
+    <div class="cabecalho-pagina">
+      <div>
+        <a href="administradorPrincipal.html" class="btn-voltar">
+          <i class="fa-solid fa-arrow-left"></i> Voltar ao Painel
+        </a>
+        <h1>Gestão de Corpo Clínico</h1>
+      </div>
+    </div>
+
+    <div class="barra-filtros">
+      <div class="grupo-filtro">
+        <label for="ordenar-nome"><i class="fa-solid fa-sort"></i> Ordem Alfabética:</label>
+        <select id="ordenar-nome">
+          <option value="asc">Nome: A para Z</option>
+          <option value="desc">Nome: Z para A</option>
+        </select>
+      </div>
+
+      <div class="grupo-filtro">
+        <label for="filtrar-especialidade"><i class="fa-solid fa-filter"></i> Especialidade:</label>
+        <select id="filtrar-especialidade">
+          <option value="todas">Todas as Especialidades</option>
+          </select>
+      </div>
+    </div>
+
+    <div class="contentor-tabela">
+      <table class="tabela-medicos">
+        <thead>
+          <tr>
+            <th>Nome do Profissional</th>
+            <th>Especialidade</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpo-tabela-medicos">
+          <tr>
+            <td colspan="3" class="msg-vazia">A carregar corpo clínico...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <script>
+    // Variável global que vai reter a cópia exata dos dados vindos da API
+    let listaMedicosOriginal = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      verificarSessao();
+      carregarMedicos();
+      configurarLogout();
+      configurarEventosFiltro();
+    });
+
+    // 1. Guarda de Rota (Segurança)
+    function verificarSessao() {
+      const token = localStorage.getItem('token');
+      const userRaw = localStorage.getItem('user');
+
+      if (!token || !userRaw) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const utilizador = JSON.parse(userRaw);
+      if (utilizador.tipo.toLowerCase() !== 'administrador') {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const elementoNome = document.querySelector('.perfil-nome');
+      if (elementoNome && utilizador.nome) {
+        elementoNome.textContent = utilizador.nome;
+      }
+    }
+
+    // 2. Procurar Médicos no Backend Express
+    async function carregarMedicos() {
+      const tabelaCorpo = document.getElementById('corpo-tabela-medicos');
+      const token = localStorage.getItem('token');
+
+      try {
+        const resposta = await fetch('http://localhost:3000/medicos', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!resposta.ok) {
+          throw new Error('Falha ao obter dados do servidor.');
+        }
+
+        // Guardamos a resposta na nossa lista global
+        listaMedicosOriginal = await resposta.json();
+
+        if (listaMedicosOriginal.length === 0) {
+          tabelaCorpo.innerHTML = `<tr><td colspan="3" class="msg-vazia">Nenhum médico registado no sistema.</td></tr>`;
+          return;
+        }
+
+        // Construir as opções do select de Especialidades com base nas que existem na BD
+        gerarOpcoesEspecialidade(listaMedicosOriginal);
+
+        // Processar os filtros e desenhar a tabela inicialmente
+        processarETratarMedicos();
+
+      } catch (err) {
+        console.error(err);
+        tabelaCorpo.innerHTML = `<tr><td colspan="3" class="msg-vazia" style="color: #ef4444;">Erro ao carregar dados: ${err.message}</td></tr>`;
+      }
+    }
+
+    // 3. Gerar as opções do filtro de especialidades automaticamente
+    function gerarOpcoesEspecialidade(medicos) {
+      const selectEspecialidade = document.getElementById('filtrar-especialidade');
+      
+      // Criar um Set para garantir que não guardamos especialidades repetidas
+      const especialidadesUnicas = new Set();
+      medicos.forEach(m => {
+        if (m.especialidade) especialidadesUnicas.add(m.especialidade.trim());
+      });
+
+      // Adicionar cada especialidade única como uma tag <option> no select
+      especialidadesUnicas.forEach(especialidade => {
+        const opcao = document.createElement('option');
+        opcao.value = especialidade;
+        opcao.textContent = especialidade;
+        selectEspecialidade.appendChild(opcao);
+      });
+    }
+
+    // 4. Lógica de Filtro e Ordenação Combinada em Memória (Sem novos pedidos à API)
+    function processarETratarMedicos() {
+      const tabelaCorpo = document.getElementById('corpo-tabela-medicos');
+      const criterioOrdem = document.getElementById('ordenar-nome').value;
+      const filtroEspecialidade = document.getElementById('filtrar-especialidade').value;
+
+      // Fazer uma cópia rasa da lista original para podermos manipular
+      let medicosTratados = [...listaMedicosOriginal];
+
+      // A) Aplicar Filtro de Especialidade (Se selecionada uma específica)
+      if (filtroEspecialidade !== 'todas') {
+        medicosTratados = medicosTratados.filter(m => m.especialidade === filtroEspecialidade);
+      }
+
+      // B) Aplicar Ordenação Alfabética por Nome
+      medicosTratados.sort((a, b) => {
+        const nomeA = (a.nome || '').toLowerCase();
+        const nomeB = (b.nome || '').toLowerCase();
+        
+        if (criterioOrdem === 'asc') {
+          return nomeA.localeCompare(nomeB, 'pt', { sensitivity: 'base' });
+        } else {
+          return nomeB.localeCompare(nomeA, 'pt', { sensitivity: 'base' });
+        }
+      });
+
+      // C) Renderizar o resultado final no HTML
+      if (medicosTratados.length === 0) {
+        tabelaCorpo.innerHTML = `<tr><td colspan="3" class="msg-vazia">Nenhum médico corresponde aos filtros selecionados.</td></tr>`;
+        return;
+      }
+
+      tabelaCorpo.innerHTML = '';
+      medicosTratados.forEach(medico => {
+        const linha = document.createElement('tr');
+        linha.innerHTML = `
+          <td><strong>${medico.nome}</strong></td>
+          <td><span class="badge-especialidade">${medico.especialidade}</span></td>
+          <td>
+            <button class="btn-detalhes" onclick="verDetalhes(${medico.id})">
+              <i class="fa-solid fa-eye"></i> Ver Detalhes
+            </button>
+          </td>
+        `;
+        tabelaCorpo.appendChild(linha);
+      });
+    }
+
+    // 5. Escutar as mudanças de seleção do Administrador
+    function configurarEventosFiltro() {
+      document.getElementById('ordenar-nome').addEventListener('change', processarETratarMedicos);
+      document.getElementById('filtrar-especialidade').addEventListener('change', processarETratarMedicos);
+    }
+
+    // 6. Ações de clique e navegação
+    function verDetalhes(idMedico) {
+      window.location.href = `detalhesMedico.html?id=${idMedico}`;
+    }
+
+    function abrirModalAdicionar() {
+      window.location.href = 'adicionarMedico.html';
+    }
+
+    function configurarLogout() {
+      const btnLogout = document.querySelector('.btn-logout');
+      if (btnLogout) {
+        btnLogout.addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.clear();
+          window.location.href = 'login.html';
+        });
+      }
+    }
+  </script>
+</body>
+</html>

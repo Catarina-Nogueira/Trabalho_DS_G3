@@ -3,22 +3,23 @@ import { AuditoriaService } from '../services/auditoria.services';
 import { obterDadosAuditoria } from './auditoria.mapeamento';
 
 export const auditoriaAutomaticaMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    // Sobrescrevemos a função res.send nativa do Express para intercetar o fim da operação
     const resSendOriginal = res.send;
 
-    res.send = function (body): Response {
-        // Executa o envio da resposta original ao cliente imediatamente (para não atrasar a app)
+    // Usamos 'any' no argumento para aceitar strings, objetos ou Buffers sem queixas do TS
+    res.send = function (body: any): Response {
+        
+        // Executa primeiro a lógica da resposta original do Express
         const responseJson = resSendOriginal.call(this, body);
 
-        // Só auditamos se a operação teve sucesso (Status 2xx) e se temos um utilizador na sessão
+        // Captura o estado no momento exato em que a resposta é finalizada
         const operacaoComSucesso = res.statusCode >= 200 && res.statusCode < 300;
         const id_utilizador = req.user?.id;
 
         if (operacaoComSucesso && id_utilizador) {
             const { entidade, acao } = obterDadosAuditoria(req.originalUrl, req.method);
 
-            // Se a rota pertencer a uma entidade mapeada, grava o log de forma assíncrona
             if (entidade && acao) {
+                // Execução totalmente assíncrona em background (não bloqueia a resposta do utilizador)
                 AuditoriaService.registar({
                     id_utilizador,
                     entidade_afetada: entidade,

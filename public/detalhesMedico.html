@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB - Detalhes do Médico</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- 1) BARRA LATERAL --- */
+    .sidebar {
+      width: 260px;
+      background: #07213b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99, 179, 237, 0.15);
+    }
+
+    .perfil-admin {
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 24px;
+    }
+
+    .perfil-foto {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #1a365d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      border: 3px solid #75d0fb;
+      font-size: 2.2rem;
+      color: #75d0fb;
+    }
+
+    .perfil-nome { font-size: 1.1rem; font-weight: 600; color: #ffffff; }
+    .perfil-tipo { font-size: 0.8rem; color: #75d0fb; margin-top: 2px; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Bloco de Botões de Ação na Sidebar */
+    .sidebar-menu-acoes {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-top: 10px;
+    }
+
+    .btn-sidebar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+    }
+
+    /* Botão Atualizar (Azul) */
+    .btn-atualizar {
+      background: #0b75ff;
+      box-shadow: 0 4px 12px rgba(11, 117, 255, 0.2);
+    }
+    .btn-atualizar:hover { background: #0056cc; transform: translateY(-1px); }
+
+    /* Botão Desativar (Vermelho) */
+    .btn-desativar {
+      background: #ef4444;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+    }
+    .btn-desativar:hover { background: #dc2626; }
+
+    /* Botão Ativar (Verde) */
+    .btn-ativar {
+      background: #22c55e;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+    }
+    .btn-ativar:hover { background: #16a34a; }
+
+    /* Estado bloqueado enquanto a API não responde */
+    .btn-sidebar:disabled, .btn-sidebar.disabled {
+      background: #334155;
+      color: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+      opacity: 0.6;
+      transform: none !important;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .btn-logout:hover { background: #ef4444; color: #ffffff; }
+
+    /* --- 2) CONTEÚDO PRINCIPAL --- */
+    .main-conteudo {
+      margin-left: 260px;
+      padding: 48px;
+      width: calc(100% - 260px);
+      max-width: 1000px;
+    }
+
+    .btn-voltar {
+      color: #0b75ff;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+    .btn-voltar:hover { color: #0056cc; }
+
+    /* Ficha de Detalhes */
+    .cartao-detalhes {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      border: 1px solid #e2e8f0;
+    }
+
+    .cabecalho-medico {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid #f1f5f9;
+      margin-bottom: 32px;
+    }
+
+    .avatar-medico {
+      width: 70px;
+      height: 70px;
+      border-radius: 16px;
+      background: #e0f2fe;
+      color: #0369a1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+
+    .nome-medico { font-size: 2rem; font-weight: 300; color: #092b4c; }
+    .especialidade-medico { font-size: 1.05rem; color: #94a3b8; font-style: italic; margin-top: 4px; }
+
+    .grelha-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; }
+    .bloco-info { display: flex; flex-direction: column; gap: 6px; }
+    .bloco-info label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600; }
+    .bloco-info span { font-size: 1.1rem; color: #092b4c; font-weight: 400; }
+
+    /* Badges de Estado */
+    .badge-estado { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; width: max-content; text-transform: capitalize; }
+    .estado-ativo { background: #dcfce7; color: #15803d; }
+    .estado-inativo { background: #fee2e2; color: #991b1b; }
+
+    .msg-erro { text-align: center; padding: 40px; color: #ef4444; font-weight: 600; }
+
+    /* --- 3) MODAL DE CONFIRMAÇÃO CENTRAL --- */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(7, 33, 59, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.ativo { opacity: 1; pointer-events: auto; }
+
+    .modal-caixa {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 32px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    .modal-overlay.ativo .modal-caixa { transform: scale(1); }
+
+    .modal-icone { font-size: 3rem; margin-bottom: 16px; }
+    .icone-alerta { color: #ef4444; }
+    .icone-ativar { color: #22c55e; }
+
+    .modal-titulo { font-size: 1.3rem; font-weight: 600; margin-bottom: 12px; color: #092b4c; }
+    .modal-texto { font-size: 0.95rem; color: #64748b; line-height: 1.5; margin-bottom: 24px; }
+    
+    .modal-botoes { display: flex; gap: 12px; justify-content: center; }
+    .btn-modal { padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 0.95rem; cursor: pointer; border: none; }
+    .btn-modal-cancelar { background: #f1f5f9; color: #475569; }
+    .btn-modal-cancelar:hover { background: #e2e8f0; }
+    .btn-modal-confirmar-erro { background: #ef4444; color: #ffffff; }
+    .btn-modal-confirmar-erro:hover { background: #dc2626; }
+    .btn-modal-confirmar-sucesso { background: #22c55e; color: #ffffff; }
+    .btn-modal-confirmar-sucesso:hover { background: #16a34a; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="perfil-admin">
+      <div class="perfil-foto"><i class="fa-solid fa-user-shield"></i></div>
+      <div class="perfil-nome">Administrador Sistema</div>
+      <div class="perfil-tipo">Administrador</div>
+    </div>
+    
+    <div class="sidebar-menu-acoes">
+      <a href="#" id="link-atualizar" class="btn-sidebar btn-atualizar disabled">
+        <i class="fa-solid fa-pen-to-square"></i> Atualizar Dados
+      </a>
+
+      <button id="btn-estado-utilizador" class="btn-sidebar btn-desativar disabled" disabled>
+        <i class="fa-solid fa-user-slash"></i> <span>A carregar...</span>
+      </button>
+    </div>
+    
+    <div class="sidebar-footer">
+      <a href="#" class="btn-logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-conteudo">
+    
+    <a href="gestaoMedicos.html" class="btn-voltar">
+      <i class="fa-solid fa-arrow-left"></i> Voltar à Listagem
+    </a>
+
+    <div class="cartao-detalhes" id="contentor-detalhes">
+      <p style="text-align: center; color: #64748b; font-style: italic;">A carregar detalhes do profissional de saúde...</p>
+    </div>
+
+  </main>
+
+  <div id="modal-confirmacao" class="modal-overlay">
+    <div class="modal-caixa">
+      <div id="modal-icone" class="modal-icone"><i class="fa-solid fa-circle-exclamation"></i></div>
+      <h3 id="modal-titulo" class="modal-titulo">Confirmar Alteração</h3>
+      <p id="modal-texto" class="modal-texto">Tem a certeza que pretende realizar esta operação?</p>
+      <div class="modal-botoes">
+        <button id="btn-modal-cancelar" class="btn-modal btn-modal-cancelar">Cancelar</button>
+        <button id="btn-modal-confirmar" class="btn-modal">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let idMedicoAtual = null;
+    let idUtilizadorAtual = null;
+    let estadoAtualUtilizador = 'ativo';
+
+    document.addEventListener("DOMContentLoaded", () => {
+      verificarSessao();
+      carregarDetalhesMedico();
+      configurarModalEstado();
+      configurarLogout();
+    });
+
+    function verificarSessao() {
+        const token = localStorage.getItem('token');
+        const userRaw = localStorage.getItem('user');
+        if (!token || !userRaw) { window.location.href = 'autenticacao.html'; return; }
+        const utilizadorSessao = JSON.parse(userRaw);
+        const tipo = utilizadorSessao.tipo_utilizador || utilizadorSessao.tipo;
+        if (!tipo || tipo.toLowerCase() !== 'administrador') { window.location.href = 'autenticacao.html'; return; }
+        const elementoNome = document.querySelector('.perfil-nome');
+        if (elementoNome) elementoNome.textContent = utilizadorSessao.username || utilizadorSessao.nome || "Administrador";
+    }
+
+    async function carregarDetalhesMedico() {
+      const contentor = document.getElementById('contentor-detalhes');
+      const token = localStorage.getItem('token');
+      const parametrosUrl = new URLSearchParams(window.location.search);
+      idMedicoAtual = parametrosUrl.get('id');
+
+      if (!idMedicoAtual) {
+        contentor.innerHTML = `<p class="msg-erro">Erro: Nenhum ID de médico fornecido.</p>`;
+        return;
+      }
+
+      try {
+        const resposta = await fetch(`http://localhost:3000/medicos/${idMedicoAtual}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!resposta.ok) throw new Error('Não foi possível encontrar este profissional.');
+
+        const medico = await resposta.json();
+        const dadosUtilizador = medico.utilizador || {};
+
+        idUtilizadorAtual = dadosUtilizador.id;
+        estadoAtualUtilizador = dadosUtilizador.estado || 'ativo';
+
+        // 1. Configurar link do Botão Atualizar
+        const linkAtualizar = document.getElementById('link-atualizar');
+        linkAtualizar.href = `atualizarMedico.html?id=${medico.id}`;
+        linkAtualizar.classList.remove('disabled');
+
+        // 2. Renderizar/Atualizar o Botão de Estado na Barra Lateral
+        atualizarBotaoEstadoSidebar(estadoAtualUtilizador);
+
+        // 3. Montar a Ficha Técnica
+        renderizarFichaClinica(medico, dadosUtilizador);
+
+      } catch (err) {
+        console.error(err);
+        contentor.innerHTML = `<p class="msg-erro">Erro ao carregar dados: ${err.message}</p>`;
+      }
+    }
+
+    // Altera o aspeto do botão de estado (Ativar/Desativar) na barra lateral
+    function atualizarBotaoEstadoSidebar(estado) {
+      const btn = document.getElementById('btn-estado-utilizador');
+      const texto = btn.querySelector('span');
+      const icone = btn.querySelector('i');
+
+      btn.disabled = false;
+      btn.classList.remove('disabled', 'btn-desativar', 'btn-ativar');
+
+      if (estado.toLowerCase() === 'ativo') {
+        btn.classList.add('btn-desativar');
+        texto.textContent = "Desativar Utilizador";
+        icone.className = "fa-solid fa-user-slash";
+      } else {
+        btn.classList.add('btn-ativar');
+        texto.textContent = "Ativar Utilizador";
+        icone.className = "fa-solid fa-user-check";
+      }
+    }
+
+    // Atualiza a tabela informativa central sem precisar de recarregar a página toda
+    function renderizarFichaClinica(medico, utilizador) {
+      const contentor = document.getElementById('contentor-detalhes');
+      const estadoConta = utilizador.estado || 'ativo';
+      const classeEstado = estadoConta.toLowerCase() === 'ativo' ? 'estado-ativo' : 'estado-inativo';
+      const dataCriacao = utilizador.data_criacao ? new Date(utilizador.data_criacao).toLocaleDateString('pt-PT') : 'Não disponível';
+
+      contentor.innerHTML = `
+        <div class="cabecalho-medico">
+          <div class="avatar-medico"><i class="fa-solid fa-user-doctor"></i></div>
+          <div>
+            <h1 class="nome-medico">${medico.nome || 'Sem Nome'}</h1>
+            <div class="especialidade-medico">${medico.especialidade || 'Sem Especialidade'}</div>
+          </div>
+        </div>
+
+        <div class="grelha-info">
+          <div class="bloco-info"><label>Número de Médico</label><span>${medico.numero_medico || 'Não registada'}</span></div>
+          <div class="bloco-info"><label>Email</label><span>${utilizador.email || 'Sem email'}</span></div>
+          <div class="bloco-info"><label>Contacto Telefónico</label><span>${medico.telemovel || 'Sem contacto'}</span></div>
+          <div class="bloco-info"><label>Data de Criação</label><span>${dataCriacao}</span></div>
+          <div class="bloco-info">
+            <label>Estado da Conta</label>
+            <div><span class="badge-estado ${classeEstado}">${estadoConta}</span></div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Configuração completa do Modal Central e pedido HTTP
+    function configurarModalEstado() {
+      const btnSidebar = document.getElementById('btn-estado-utilizador');
+      const overlay = document.getElementById('modal-confirmacao');
+      const btnCancelar = document.getElementById('btn-modal-cancelar');
+      const btnConfirmar = document.getElementById('btn-modal-confirmar');
+      
+      const mIcone = document.getElementById('modal-icone');
+      const mTitulo = document.getElementById('modal-titulo');
+      const mTexto = document.getElementById('modal-texto');
+
+      btnSidebar.addEventListener('click', () => {
+        btnConfirmar.className = "btn-modal"; // Reset de estilos anteriores
+
+        if (estadoAtualUtilizador.toLowerCase() === 'ativo') {
+          mIcone.className = "modal-icone icone-alerta";
+          mIcone.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i>`;
+          mTitulo.textContent = "Desativar Conta";
+          mTexto.textContent = "Tem a certeza que pretende desativar a conta deste médico? O profissional perderá imediatamente o acesso à plataforma SaudINOB.";
+          btnConfirmar.classList.add('btn-modal-confirmar-erro');
+        } else {
+          mIcone.className = "modal-icone icone-ativar";
+          mIcone.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
+          mTitulo.textContent = "Reativar Conta";
+          mTexto.textContent = "Pretende reativar o acesso deste médico? O utilizador recuperará as credenciais de entrada com efeito imediato.";
+          btnConfirmar.classList.add('btn-modal-confirmar-sucesso');
+        }
+
+        overlay.classList.add('ativo');
+      });
+
+      btnCancelar.addEventListener('click', () => overlay.classList.remove('ativo'));
+
+      btnConfirmar.addEventListener('click', async () => {
+        overlay.classList.remove('ativo');
+        const token = localStorage.getItem('token');
+        const novoEstado = estadoAtualUtilizador.toLowerCase() === 'ativo' ? 'inativo' : 'ativo';
+
+        try {
+          // Chamada PUT / PATCH para mudar o estado na tabela utilizadores
+          const resposta = await fetch(`http://localhost:3000/utilizadores/${idUtilizadorAtual}`, {
+            method: 'PUT', 
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ estado: novoEstado })
+          });
+
+          if (!resposta.ok) throw new Error('Não foi possível processar a alteração no servidor.');
+
+          // Atualiza as variáveis locais e re-renderiza o ecrã dinamicamente
+          estadoAtualUtilizador = novoEstado;
+          atualizarBotaoEstadoSidebar(estadoAtualUtilizador);
+          
+          // Força a atualização do cartão central de detalhes com o novo badge
+          carregarDetalhesMedico(); 
+
+        } catch (err) {
+          alert(`Erro na operação: ${err.message}`);
+        }
+      });
+    }
+
+    function configurarLogout() {
+      const btnLogout = document.querySelector('.btn-logout');
+      if (btnLogout) {
+        btnLogout.addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.clear();
+          window.location.href = 'autenticacao.html';
+        });
+      }
+    }
+  </script>
+</body>
+</html>

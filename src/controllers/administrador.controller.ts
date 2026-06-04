@@ -26,15 +26,18 @@ export const AdministradorController = {
 
     criar: async (req: Request, res: Response) => {
         try {
-            const id_utilizador_logado = req.user!.id; // Quem está a criar
-            const id_utilizador = Number(req.params.id_utilizador); // Alvo da conta
+            if (!req.user) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+
+            const id_utilizador_logado = req.user.id; 
+            const id_utilizador = Number(req.params.id_utilizador); 
             const dadosDTO: CriarAdministradorDTO = req.body;
 
             if (!id_utilizador) {
                 return res.status(400).json({ erro: 'O parâmetro id_utilizador na URL é obrigatório.' });
             }
 
-            // Passagem do id_utilizador_logado corrigida
             const administrador = await AdministradorService.criar(id_utilizador, dadosDTO, id_utilizador_logado);
             return res.status(201).json(administrador);
         } catch (err: any) {
@@ -46,11 +49,14 @@ export const AdministradorController = {
 
     atualizar: async (req: Request, res: Response) => {
         try {
-            const id_utilizador_logado = req.user!.id; // Autor da ação
+            if (!req.user) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+
+            const id_utilizador_logado = req.user.id; 
             const id = Number(req.params.id);
             const dadosDTO: AtualizarAdministradorDTO = req.body;
             
-            // Passagem do id_utilizador_logado corrigida
             const administradorAtualizado = await AdministradorService.atualizar(id, dadosDTO, id_utilizador_logado);
             return res.json(administradorAtualizado);
         } catch (err: any) {
@@ -62,10 +68,13 @@ export const AdministradorController = {
 
     eliminar: async (req: Request, res: Response) => {
         try {
-            const id_utilizador_logado = req.user!.id; // Autor da ação
+            if (!req.user) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+
+            const id_utilizador_logado = req.user.id; 
             const id_alvo = Number(req.params.id);
 
-            // Passagem do id_utilizador_logado corrigida
             const resultado = await AdministradorService.eliminar(id_alvo, id_utilizador_logado);
             return res.json(resultado);
         } catch (err: any) {

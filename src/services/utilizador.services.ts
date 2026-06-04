@@ -1,5 +1,5 @@
 import { AppDataSource } from '../database/database';
-import { Utilizador, Estado } from '../models/utilizador.entity';
+import { Utilizador, Estado, Tipo_Utilizador } from '../models/utilizador.entity';
 import { CriarUtilizadorDTO, AtualizarUtilizadorDTO, UtilizadorRespostaDTO } from '../dtos/utilizador.dto';
 import { AutenticacaoService } from './autenticacao.services';
 import { AuditoriaService } from './auditoria.services';
@@ -11,8 +11,8 @@ const toResposta = (u: Utilizador): UtilizadorRespostaDTO => ({
     id: u.id,
     username: u.username,
     email: u.email,
-    tipo_utilizador: u.tipo_utilizador as any,
-    estado: u.estado as any,
+    tipo_utilizador: u.tipo_utilizador, // Removido o 'as any' desnecessário
+    estado: u.estado,                   // Removido o 'as any' desnecessário
     data_criacao: u.data_criacao?.toISOString(),
     data_ultimo_acesso: u.data_ultimo_acesso?.toISOString(),
 });
@@ -30,7 +30,6 @@ export const UtilizadorService = {
         return toResposta(utilizador);
     },
 
-    // Passa a receber o ID do administrador executor
     criar: async (dados: CriarUtilizadorDTO, idUtilizadorLogado: number): Promise<UtilizadorRespostaDTO> => {
         if (!dados.email) throw new Error('O email do utilizador é obrigatório.');
 
@@ -45,14 +44,13 @@ export const UtilizadorService = {
         const utilizador = utilizadorRepo().create({
             username: dados.username,
             email: dados.email,
-            tipo_utilizador: dados.tipo_utilizador.toLowerCase(),
+            tipo_utilizador: dados.tipo_utilizador,
             estado: Estado.ATIVO,
             password: passwordEncriptada,
         });      
 
         const guardado = await utilizadorRepo().save(utilizador);
 
-        // REGISTO DE AUDITORIA
         await AuditoriaService.registar({
             id_utilizador: idUtilizadorLogado,
             entidade_afetada: 'UTILIZADOR' as EntidadeAuditoria,
@@ -62,13 +60,12 @@ export const UtilizadorService = {
         return toResposta(guardado);
     },
 
-    // Substituído .update() por mutação de entidade + .save()
-    atualizar: async (id: number, dados: AtualizarUtilizadorDTO, utilizadorSessao: { id: number; tipo_utilizador: string }): Promise<UtilizadorRespostaDTO | null> => {
+    atualizar: async (id: number, dados: AtualizarUtilizadorDTO, utilizadorSessao: { id: number; tipo_utilizador: Tipo_Utilizador }): Promise<UtilizadorRespostaDTO | null> => {
         const utilizadoralvo = await utilizadorRepo().findOneBy({ id });
         if (!utilizadoralvo) return null;
 
         const ehOProprio = utilizadorSessao.id === utilizadoralvo.id;
-        const ehAdmin = utilizadorSessao.tipo_utilizador.toLowerCase() === 'administrador';
+        const ehAdmin = utilizadorSessao.tipo_utilizador === Tipo_Utilizador.ADMINISTRADOR;
 
         if (!ehOProprio && !ehAdmin) {
             throw new Error('Acesso negado. Não pode alterar dados de outros utilizadores.');
@@ -96,7 +93,6 @@ export const UtilizadorService = {
 
         const atualizado = await utilizadorRepo().save(utilizadoralvo);
 
-        // REGISTO DE AUDITORIA (Usa o ID de quem operou a alteração)
         await AuditoriaService.registar({
             id_utilizador: utilizadorSessao.id,
             entidade_afetada: 'UTILIZADOR' as EntidadeAuditoria,
@@ -105,10 +101,9 @@ export const UtilizadorService = {
 
         return toResposta(atualizado);
     },
-
     
-    desativar: async (id: number, utilizadorSessao: { id: number; tipo_utilizador: string }): Promise<UtilizadorRespostaDTO | null> => {
-        if (utilizadorSessao.tipo_utilizador.toLowerCase() !== 'administrador') {
+    desativar: async (id: number, utilizadorSessao: { id: number; tipo_utilizador: Tipo_Utilizador }): Promise<UtilizadorRespostaDTO | null> => {
+        if (utilizadorSessao.tipo_utilizador !== Tipo_Utilizador.ADMINISTRADOR) {
             throw new Error('Acesso negado. Apenas administradores podem desativar contas.');
         }
         
@@ -119,7 +114,6 @@ export const UtilizadorService = {
         utilizador.estado = Estado.INATIVO;
         const atualizado = await utilizadorRepo().save(utilizador);
 
-        // REGISTO DE AUDITORIA
         await AuditoriaService.registar({
             id_utilizador: utilizadorSessao.id,
             entidade_afetada: 'UTILIZADOR' as EntidadeAuditoria,
@@ -128,10 +122,9 @@ export const UtilizadorService = {
 
         return toResposta(atualizado);
     },
-
     
-    eliminar: async (id: number, utilizadorSessao: { id: number; tipo_utilizador: string }): Promise<void> => {
-        if (utilizadorSessao.tipo_utilizador.toLowerCase() !== 'administrador') {
+    eliminar: async (id: number, utilizadorSessao: { id: number; tipo_utilizador: Tipo_Utilizador }): Promise<void> => {
+        if (utilizadorSessao.tipo_utilizador !== Tipo_Utilizador.ADMINISTRADOR) {
             throw new Error('Acesso negado. Apenas administradores podem eliminar contas do sistema.');
         }
 
@@ -140,7 +133,6 @@ export const UtilizadorService = {
         
         await utilizadorRepo().remove(utilizador);
 
-        // REGISTO DE AUDITORIA
         await AuditoriaService.registar({
             id_utilizador: utilizadorSessao.id,
             entidade_afetada: 'UTILIZADOR' as EntidadeAuditoria,

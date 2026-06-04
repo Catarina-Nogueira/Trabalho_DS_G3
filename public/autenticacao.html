@@ -15,13 +15,12 @@
 
     body {
       font-family: 'Segoe UI', sans-serif;
-      /* Degradê de azul suave solicitado */
       background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #f5fcff 100%);
       min-height: 100vh;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      justify-content: center; /* horizontal */
+      align-items: center; 
+      flex-direction: column;
     }
 
     /* Container do formulário sem o retângulo branco */
@@ -92,6 +91,13 @@
       box-shadow: 0 0 0 4px rgba(11, 117, 255, 0.15);
     }
 
+    .container-central {
+      min-height: 80vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
     /* Botão para ver a password */
     .btn-toggle-password {
       position: absolute;
@@ -150,105 +156,108 @@
       box-shadow: 0 6px 16px rgba(11, 117, 255, 0.3);
     }
 
-    footer {
-      margin-top: auto;
+    .footer {
+      margin-top: 70px;
       text-align: center;
-      padding: 24px;
-      font-size: 0.7rem;
+      font-size: 0.9rem;
       color: #334155;
       border-top: 1px solid rgba(99, 179, 237, 0.08);
     }
+
   </style>
 </head>
 <body>
+  <main class="container-central">
+    <div class="login-wrapper">
 
-  <div class="login-wrapper">
+      <h1>SaudINOB</h1>
+      <div class="subtitulo">Sistema de Prevenção e Controlo de Doenças Respiratórias</div>
 
-    <h1>SaudINOB</h1>
-    <div class="subtitulo">Sistema de Prevenção e Controlo de Doenças Respiratórias</div>
-
-    <form id="formLogin" onsubmit="lidarLogin(event)">
-      
-      <div class="grupo-input">
-        <label for="username">Nome de Utilizador</label>
-        <div class="input-container">
-          <input 
-            type="text" 
-            id="username" 
-            name="username" 
-            placeholder="Introduza o seu nome de utilizador" 
-            required 
-          />
+      <form id="formLogin" onsubmit="lidarLogin(event)">
+        
+        <div class="grupo-input">
+          <label for="username">Nome de Utilizador</label>
+          <div class="input-container">
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              placeholder="Introduza o seu nome de utilizador" 
+              required 
+            />
+          </div>
         </div>
-      </div>
 
-      <div class="grupo-input">
-        <label for="password">Palavra-passe</label>
-        <div class="input-container">
-          <input 
-            type="password" 
-            id="password" 
-            name="password" 
-            placeholder="Introduza a sua palavra-passe" 
-            required 
-          />
-          <button 
-            type="button" 
-            class="btn-toggle-password" 
-            onclick="alternarVisibilidadePassword()"
-            title="Mostrar/Esconder palavra-passe"
-          >
-            <i class="fa-solid fa-eye" id="iconeOlho"></i>
-          </button>
+        <div class="grupo-input">
+          <label for="password">Palavra-passe</label>
+          <div class="input-container">
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              placeholder="Introduza a sua palavra-passe" 
+              required 
+            />
+            <button 
+              type="button" 
+              class="btn-toggle-password" 
+              onclick="alternarVisibilidadePassword()"
+              title="Mostrar/Esconder palavra-passe"
+            >
+              <i class="fa-solid fa-eye" id="iconeOlho"></i>
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div class="opcoes-auxiliares">
-        <a href="recuperar-password.html" class="link-esqueceu">
-          Esqueceu-se da palavra-passe?
-        </a>
-      </div>
+        <div class="opcoes-auxiliares">
+          <a href="recuperar-password.html" class="link-esqueceu">
+            Esqueceu-se da palavra-passe?
+          </a>
+        </div>
 
-      <button type="submit" class="btn-login">
-        Iniciar Sessão
-      </button>
+        <button type="submit" class="btn-login">
+          Iniciar Sessão
+        </button>
 
-    </form>
+      </form>
 
-  </div>
+    </div>
+  </main>   
+
+  <footer class="footer">
+    SaudINOB © 2026 — Saúde Digital e Inovação Biomédica
+  </footer>
 
   <script>
-    // 1. Lógica para o Olhinho funcionar (Mudar entre texto e password)
-    function alternarVisibilidadePassword() {
-      const campoPassword = document.getElementById('password');
-      const iconeOlho = document.getElementById('iconeOlho');
+      // 1. Lógica para o Olhinho funcionar (Mudar entre texto e password)
+      function alternarVisibilidadePassword() {
+        const campoPassword = document.getElementById('password');
+        const iconeOlho = document.getElementById('iconeOlho');
 
-      if (campoPassword.type === 'password') {
-        campoPassword.type = 'text';
-        campoPassword.classList.add('password-field');
-        iconeOlho.className = 'fa-solid fa-eye-slash';
-      } else {
-        campoPassword.type = 'password';
-        campoPassword.classList.remove('password-field');
-        iconeOlho.className = 'fa-solid fa-eye';
+        if (campoPassword.type === 'password') {
+          campoPassword.type = 'text';
+          campoPassword.classList.add('password-field');
+          iconeOlho.className = 'fa-solid fa-eye-slash';
+        } else {
+          campoPassword.type = 'password';
+          campoPassword.classList.remove('password-field');
+          iconeOlho.className = 'fa-solid fa-eye';
+        }
       }
-    }
 
-    // 2. Conexão Real com o teu Backend Express
-    async function lidarLogin(event) {
+      // 2. Conexão Real com o teu Backend Express
+      async function lidarLogin(event) {
       event.preventDefault();
       
       const form = document.getElementById('formLogin');
       const formData = new FormData(form);
       
-      // Criamos o objeto com os dados dos inputs
       const payloadLogin = {
-        username: formData.get('username'), // Mapeia o campo do input
+        username: formData.get('username'),
         password: formData.get('password')
       };
 
       try {
-        // Altera para o URL correto da tua API (ex: http://localhost:3000)
         const URL_BACKEND = 'http://localhost:3000/autenticacao/login';
 
         const resposta = await fetch(URL_BACKEND, {
@@ -261,39 +270,42 @@
 
         const dados = await resposta.json();
 
-        // Se o backend devolver um erro (ex: status 400 ou 401)
         if (!resposta.ok) {
           throw new Error(dados.erro || 'Falha ao iniciar sessão.');
         }
 
-        // Se o login for um sucesso:
-        // Guardamos o Token de segurança e os dados do utilizador no navegador
+        // --- ALINHAMENTO REALIZADO AQUI ---
+        // O teu backend devolve: { token, tipo_utilizador, nome, id_perfil_especifico, mensagem }
+        
+        // Guardamos o Token
         localStorage.setItem('token', dados.token);
-        localStorage.setItem('user', JSON.stringify(dados.utilizador));
+        
+        // Guardamos os dados de perfil de forma limpa
+        const dadosUtilizador = {
+          nome: dados.nome,
+          tipo: dados.tipo_utilizador,
+          id_especifico: dados.id_perfil_especifico
+        };
+        localStorage.setItem('user', JSON.stringify(dadosUtilizador));
 
-        // O POLÍCIA DE TRÂNSITO: Redireciona conforme o tipo_utilizador recebido
-        const perfil = dados.utilizador.tipo_utilizador;
+        // Normalizamos para minúsculas para garantir que a comparação não falha (Ex: "MEDICO" -> "medico")
+        const perfil = dados.tipo_utilizador.toLowerCase();
 
         if (perfil === 'administrador') {
-          window.location.href = 'administradorPrincipal.html'; // Altera para o nome real do teu HTML de Admin
+          window.location.href = 'administradorPrincipal.html';
         } else if (perfil === 'medico') {
-          window.location.href = 'medicoPrincipal.html'; // Altera para o nome real do teu HTML de Médico
+          window.location.href = 'medicoPrincipal.html';
         } else if (perfil === 'utente') {
-          window.location.href = 'utentePrincipal.html'; // Altera para o nome real do teu HTML de Utente
+          window.location.href = 'utentePrincipal.html';
         } else {
-          alert('Perfil não reconhecido pelo sistema.');
+          alert('Perfil não reconhecido pelo sistema: ' + dados.tipo_utilizador);
         }
 
       } catch (err) {
-        // Mostra o erro devolvido pelo teu backend (ex: "Password incorreta")
         alert('Erro no Login: ' + err.message);
       }
     }
   </script>
-  
-  <footer>
-    SaudINOB © 2026 — Saúde Digital e Inovação Biomédica
-  </footer>
 
 </body>
 </html>

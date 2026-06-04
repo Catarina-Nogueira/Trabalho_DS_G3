@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { UtenteService } from '../services/utente.services';
-import { CriarUtenteDTO } from '../dtos/utente.dto';
+import { CriarUtenteDTO, AtualizarUtenteDTO } from '../dtos/utente.dto';
 
 export const UtenteController = {
 
@@ -15,7 +15,11 @@ export const UtenteController = {
 
     listarPorMedico: async (req: Request, res: Response) => {
         try {
-            const utilizadorLogado = req.user!;
+            if (!req.user) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+
+            const utilizadorLogado = req.user;
             const id_medico_param = Number(req.params.id_medico);
 
             // BARREIRA DE SEGURANÇA: Um médico não pode ver a lista de utentes de outro colega
@@ -32,7 +36,11 @@ export const UtenteController = {
 
     buscarPorId: async (req: Request, res: Response) => {
         try {
-            const utilizadorLogado = req.user!;
+            if (!req.user) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+
+            const utilizadorLogado = req.user;
             const id_utente = Number(req.params.id);
 
             const utente = await UtenteService.buscarPorId(id_utente);
@@ -51,7 +59,11 @@ export const UtenteController = {
 
     buscarDadosPermitidos: async (req: Request, res: Response) => {
         try {
-            const utilizadorLogado = req.user!;
+            if (!req.user) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+
+            const utilizadorLogado = req.user;
             const id_utente = Number(req.params.id);
 
             const utente = await UtenteService.buscarDadosPermitidos(id_utente);
@@ -65,8 +77,8 @@ export const UtenteController = {
                 return res.status(403).json({ erro: 'Acesso negado. Este utente não está sob a sua tutela clínica.' });
             }
 
-            // Remove referências de segurança antes de enviar a resposta limpa para o cliente
-            const { utilizador, medico, ...dadosLimpos } = utente as any;
+            // 🚨 CORREÇÃO: Desestruturação limpa convertendo de forma explícita para Record<string, unknown>
+            const { utilizador, medico, ...dadosLimpos } = utente as Record<string, any>;
             return res.json(dadosLimpos);
         } catch (err) {
             return res.status(500).json({ erro: 'Erro ao buscar dados do utente.' });
@@ -75,7 +87,11 @@ export const UtenteController = {
 
     criar: async (req: Request, res: Response) => {
         try {
-            const id_utilizador_logado = req.user!.id; // Administrador executor
+            if (!req.user) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+
+            const id_utilizador_logado = req.user.id; 
             const id_utilizador = Number(req.params.id_utilizador);
             const { nome, data_nascimento, sexo_biologico, id_medico } = req.body;
 
@@ -87,7 +103,6 @@ export const UtenteController = {
 
             const dadosDTO: CriarUtenteDTO = { nome, data_nascimento, sexo_biologico };
 
-            
             const utente = await UtenteService.criar(dadosDTO, id_utilizador, Number(id_medico), id_utilizador_logado);
             return res.status(201).json(utente);
         } catch (err: any) {
@@ -98,13 +113,13 @@ export const UtenteController = {
     atualizar: async (req: Request, res: Response) => {
         try {
             const id = Number(req.params.id);
-            const dados = req.body;
+            const dados: AtualizarUtenteDTO = req.body;
             const utilizadorSessao = req.user;
             
             if (!utilizadorSessao) {
                 return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
             }
-             
+               
             const utente = await UtenteService.atualizar(id, dados, utilizadorSessao);
             if (!utente) return res.status(404).json({ erro: 'Utente não encontrado.' });
             return res.json(utente);
@@ -115,10 +130,13 @@ export const UtenteController = {
 
     eliminar: async (req: Request, res: Response) => {
         try {
-            const id_utilizador_logado = req.user!.id;
+            if (!req.user) {
+                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+            }
+
+            const id_utilizador_logado = req.user.id;
             const id_alvo = Number(req.params.id);
 
-            
             await UtenteService.eliminar(id_alvo, id_utilizador_logado);
             return res.status(204).send();
         } catch (err: any) {
