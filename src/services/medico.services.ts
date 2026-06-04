@@ -2,13 +2,14 @@ import { AppDataSource } from '../database/database';
 import { Medico } from '../models/medico.entity';
 import { CriarMedicoDTO, AtualizarMedicoDTO }   from '../dtos/medico.dto';
 import { Utilizador } from '../models/utilizador.entity';
+import { AuditoriaService } from './auditoria.services';
+import { EntidadeAuditoria, AcaoAuditoria } from '../models/auditoria.entity';
 
 const medicoRepo = AppDataSource.getRepository(Medico);
 const utilizadorRepo = AppDataSource.getRepository(Utilizador);
 
 export const MedicoService = {
 
-    // Listar todos os médicos
     listarTodos: async () => {
         return await medicoRepo.find({
             relations: ['utilizador'],
@@ -27,7 +28,6 @@ export const MedicoService = {
         });
     },
 
-    // Consulta de detalhe de médico
     buscarPorId: async (id: number) => {
         if (!id || id <= 0) throw new Error('ID inválido');
 
@@ -52,8 +52,8 @@ export const MedicoService = {
         return medico;
     },
 
-    // Criar médico
-    criar: async (id_utilizador: number, dados: CriarMedicoDTO) => {
+    
+    criar: async (id_utilizador: number, dados: CriarMedicoDTO, idUtilizadorLogado: number) => {
         if (!id_utilizador || id_utilizador <= 0) throw new Error('ID de utilizador inválido ou não fornecido.');
         if (!dados.nome) throw new Error('O nome é obrigatório.');
         if (!dados.especialidade) throw new Error('A especialidade é obrigatória.');
@@ -82,6 +82,13 @@ export const MedicoService = {
 
         const guardado = await medicoRepo.save(novoMedico);
 
+        
+        await AuditoriaService.registar({
+            id_utilizador: idUtilizadorLogado,
+            entidade_afetada: 'MEDICO' as EntidadeAuditoria,
+            acao: 'CRIAR' as AcaoAuditoria
+        });
+
         return await medicoRepo.findOne({
             where: { id: guardado.id },
             relations: ['utilizador'],
@@ -100,8 +107,8 @@ export const MedicoService = {
         });
     },
 
-    /// Atualizar nome/telemóvel do médico
-    atualizar: async (id: number, dados: AtualizarMedicoDTO) => {
+    
+    atualizar: async (id: number, dados: AtualizarMedicoDTO, idUtilizadorLogado: number) => {
         if (!id || id <= 0) throw new Error('ID inválido');
 
         const medico = await medicoRepo.findOne({ where: { id }, relations: ['utilizador'] });
@@ -115,16 +122,34 @@ export const MedicoService = {
             medico.telemovel = dados.telemovel.trim();
         }
 
-        return await medicoRepo.save(medico);
+        const atualizado = await medicoRepo.save(medico);
+
+       
+        await AuditoriaService.registar({
+            id_utilizador: idUtilizadorLogado,
+            entidade_afetada: 'MEDICO' as EntidadeAuditoria,
+            acao: 'ATUALIZAR' as AcaoAuditoria
+        });
+
+        return atualizado;
     },
 
-    eliminar: async (id: number) => {
+    
+    eliminar: async (id: number, idUtilizadorLogado: number) => {
         if (!id || id <= 0) throw new Error('ID inválido');
 
         const medico = await medicoRepo.findOneBy({ id });
         if (!medico) throw new Error('Médico não encontrado');
 
-        await medicoRepo.delete(id);
+        await medicoRepo.remove(medico);
+
+        
+        await AuditoriaService.registar({
+            id_utilizador: idUtilizadorLogado,
+            entidade_afetada: 'MEDICO' as EntidadeAuditoria,
+            acao: 'ELIMINAR' as AcaoAuditoria
+        });
+
         return { mensagem: 'Médico eliminado com sucesso' };
     }
 };

@@ -8,12 +8,12 @@ export interface LoginDTO {
 export interface TokenPayload {
     id_utilizador: number;
     tipo_utilizador: Tipo_Utilizador;
-    id_utente?: number;
-    id_medico?: number;
+    id_perfil_especifico?: number | undefined; // id_utente ou id_medico
 }
 
 export interface LoginRespostaDTO {
     token: string;
     tipo_utilizador: Tipo_Utilizador;
     nome: string;
+    id_perfil_especifico?: number | undefined;
 }

@@ -1,25 +1,28 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { AppDataSource } from '../database/database';
 import { Utilizador, Estado, Tipo_Utilizador } from '../models/utilizador.entity';
 import { Utente } from '../models/utente.entity';
 import { Medico } from '../models/medico.entity';
-import { LoginDTO} from '../dtos/autenticacao.dto';
+import { LoginDTO, LoginRespostaDTO, TokenPayload } from '../dtos/autenticacao.dto';
 
 const utilizadorRepo = () => AppDataSource.getRepository(Utilizador);
 const utenteRepo     = () => AppDataSource.getRepository(Utente);
 const medicoRepo     = () => AppDataSource.getRepository(Medico);
 
+// Chave secreta para assinar o token (Num ambiente real, usar process.env.JWT_SECRET)
+const JWT_SECRET = 'sua_chave_secreta_super_segura_123';
+
 export const AutenticacaoService = {
 
-    // RF01 — Autenticação do utilizador
-    login: async (dto: LoginDTO) => {
+    login: async (dto: LoginDTO): Promise<LoginRespostaDTO> => {
         // 1. Verificar que o utilizador existe pelo username
         const utilizador = await utilizadorRepo().findOneBy({ username: dto.username });
         if (!utilizador) {
-            throw new Error('Username não coincide.');
+            throw new Error('Credenciais inválidas.'); // Mensagem genérica por segurança
         }
 
-        // 2. Verificar que a conta está ativa (RF08)
+        // 2. Verificar se a conta está ativa
         if (utilizador.estado === Estado.INATIVO) {
             throw new Error('A conta está desativada. Contacte o administrador.');
         }
@@ -27,23 +30,23 @@ export const AutenticacaoService = {
         // 3. Verificar a password
         const passwordCorreta = await bcrypt.compare(dto.password, utilizador.password);
         if (!passwordCorreta) {
-            throw new Error('Password incorreta.');
+            throw new Error('Credenciais inválidas.');
         }
 
-        // 4. Registar data do último acesso (RF02)
+        // 4. Registar data do último acesso
         await utilizadorRepo().update(utilizador.id, {
             data_ultimo_acesso: new Date(),
         });
 
-        // 5. Ir buscar os IDs específicos dependendo do tipo de utilizador
-        let id_especifico: number | undefined = undefined;
+        // 5. Obter ID do perfil específico
+        let id_especifico: number | undefined;
 
-        if (utilizador.tipo_utilizador === 'utente') {
+        if (utilizador.tipo_utilizador === Tipo_Utilizador.UTENTE) {
             const utente = await utenteRepo().findOne({
                 where: { utilizador: { id: utilizador.id } },
             });
             if (utente) id_especifico = utente.id;
-        } else if (utilizador.tipo_utilizador === 'medico') {
+        } else if (utilizador.tipo_utilizador === Tipo_Utilizador.MEDICO) {
             const medico = await medicoRepo().findOne({
                 where: { utilizador: { id: utilizador.id } },
             });
@@ -52,33 +55,35 @@ export const AutenticacaoService = {
         
         const nome = await AutenticacaoService.obterNomePerfil(utilizador.id, utilizador.tipo_utilizador);
 
-        // Devolve apenas os dados de confirmação do utilizador
-        return {
+        // 6. Gerar Token JWT com as credenciais encriptadas
+        const payload: TokenPayload = {
             id_utilizador: utilizador.id,
-            tipo_utilizador: utilizador.tipo_utilizador,
+            tipo_utilizador: utilizador.tipo_utilizador ,
+            id_perfil_especifico: id_especifico
+        };
+
+        const token = jwt.sign(payload, JWT_SECRET!, { expiresIn: '8h' });
+
+        return {
+            token,
+            tipo_utilizador: utilizador.tipo_utilizador ,
             nome,
-            id_perfil_especifico: id_especifico // id_utente ou id_medico
+            id_perfil_especifico: id_especifico
         };
     },
 
-    // Obtém o nome do utilizador conforme o seu perfil
-    obterNomePerfil: async (id_utilizador: number, tipo: string): Promise<string> => {
-        if (tipo === 'utente') {
-            const utente = await utenteRepo().findOne({
-                where: { utilizador: { id: id_utilizador } },
-            });
+    obterNomePerfil: async (id_utilizador: number, tipo: Tipo_Utilizador): Promise<string> => {
+        if (tipo === Tipo_Utilizador.UTENTE) {
+            const utente = await utenteRepo().findOne({ where: { utilizador: { id: id_utilizador } } });
             return utente?.nome ?? 'Utente';
         }
-        if (tipo === 'medico') {
-            const medico = await medicoRepo().findOne({
-                where: { utilizador: { id: id_utilizador } },
-            });
+        if (tipo === Tipo_Utilizador.MEDICO) {
+            const medico = await medicoRepo().findOne({ where: { utilizador: { id: id_utilizador } } });
             return medico?.nome ?? 'Médico';
         }
         return 'Administrador';
     },
 
-    // Utilitário — encriptar password antes de guardar (usar no criar utilizador)
     encriptarPassword: async (password: string): Promise<string> => {
         return bcrypt.hash(password, 10);
     },

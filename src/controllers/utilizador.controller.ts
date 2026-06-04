@@ -1,11 +1,10 @@
-import { Request, Response } from 'express'; // Pedido e resposta http
+import { Request, Response } from 'express';
 import { UtilizadorService } from '../services/utilizador.services';
 import { Tipo_Utilizador } from '../models/utilizador.entity';
 import { CriarUtilizadorDTO } from '../dtos/utilizador.dto';
 
 export const UtilizadorController = {
     
-    // GET /utilizadores
     listarTodos: async (req: Request, res: Response) => {
         try {
             const utilizadores = await UtilizadorService.listarTodos();
@@ -15,7 +14,6 @@ export const UtilizadorController = {
         }
     },
 
-    // GET /utilizadores/:id
     buscarPorId: async (req: Request, res: Response) => {
         try {
             const utilizador = await UtilizadorService.buscarPorId(Number(req.params.id));
@@ -26,8 +24,8 @@ export const UtilizadorController = {
         }
     },
 
-    // POST /utilizadores
     criar: async (req: Request, res: Response) => {
+        const id_utilizador_logado = req.user!.id; // 🔑 Administrador autenticado
         const { username, email, password, tipo_utilizador } = req.body;
  
         if (!username) return res.status(400).json({ erro: 'O username é obrigatório.' });
@@ -44,14 +42,14 @@ export const UtilizadorController = {
  
         try {
             const dadosDTO: CriarUtilizadorDTO = { username, email, password, tipo_utilizador };
-            const utilizador = await UtilizadorService.criar(dadosDTO);
+            // 🚨 Correção: Passagem do executor adicionada
+            const utilizador = await UtilizadorService.criar(dadosDTO, id_utilizador_logado);
             return res.status(201).json(utilizador);
         } catch (err: any) {
             return res.status(400).json({ erro: err.message });
         }
     },
 
-    // PUT /utilizadores/:id
     atualizar: async (req: Request, res: Response) => {
         try {
             const id = Number(req.params.id);
@@ -70,7 +68,6 @@ export const UtilizadorController = {
         }
     },
 
-    // PUT /utilizadores/:id/desativar
     desativar: async (req: Request, res: Response) => {
         try {
             const id = Number(req.params.id);

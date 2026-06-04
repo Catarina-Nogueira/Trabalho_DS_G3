@@ -25,7 +25,7 @@ export class Utilizador {
     password!: string;
 
     @Column({ type: 'simple-enum', enum: Tipo_Utilizador })
-    tipo_utilizador!: string;
+    tipo_utilizador!: Tipo_Utilizador;
 
     @Column({ unique: true })
     email!: string;
@@ -39,5 +39,5 @@ export class Utilizador {
     data_ultimo_acesso!: Date
 
     @Column({ type: 'simple-enum', enum: Estado })
-    estado!: string
+    estado!: Estado
 }

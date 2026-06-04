@@ -15,7 +15,15 @@ export const UtenteController = {
 
     listarPorMedico: async (req: Request, res: Response) => {
         try {
-            const utentes = await UtenteService.listarPorMedico(Number(req.params.id_medico));
+            const utilizadorLogado = req.user!;
+            const id_medico_param = Number(req.params.id_medico);
+
+            // BARREIRA DE SEGURANÇA: Um médico não pode ver a lista de utentes de outro colega
+            if (utilizadorLogado.tipo_utilizador === 'medico' && utilizadorLogado.id !== id_medico_param) {
+                return res.status(403).json({ erro: 'Acesso negado. Não pode listar utentes de outros médicos.' });
+            }
+
+            const utentes = await UtenteService.listarPorMedico(id_medico_param);
             return res.json(utentes);
         } catch (err) {
             return res.status(500).json({ erro: 'Erro ao listar utentes do médico.' });
@@ -24,8 +32,17 @@ export const UtenteController = {
 
     buscarPorId: async (req: Request, res: Response) => {
         try {
-            const utente = await UtenteService.buscarPorId(Number(req.params.id));
+            const utilizadorLogado = req.user!;
+            const id_utente = Number(req.params.id);
+
+            const utente = await UtenteService.buscarPorId(id_utente);
             if (!utente) return res.status(404).json({ erro: 'Utente não encontrado.' });
+
+            // BARREIRA DE SEGURANÇA: Bloqueia médicos intrusos
+            if (utilizadorLogado.tipo_utilizador === 'medico' && utente.medico.id !== utilizadorLogado.id) {
+                return res.status(403).json({ erro: 'Acesso negado. Este utente não está sob a sua tutela clínica.' });
+            }
+
             return res.json(utente);
         } catch (err) {
             return res.status(500).json({ erro: 'Erro ao buscar utente.' });
@@ -34,17 +51,31 @@ export const UtenteController = {
 
     buscarDadosPermitidos: async (req: Request, res: Response) => {
         try {
-            const utente = await UtenteService.buscarDadosPermitidos(Number(req.params.id));
+            const utilizadorLogado = req.user!;
+            const id_utente = Number(req.params.id);
+
+            const utente = await UtenteService.buscarDadosPermitidos(id_utente);
             if (!utente) return res.status(404).json({ erro: 'Utente não encontrado.' });
-            return res.json(utente);
+
+            // BARREIRA DE SEGURANÇA: Utente só vê ele próprio, Médico só vê os seus utentes
+            if (utilizadorLogado.tipo_utilizador === 'utente' && utente.utilizador.id !== utilizadorLogado.id) {
+                return res.status(403).json({ erro: 'Acesso negado. Não pode ver dados de outros utentes.' });
+            }
+            if (utilizadorLogado.tipo_utilizador === 'medico' && utente.medico.id !== utilizadorLogado.id) {
+                return res.status(403).json({ erro: 'Acesso negado. Este utente não está sob a sua tutela clínica.' });
+            }
+
+            // Remove referências de segurança antes de enviar a resposta limpa para o cliente
+            const { utilizador, medico, ...dadosLimpos } = utente as any;
+            return res.json(dadosLimpos);
         } catch (err) {
             return res.status(500).json({ erro: 'Erro ao buscar dados do utente.' });
         }
     },
 
-    // POST /utentes/utilizador/:id_utilizador
     criar: async (req: Request, res: Response) => {
         try {
+            const id_utilizador_logado = req.user!.id; // Administrador executor
             const id_utilizador = Number(req.params.id_utilizador);
             const { nome, data_nascimento, sexo_biologico, id_medico } = req.body;
 
@@ -56,7 +87,8 @@ export const UtenteController = {
 
             const dadosDTO: CriarUtenteDTO = { nome, data_nascimento, sexo_biologico };
 
-            const utente = await UtenteService.criar(dadosDTO, id_utilizador, Number(id_medico));
+            
+            const utente = await UtenteService.criar(dadosDTO, id_utilizador, Number(id_medico), id_utilizador_logado);
             return res.status(201).json(utente);
         } catch (err: any) {
             return res.status(400).json({ erro: err.message });
@@ -83,7 +115,11 @@ export const UtenteController = {
 
     eliminar: async (req: Request, res: Response) => {
         try {
-            await UtenteService.eliminar(Number(req.params.id));
+            const id_utilizador_logado = req.user!.id;
+            const id_alvo = Number(req.params.id);
+
+            
+            await UtenteService.eliminar(id_alvo, id_utilizador_logado);
             return res.status(204).send();
         } catch (err: any) {
             return res.status(400).json({ erro: err.message });

@@ -26,14 +26,16 @@ export const AdministradorController = {
 
     criar: async (req: Request, res: Response) => {
         try {
-            const id_utilizador = Number(req.params.id_utilizador);
+            const id_utilizador_logado = req.user!.id; // Quem está a criar
+            const id_utilizador = Number(req.params.id_utilizador); // Alvo da conta
             const dadosDTO: CriarAdministradorDTO = req.body;
 
             if (!id_utilizador) {
                 return res.status(400).json({ erro: 'O parâmetro id_utilizador na URL é obrigatório.' });
             }
 
-            const administrador = await AdministradorService.criar(id_utilizador, dadosDTO);
+            // Passagem do id_utilizador_logado corrigida
+            const administrador = await AdministradorService.criar(id_utilizador, dadosDTO, id_utilizador_logado);
             return res.status(201).json(administrador);
         } catch (err: any) {
             const status = err.message.includes('obrigatório') ? 400 :
@@ -44,9 +46,12 @@ export const AdministradorController = {
 
     atualizar: async (req: Request, res: Response) => {
         try {
+            const id_utilizador_logado = req.user!.id; // Autor da ação
             const id = Number(req.params.id);
             const dadosDTO: AtualizarAdministradorDTO = req.body;
-            const administradorAtualizado = await AdministradorService.atualizar(id, dadosDTO);
+            
+            // Passagem do id_utilizador_logado corrigida
+            const administradorAtualizado = await AdministradorService.atualizar(id, dadosDTO, id_utilizador_logado);
             return res.json(administradorAtualizado);
         } catch (err: any) {
             const status = err.message === 'Administrador não encontrado' ? 404 :
@@ -57,7 +62,11 @@ export const AdministradorController = {
 
     eliminar: async (req: Request, res: Response) => {
         try {
-            const resultado = await AdministradorService.eliminar(Number(req.params.id));
+            const id_utilizador_logado = req.user!.id; // Autor da ação
+            const id_alvo = Number(req.params.id);
+
+            // Passagem do id_utilizador_logado corrigida
+            const resultado = await AdministradorService.eliminar(id_alvo, id_utilizador_logado);
             return res.json(resultado);
         } catch (err: any) {
             const status = err.message === 'Administrador não encontrado' ? 404 :

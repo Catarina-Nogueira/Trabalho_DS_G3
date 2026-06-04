@@ -2,10 +2,11 @@ import { AppDataSource } from '../database/database';
 import { Utilizador, Estado } from '../models/utilizador.entity';
 import { CriarUtilizadorDTO, AtualizarUtilizadorDTO, UtilizadorRespostaDTO } from '../dtos/utilizador.dto';
 import { AutenticacaoService } from './autenticacao.services';
+import { AuditoriaService } from './auditoria.services';
+import { EntidadeAuditoria, AcaoAuditoria } from '../models/auditoria.entity';
 
 const utilizadorRepo = () => AppDataSource.getRepository(Utilizador);
 
-// Converte entidade para DTO de resposta (nunca expõe a password)
 const toResposta = (u: Utilizador): UtilizadorRespostaDTO => ({
     id: u.id,
     username: u.username,
@@ -18,21 +19,19 @@ const toResposta = (u: Utilizador): UtilizadorRespostaDTO => ({
 
 export const UtilizadorService = {
 
-    // Devolve todos os utilizadores (sem password)
     listarTodos: async (): Promise<UtilizadorRespostaDTO[]> => {
         const utilizadores = await utilizadorRepo().find();
         return utilizadores.map(toResposta);
     },
 
-    // Devolve um utilizador pelo id (sem password)
     buscarPorId: async (id: number): Promise<UtilizadorRespostaDTO | null> => {
         const utilizador = await utilizadorRepo().findOneBy({ id });
         if (!utilizador) return null;
         return toResposta(utilizador);
     },
 
-    // Cria um novo utilizador — estado inicial sempre ATIVO (RF07)
-    criar: async (dados: CriarUtilizadorDTO): Promise<UtilizadorRespostaDTO> => {
+    // Passa a receber o ID do administrador executor
+    criar: async (dados: CriarUtilizadorDTO, idUtilizadorLogado: number): Promise<UtilizadorRespostaDTO> => {
         if (!dados.email) throw new Error('O email do utilizador é obrigatório.');
 
         const existe = await utilizadorRepo().findOneBy({ email: dados.email });
@@ -52,11 +51,19 @@ export const UtilizadorService = {
         });      
 
         const guardado = await utilizadorRepo().save(utilizador);
+
+        // REGISTO DE AUDITORIA
+        await AuditoriaService.registar({
+            id_utilizador: idUtilizadorLogado,
+            entidade_afetada: 'UTILIZADOR' as EntidadeAuditoria,
+            acao: 'CRIAR' as AcaoAuditoria
+        });
+
         return toResposta(guardado);
     },
 
-    // Atualiza email, password ou estado (RF04, RF08)
-    atualizar: async (id: number, dados: AtualizarUtilizadorDTO, utilizadorSessao: {id: number; tipo_utilizador: string }): Promise<UtilizadorRespostaDTO | null> => {
+    // Substituído .update() por mutação de entidade + .save()
+    atualizar: async (id: number, dados: AtualizarUtilizadorDTO, utilizadorSessao: { id: number; tipo_utilizador: string }): Promise<UtilizadorRespostaDTO | null> => {
         const utilizadoralvo = await utilizadorRepo().findOneBy({ id });
         if (!utilizadoralvo) return null;
 
@@ -70,23 +77,36 @@ export const UtilizadorService = {
         if (dados.email && dados.email !== utilizadoralvo.email) {
             const existe = await utilizadorRepo().findOneBy({ email: dados.email });
             if (existe) throw new Error('Já existe um utilizador com este email.');
+            utilizadoralvo.email = dados.email;
         }
 
         if (dados.username && dados.username !== utilizadoralvo.username) {
             const existe = await utilizadorRepo().findOneBy({ username: dados.username });
             if (existe) throw new Error('Já existe um utilizador com este username.');
+            utilizadoralvo.username = dados.username;
         }
 
         if (dados.password) {
-            dados.password = await AutenticacaoService.encriptarPassword(dados.password);
+            utilizadoralvo.password = await AutenticacaoService.encriptarPassword(dados.password);
         }
 
-        await utilizadorRepo().update(id, dados);
-        const atualizado = await utilizadorRepo().findOneBy({ id });
-        return atualizado ? toResposta(atualizado) : null;
+        if (dados.estado && ehAdmin) {
+            utilizadoralvo.estado = dados.estado;
+        }
+
+        const atualizado = await utilizadorRepo().save(utilizadoralvo);
+
+        // REGISTO DE AUDITORIA (Usa o ID de quem operou a alteração)
+        await AuditoriaService.registar({
+            id_utilizador: utilizadorSessao.id,
+            entidade_afetada: 'UTILIZADOR' as EntidadeAuditoria,
+            acao: 'ATUALIZAR' as AcaoAuditoria
+        });
+
+        return toResposta(atualizado);
     },
 
-    // Desativa a conta sem eliminar os dados (RF08)
+    
     desativar: async (id: number, utilizadorSessao: { id: number; tipo_utilizador: string }): Promise<UtilizadorRespostaDTO | null> => {
         if (utilizadorSessao.tipo_utilizador.toLowerCase() !== 'administrador') {
             throw new Error('Acesso negado. Apenas administradores podem desativar contas.');
@@ -96,11 +116,20 @@ export const UtilizadorService = {
         if (!utilizador) return null;
         if (utilizador.estado === Estado.INATIVO) throw new Error('A conta já está desativada.');
 
-        await utilizadorRepo().update(id, { estado: Estado.INATIVO });
-        const atualizado = await utilizadorRepo().findOneBy({ id });
-        return atualizado ? toResposta(atualizado) : null;
+        utilizador.estado = Estado.INATIVO;
+        const atualizado = await utilizadorRepo().save(utilizador);
+
+        // REGISTO DE AUDITORIA
+        await AuditoriaService.registar({
+            id_utilizador: utilizadorSessao.id,
+            entidade_afetada: 'UTILIZADOR' as EntidadeAuditoria,
+            acao: 'ATUALIZAR' as AcaoAuditoria
+        });
+
+        return toResposta(atualizado);
     },
 
+    
     eliminar: async (id: number, utilizadorSessao: { id: number; tipo_utilizador: string }): Promise<void> => {
         if (utilizadorSessao.tipo_utilizador.toLowerCase() !== 'administrador') {
             throw new Error('Acesso negado. Apenas administradores podem eliminar contas do sistema.');
@@ -109,6 +138,13 @@ export const UtilizadorService = {
         const utilizador = await utilizadorRepo().findOneBy({ id });
         if (!utilizador) throw new Error('Utilizador não encontrado.');
         
-        await utilizadorRepo().delete(id);
+        await utilizadorRepo().remove(utilizador);
+
+        // REGISTO DE AUDITORIA
+        await AuditoriaService.registar({
+            id_utilizador: utilizadorSessao.id,
+            entidade_afetada: 'UTILIZADOR' as EntidadeAuditoria,
+            acao: 'ELIMINAR' as AcaoAuditoria
+        });
     },
 };

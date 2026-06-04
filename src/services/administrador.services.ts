@@ -1,6 +1,8 @@
 import { AppDataSource } from '../database/database';
 import { Administrador } from '../models/administrador.entity';
 import { CriarAdministradorDTO, AtualizarAdministradorDTO, AdministradorRespostaDTO } from '../dtos/administrador.dto';
+import { AuditoriaService } from './auditoria.services';
+import { EntidadeAuditoria, AcaoAuditoria } from '../models/auditoria.entity';
 
 const administradorRepo = AppDataSource.getRepository(Administrador);
 
@@ -36,7 +38,7 @@ export const AdministradorService = {
     },
 
     // Criar administrador
-    criar: async (id_utilizador: number, dados: CriarAdministradorDTO): Promise<AdministradorRespostaDTO> => {
+    criar: async (id_utilizador: number, dados: CriarAdministradorDTO, idUtilizadorLogado: number): Promise<AdministradorRespostaDTO> => {
         if (!id_utilizador || id_utilizador <= 0) {
             throw new Error('ID de utilizador inválido ou não fornecido');
         }
@@ -51,13 +53,19 @@ export const AdministradorService = {
             throw new Error('Já existe um administrador com este nome');
         }
 
-        // Cria a entidade associando o ID do utilizador automaticamente
         const novoAdministrador = administradorRepo.create({
             nome: dados.nome,
             utilizador: { id: id_utilizador }
         });
 
         const administradorGuardado = await administradorRepo.save(novoAdministrador);
+
+        // REGISTO DE AUDITORIA
+        await AuditoriaService.registar({
+            id_utilizador: idUtilizadorLogado,
+            entidade_afetada: 'ADMINISTRADOR' as EntidadeAuditoria,
+            acao: 'CRIAR' as AcaoAuditoria
+        });
 
         const administradorCompleto = await administradorRepo.findOne({
             where: { id: administradorGuardado.id },
@@ -81,8 +89,8 @@ export const AdministradorService = {
         };
     },
 
-// Atualizar Administrador
-    atualizar: async (id: number, dados: AtualizarAdministradorDTO) => {
+    // Atualizar Administrador
+    atualizar: async (id: number, dados: AtualizarAdministradorDTO, idUtilizadorLogado: number) => {
         if (!id || id <= 0) throw new Error('ID inválido');
 
         const administrador = await administradorRepo.findOne({ where: { id }, relations: ['utilizador'] });
@@ -92,22 +100,37 @@ export const AdministradorService = {
             administrador.nome = dados.nome.trim();
         }
 
-        return await administradorRepo.save(administrador);
+        const resultado = await administradorRepo.save(administrador);
+
+        // REGISTO DE AUDITORIA
+        await AuditoriaService.registar({
+            id_utilizador: idUtilizadorLogado,
+            entidade_afetada: 'ADMINISTRADOR' as EntidadeAuditoria,
+            acao: 'ATUALIZAR' as AcaoAuditoria
+        });
+
+        return resultado;
     },
 
 // Eliminar Administrador
-    eliminar: async (id: number) => {
+    eliminar: async (id: number, idUtilizadorLogado: number) => {
         if (!id || id <= 0) throw new Error('ID inválido');
         
         const administrador = await administradorRepo.findOneBy({ id });
         if (!administrador) throw new Error('Administrador não encontrado');
 
-        const resultado = await administradorRepo.delete(id);
-        if (resultado.affected === 0) throw new Error('Falha ao eliminar o administrador');
+        // CORREÇÃO: Usar .remove() em vez de .delete() para manter a consistência do ORM
+        await administradorRepo.remove(administrador);
+
+        // REGISTO DE AUDITORIA (Executado com sucesso porque guardámos a referência em memória antes de apagar)
+        await AuditoriaService.registar({
+            id_utilizador: idUtilizadorLogado,
+            entidade_afetada: 'ADMINISTRADOR' as EntidadeAuditoria,
+            acao: 'ELIMINAR' as AcaoAuditoria
+        });
 
         return {
-            mensagem: 'Administrador eliminado com sucesso',
-            resultado
+            mensagem: 'Administrador eliminado com sucesso'
         };
     }
-};
+};;

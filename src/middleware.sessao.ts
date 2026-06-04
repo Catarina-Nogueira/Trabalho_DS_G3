@@ -1,36 +1,45 @@
-// src/middlewares/sessao.middleware.ts
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import { TokenPayload } from '../src/dtos/autenticacao.dto'; // Garante que o path do import está correto
+import { Tipo_Utilizador } from '../src/models/utilizador.entity';
 
-// Estender o tipo Request do Express para aceitar o nosso objeto de sessão
+const JWT_SECRET = 'sua_chave_secreta_super_segura_123';
+
 declare global {
     namespace Express {
         interface Request {
             user?: {
                 id: number;
-                tipo_utilizador: string;
+                tipo_utilizador: Tipo_Utilizador; // 👈 Atualizado para usar o Enum estrito
+                id_perfil_especifico?: number | undefined; // 👈 Adicionado '| undefined' para satisfazer o exactOptionalPropertyTypes
             };
         }
     }
 }
 
 export const autenticarSessao = (req: Request, res: Response, next: NextFunction) => {
-    // O Express converte automaticamente todos os headers para letras minúsculas
-    const executorId = req.headers['x-user-id'];
-    const executorTipo = req.headers['x-user-tipo'];
+    const authHeader = req.headers['authorization'];
 
-    // Se não enviarem os headers, bloqueia logo aqui
-    if (!executorId || !executorTipo) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ 
-            erro: 'Acesso negado. Headers de identificação em falta (x-user-id, x-user-tipo).' 
+            erro: 'Acesso negado. Token de autenticação em falta ou mal formatado.' 
         });
     }
 
-    // Injeta os dados no objeto 'req' para os controladores usarem
-    req.user = {
-        id: Number(executorId),
-        tipo_utilizador: String(executorTipo)
-    };
+    const token = authHeader.split(' ')[1];
 
-    // Avança para o controlador
-    next();
+    try {
+        
+        const descodificado = jwt.verify(token, JWT_SECRET) as unknown as TokenPayload;
+        
+        req.user = {
+            id: descodificado.id_utilizador,
+            tipo_utilizador: descodificado.tipo_utilizador,
+            id_perfil_especifico: descodificado.id_perfil_especifico
+        };
+
+        return next();
+    } catch (err) {
+        return res.status(401).json({ erro: 'Sessão inválida ou expirada. Efetue login novamente.' });
+    }
 };

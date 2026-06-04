@@ -3,12 +3,13 @@ import { Utente } from '../models/utente.entity';
 import { Medico } from '../models/medico.entity';
 import { Utilizador } from '../models/utilizador.entity';
 import { CriarUtenteDTO, AtualizarUtenteDTO, UtenteRespostaDTO } from '../dtos/utente.dto';
+import { AuditoriaService } from './auditoria.services';
+import { EntidadeAuditoria, AcaoAuditoria } from '../models/auditoria.entity';
 
 const utenteRepo  = () => AppDataSource.getRepository(Utente);
 const medicoRepo  = () => AppDataSource.getRepository(Medico);
 const utilizadorRepo = () => AppDataSource.getRepository(Utilizador);
 
-// Função auxiliar — calcula idade a partir da data de nascimento
 const calcularIdade = (data_nascimento: string): number => {
     const hoje = new Date();
     const nascimento = new Date(data_nascimento);
@@ -20,7 +21,6 @@ const calcularIdade = (data_nascimento: string): number => {
     return idade;
 };
 
-// Converte entidade para DTO de resposta
 const toResposta = (u: Utente): UtenteRespostaDTO => ({
     id: u.id,
     nome: u.nome,
@@ -42,7 +42,6 @@ const toResposta = (u: Utente): UtenteRespostaDTO => ({
 
 export const UtenteService = {
 
-    // RF51 — Listagem de todos os utentes (Administrador)
     listarTodos: async (): Promise<UtenteRespostaDTO[]> => {
         const utentes = await utenteRepo().find({
             relations: ['medico', 'utilizador'],
@@ -50,7 +49,6 @@ export const UtenteService = {
         return utentes.map(toResposta);
     },
 
-    // RF51 — Listar utentes de um médico específico
     listarPorMedico: async (id_medico: number): Promise<UtenteRespostaDTO[]> => {
         const utentes = await utenteRepo().find({
             where: { medico: { id: id_medico } },
@@ -59,7 +57,6 @@ export const UtenteService = {
         return utentes.map(toResposta);
     },
 
-    // RF50 — Consulta de detalhe completo do utente (médico/admin)
     buscarPorId: async (id: number): Promise<UtenteRespostaDTO | null> => {
         const utente = await utenteRepo().findOne({
             where: { id },
@@ -69,24 +66,17 @@ export const UtenteService = {
         return toResposta(utente);
     },
 
-    // RF50 — Apenas os dados clínicos permitidos (sem dados administrativos — RF06)
     buscarDadosPermitidos: async (id: number) => {
         const utente = await utenteRepo().findOne({
             where: { id },
-            select: {
-                id: true,
-                nome: true,
-                data_nascimento: true,
-                sexo_biologico: true,
-            },
+            relations: ['medico', 'utilizador'] // Carrega relações para validação de segurança no controller
         });
         if (!utente) return null;
         return utente;
     },
 
-    // RF07 — Criar utente (Administrador)
-    // Recebe id_utilizador e id_medico porque o utente já tem um Utilizador criado antes
-    criar: async (dados: CriarUtenteDTO, id_utilizador: number, id_medico: number): Promise<UtenteRespostaDTO> => {
+    
+    criar: async (dados: CriarUtenteDTO, id_utilizador: number, id_medico: number, idUtilizadorLogado: number): Promise<UtenteRespostaDTO> => {
         if (!id_utilizador || id_utilizador <= 0) throw new Error('ID de utilizador inválido ou não fornecido.');
         if (!id_medico || id_medico <= 0) throw new Error('ID de médico inválido ou não fornecido.');
 
@@ -109,6 +99,13 @@ export const UtenteService = {
 
         const guardado = await utenteRepo().save(utente);
 
+        // REGISTO DE AUDITORIA
+        await AuditoriaService.registar({
+            id_utilizador: idUtilizadorLogado,
+            entidade_afetada: 'UTENTE' as EntidadeAuditoria,
+            acao: 'CRIAR' as AcaoAuditoria
+        });
+
         const completo = await utenteRepo().findOne({
             where: { id: guardado.id },
             relations: ['medico', 'utilizador'],
@@ -116,6 +113,7 @@ export const UtenteService = {
         return toResposta(completo!);
     },
 
+    
     atualizar: async (id: number, dados: AtualizarUtenteDTO, utilizadorSession: {id: number, tipo_utilizador: string}): Promise<UtenteRespostaDTO | null> => {
         const utente = await utenteRepo().findOne({
             where: { id },
@@ -140,12 +138,28 @@ export const UtenteService = {
         }
 
         const atualizado = await utenteRepo().save(utente);
+
+        // REGISTO DE AUDITORIA
+        await AuditoriaService.registar({
+            id_utilizador: utilizadorSession.id,
+            entidade_afetada: 'UTENTE' as EntidadeAuditoria,
+            acao: 'ATUALIZAR' as AcaoAuditoria
+        });
+
         return toResposta(atualizado);
     },
 
-    eliminar: async (id: number): Promise<void> => {
+    eliminar: async (id: number, idUtilizadorLogado: number): Promise<void> => {
         const utente = await utenteRepo().findOneBy({ id });
         if (!utente) throw new Error('Utente não encontrado.');
-        await utenteRepo().delete(id);
+        
+        await utenteRepo().remove(utente);
+
+        // REGISTO DE AUDITORIA
+        await AuditoriaService.registar({
+            id_utilizador: idUtilizadorLogado,
+            entidade_afetada: 'UTENTE' as EntidadeAuditoria,
+            acao: 'ELIMINAR' as AcaoAuditoria
+        });
     },
 };
