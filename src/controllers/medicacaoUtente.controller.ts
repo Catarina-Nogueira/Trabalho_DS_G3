@@ -53,16 +53,43 @@ export const MedicacaoUtenteController = {
 
     criar: async (req: Request, res: Response) => {
         try {
-            const id_medico = req.user!.id; // Garante que o médico não finge ser outro médico
-            const { id_utente, id_medicacao, frequencia, data_inicio, duracao, dosagem } = req.body;
+            const id_medico_logado = req.user!.id; // ID do médico autenticado
+            const id_utente_alvo = Number(req.params.id_utente); // Vem automaticamente do URL da página do utente
+            const { id_medicacao, frequencia, data_inicio, duracao, dosagem } = req.body;
 
-            if (!id_utente || !id_medicacao) {
-                return res.status(400).json({ erro: 'Campos obrigatórios em falta (id_utente, id_medicacao).' });
+            // Validação de parâmetros obrigatórios
+            if (!id_utente_alvo) {
+                return res.status(400).json({ erro: 'O parâmetro id_utente na URL é obrigatório.' });
+            }
+            if (!id_medicacao) {
+                return res.status(400).json({ erro: 'O campo id_medicacao no corpo do pedido é obrigatório.' });
             }
 
+            // 1. Validar se o utente existe e quem é o seu médico tutor
+            const { AppDataSource } = require('../database/database');
+            const { Utente } = require('../models/utente.entity');
+            const utenteRepo = AppDataSource.getRepository(Utente);
+
+            const utenteAlvo = await utenteRepo.findOne({
+                where: { id: id_utente_alvo },
+                relations: ['medico']
+            });
+
+            if (!utenteAlvo) {
+                return res.status(404).json({ erro: 'Utente não encontrado no sistema.' });
+            }
+
+            // 2. BARREIRA DE SEGURANÇA: Bloqueia médicos intrusos
+            if (!utenteAlvo.medico || utenteAlvo.medico.id !== id_medico_logado) {
+                return res.status(403).json({ 
+                    erro: 'Acesso negado. Apenas o médico responsável por este utente pode emitir novas prescrições.' 
+                });
+            }
+
+            // 3. Avança para o serviço de criação usando o ID limpo extraído do URL
             const novaPrescricao = await MedicacaoUtenteService.criar({
-                utente: { id: Number(id_utente) },
-                medico: { id: id_medico },
+                utente: { id: id_utente_alvo },
+                medico: { id: id_medico_logado },
                 medicacao: { id: Number(id_medicacao) },
                 frequencia,
                 data_inicio,
@@ -71,8 +98,8 @@ export const MedicacaoUtenteController = {
             });
 
             return res.status(201).json(novaPrescricao);
-        } catch (err) {
-            return res.status(500).json({ erro: 'Erro ao criar prescrição' });
+        } catch (err: any) {
+            return res.status(500).json({ erro: 'Erro ao criar prescrição médica.' });
         }
     },
 

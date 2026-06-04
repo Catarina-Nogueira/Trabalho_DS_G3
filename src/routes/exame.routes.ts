@@ -6,9 +6,9 @@ import { autorizarSessao } from '../middleware.autorizar';
 const router = Router();
 
 // Acesso de Leitura ao catálogo
-router.get('/', autenticarSessao, autorizarSessao('medico', 'utente', 'administrador'), ExameController.listarTodos);
-router.get('/nome/:nome_exame', autenticarSessao, autorizarSessao('medico', 'utente', 'administrador'), ExameController.buscarPorNome);
-router.get('/:id', autenticarSessao, autorizarSessao('medico', 'utente', 'administrador'), ExameController.buscarPorId);
+router.get('/', autenticarSessao, autorizarSessao('medico', 'administrador'), ExameController.listarTodos);
+router.get('/nome/:nome_exame', autenticarSessao, autorizarSessao('medico', 'administrador'), ExameController.buscarPorNome);
+router.get('/:id', autenticarSessao, autorizarSessao('medico', 'administrador'), ExameController.buscarPorId);
 
 // Gestão de Infraestrutura do Catálogo (Apenas Administrador)
 router.post('/', autenticarSessao, autorizarSessao('administrador'), ExameController.criar); // Se for o catálogo de exames base

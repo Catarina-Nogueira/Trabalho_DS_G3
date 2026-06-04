@@ -5,14 +5,10 @@ import { autenticarSessao } from '../middleware.sessao';
 
 const router = Router();
 
-router.post('/', (req, res, next) => {
-    console.log("--> HEADERS RECEBIDOS NO EXPRESS:", req.headers);
-    next();
-}, autenticarSessao, autorizarSessao('utente'), SintomaReportadoController.reportar);
-//router.post('/', autenticarSessao,autorizarSessao('utente'), SintomaReportadoController.reportar);
-router.get('/historico', autenticarSessao, autorizarSessao('utente'), SintomaReportadoController.listarMeuHistorico);
-router.get('/', autenticarSessao, autorizarSessao('administrador', 'medico'), SintomaReportadoController.listarTodos);
-router.get('/:id', autenticarSessao, autorizarSessao('administrador', 'medico'), SintomaReportadoController.buscarPorId);
 
+router.post('/utente/:id_utente', autenticarSessao, autorizarSessao('utente'), SintomaReportadoController.reportar);
+router.get('/utente/:id_utente/historico', autenticarSessao, autorizarSessao('medico', 'utente'), SintomaReportadoController.listarHistoricoPorUtente);
+router.get('/', autenticarSessao, autorizarSessao('medico'), SintomaReportadoController.listarTodos);
+router.get('/:id', autenticarSessao, autorizarSessao('medico'), SintomaReportadoController.buscarPorId);
 
 export default router;

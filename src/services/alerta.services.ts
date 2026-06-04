@@ -24,6 +24,7 @@ export const AlertaService = {
         if (!id_medico || id_medico <= 0) throw new Error('ID do médico inválido');
 
         const query = alertaRepo.createQueryBuilder('alerta')
+            .leftJoinAndSelect('alerta.medico', 'medico')
             .leftJoinAndSelect('alerta.utente', 'utente')
             .leftJoinAndSelect('alerta.avaliacao', 'avaliacao')
             .leftJoinAndSelect('alerta.sintoma', 'sintoma')
@@ -74,7 +75,7 @@ export const AlertaService = {
 
         const alerta = await alertaRepo.findOne({
             where: { id },
-            relations: ['utente', 'medico', 'avaliacao', 'sintoma']
+            relations: ['utente', 'medico', 'avaliacao', 'sintoma', 'avaliacao.utente.medico', 'avaliacao.utente', 'sintoma.utente.medico']
         });
 
         if (!alerta) throw new Error('Alerta não encontrado');

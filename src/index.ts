@@ -77,7 +77,7 @@ AppDataSource.initialize()
         /*//seeds
         await rodarMedicacaoSeed();
         await rodarExameSeed();*/
-        await QuestionarioCaratSeed();
+        //await QuestionarioCaratSeed();
         /*await rodarUtilizadoresSeed();*/
 
         // Iniciar o servidor só depois da base de dados estar ligada

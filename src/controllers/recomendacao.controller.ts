@@ -23,22 +23,46 @@ export const RecomendacaoController = {
 
     listarPorUtente: async (req: Request, res: Response) => {
         try {
-            const recomendacoes = await RecomendacaoService.listarPorUtente(Number(req.params.id_utente));
-            res.json(recomendacoes);
-        } catch (err) {
-            res.status(500).json({ erro: 'Erro ao listar recomendações do utente' });
-        }
-    },
+            if (!req.user || !req.user.id) {
+                return res.status(401).json({ erro: 'Sessão inválida ou utilizador não autenticado.' });
+            }
 
-    listarPorUtenteParaMedico: async (req: Request, res: Response) => {
-        try {
-            const recomendacoes = await RecomendacaoService.listarPorUtenteParaMedico(
-                Number(req.params.id_utente),
-                Number(req.params.id_medico)
-            );
-            res.json(recomendacoes);
+            const utilizadorLogado = req.user;
+            const idUtenteUrl = Number(req.params.id_utente);
+
+            if (!idUtenteUrl) {
+                return res.status(400).json({ erro: 'ID do utente inválido ou em falta.' });
+            }
+
+            // Como agora esta rota é só para UTENTES, fazemos a validação direta
+            if (utilizadorLogado.tipo_utilizador !== 'utente') {
+                return res.status(403).json({ erro: 'Acesso negado. Esta rota é exclusiva para utentes.' });
+            }
+
+            // 1. Procurar o perfil clínico do utente com base no utilizador da sessão
+            const { AppDataSource } = require('../database/database');
+            const { Utente } = require('../models/utente.entity');
+            const utenteRepo = AppDataSource.getRepository(Utente);
+
+            const utenteDados = await utenteRepo.findOne({ 
+                where: { utilizador: { id: utilizadorLogado.id } } 
+            });
+
+            if (!utenteDados) {
+                return res.status(404).json({ erro: 'Perfil clínico de utente não encontrado.' });
+            }
+
+            // 2. Bloqueia se o utente tentar meter o ID de outro utente no URL
+            if (utenteDados.id !== idUtenteUrl) {
+                return res.status(403).json({ erro: 'Acesso negado. Não pode consultar dados de outro utente.' });
+            }
+
+            // 3. Tudo OK, chama o serviço
+            const recomendacoes = await RecomendacaoService.listarPorUtente(idUtenteUrl);
+            return res.json(recomendacoes);
+
         } catch (err) {
-            res.status(500).json({ erro: 'Erro ao listar recomendações do utente para o médico' });
+            return res.status(500).json({ erro: 'Erro ao obter recomendações do utente.' });
         }
     },
 

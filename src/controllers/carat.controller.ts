@@ -4,12 +4,22 @@ import { CaratService } from '../services/carat.service';
 export const CaratController = {
 
     // RF16 — Retorna o questionário ativo com questões e opções
-    getQuestionarioAtivo: async (res: Response) => {
+    getQuestionarioAtivo: async (req: Request, res: Response) => {
         try {
+            // 1. Chamas o teu serviço que vai à Base de Dados buscar o questionário
             const questionario = await CaratService.obterQuestionarioAtivo();
-             return res.json(questionario);
+
+            // 2. Se não existir nenhum questionário ativo no sistema, avisas o Frontend
+            if (!questionario) {
+                return res.status(404).json({ erro: 'Nenhum questionário CARAT ativo foi encontrado.' });
+            }
+
+            // 3. Se correr bem, devolves o questionário com o status 200 (OK)
+            return res.json(questionario);
+
         } catch (err: any) {
-            res.status(404).json({ erro: err.message });
+            // Como a ordem (req, res) já está certa, o res.status já não vai falhar!
+            return res.status(500).json({ erro: 'Erro interno ao obter o questionário ativo.' });
         }
     },
 
@@ -91,15 +101,57 @@ export const CaratController = {
     },
 
     // RF22, RF27 — Detalhe de uma avaliação (score + respostas + recomendações)
+    // RF22, RF27 — Detalhe de uma avaliação (score + respostas + recomendações)
     getDetalheAvaliacao: async (req: Request, res: Response) => {
         try {
-            const id_utente_sessao = req.user!.tipo_utilizador === 'utente' ? req.user!.id : undefined;
+            const { AppDataSource } = require('../database/database');
+            const { Utente } = require('../models/utente.entity');
+            const utenteRepo = AppDataSource.getRepository(Utente);
+
+            const utilizadorLogado = req.user!;
+            let id_utente_sessao: number | undefined = undefined;
+
+            // 1. SE FOR UTENTE: Traduz o ID de utilizador para o ID de utente clínico
+            if (utilizadorLogado.tipo_utilizador === 'utente') {
+                const utenteDados = await utenteRepo.findOne({ 
+                    where: { utilizador: { id: utilizadorLogado.id } } 
+                });
+
+                if (!utenteDados) {
+                    return res.status(404).json({ erro: 'Perfil de utente não encontrado.' });
+                }
+                id_utente_sessao = utenteDados.id;
+            }
+
+            // 2. Procurar primeiro a avaliação para saber de quem ela é
             const detalhe = await CaratService.detalheAvaliacao(Number(req.params.id), id_utente_sessao);
-            if (!detalhe) return res.status(404).json({ erro: 'Avaliação não encontrada.' });
-            res.json(detalhe);
+            
+            if (!detalhe) {
+                return res.status(404).json({ erro: 'Avaliação não encontrada ou não tem permissão.' });
+            }
+
+            // 3. SE FOR MÉDICO: Validar se ele é o médico responsável por este utente
+            if (utilizadorLogado.tipo_utilizador === 'medico') {
+                // Vamos buscar o utente dono desta avaliação para ver quem é o seu médico
+                const idUtenteDono = detalhe.utente.id; // Ajusta conforme a estrutura que o teu service devolve
+                
+                const utenteClinico = await utenteRepo.findOne({
+                    where: { id: idUtenteDono },
+                    relations: ['medico'] // Carrega o relacionamento do médico responsável
+                });
+
+                // Se o ID do médico responsável for diferente do ID do médico logado, bloqueia!
+                if (!utenteClinico || utenteClinico.medico.id !== utilizadorLogado.id) {
+                    return res.status(403).json({ erro: 'Acesso negado. Não é o médico responsável por este utente.' });
+                }
+            }
+
+            // Se passou todas as barreiras (Dono ou Médico Responsável), devolve os dados!
+            return res.json(detalhe);
+
         } catch (err: any) {
             if (err.code === 'FORBIDDEN') return res.status(403).json({ erro: err.message });
-            res.status(500).json({ erro: 'Erro ao obter detalhe da avaliação.' });
+            return res.status(500).json({ erro: 'Erro ao obter detalhe da avaliação.' });
         }
     },
 

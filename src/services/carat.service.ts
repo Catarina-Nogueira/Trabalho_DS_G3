@@ -305,7 +305,7 @@ export const CaratService = {
     detalheAvaliacao: async (id_avaliacao: number, id_utente?: number) => {
         const avaliacao = await avaliacaoRepo().findOne({
             where: { id: id_avaliacao },
-            relations: ['utente', 'questionario'],
+            relations: ['utente', 'questionario', 'utente.medico'],
         });
 
         if (!avaliacao) throw new Error('Avaliação não encontrada.');
@@ -342,6 +342,11 @@ export const CaratService = {
                 texto: rec.texto_recomendacao,
                 data_criacao: rec.data_criacao,
             })),
+            // v--- ADICIONADO: Envia os dados do utente e o ID do médico para o controlador validar ---v
+            utente: {
+                id: avaliacao.utente.id,
+                id_medico_responsavel: avaliacao.utente.medico ? avaliacao.utente.medico.id : null
+            }
         };
     },
 

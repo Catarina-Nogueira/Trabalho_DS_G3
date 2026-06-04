@@ -11,7 +11,7 @@ router.get('/ativas', autenticarSessao, autorizarSessao('medico', 'utente'), Med
 router.get('/emitidas', autenticarSessao, autorizarSessao('medico'), MedicacaoUtenteController.listarPorMedico);
 
 // Detalhes, Criação e Fluxo Clínico
-router.post('/', autenticarSessao, autorizarSessao('medico'), MedicacaoUtenteController.criar); // RF43
+router.post('/:id_utente', autenticarSessao, autorizarSessao('medico'), MedicacaoUtenteController.criar); // RF43
 router.put('/:id', autenticarSessao, autorizarSessao('medico'), MedicacaoUtenteController.atualizar);
 router.patch('/:id/encerrar', autenticarSessao, autorizarSessao('medico'), MedicacaoUtenteController.encerrar); // RF44
 

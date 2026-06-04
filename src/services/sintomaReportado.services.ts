@@ -96,4 +96,12 @@ export const SintomaReportadoService = {
         return await sintomaReportadoRepo.save(novoSintoma);
     },
 
+    listarPorIdClinico: async (id_utente_clinico: number) => {
+        return await sintomaReportadoRepo.find({
+            where: { utente: { id: id_utente_clinico } },
+            relations: ['utente'],
+            order: { data_registo: 'DESC' }
+        });
+    },
+
 };
