@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SaudINOB - Portal Pessoal do Utente</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- BARRA LATERAL --- */
+    .sidebar {
+      width: 260px;
+      background: #07213b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99, 179, 237, 0.15);
+    }
+
+    .perfil-utente {
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .perfil-foto-link {
+      display: block;
+      text-decoration: none;
+      position: relative;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 12px;
+    }
+
+    .perfil-foto {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #1a365d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #75d0fb;
+      font-size: 2rem;
+      color: #75d0fb;
+      overflow: hidden;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .perfil-foto img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .perfil-foto-link:hover .perfil-foto {
+      border-color: #ffffff;
+      transform: scale(1.05);
+      background: #0b75ff;
+      color: #ffffff;
+    }
+
+    .perfil-nome {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+      word-break: break-word;
+    }
+
+    .perfil-tipo {
+      font-size: 0.8rem;
+      color: #75d0fb;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #dfe8f6;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .menu-item i {
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+    }
+
+    .btn-nova-avaliacao {
+      background: #0b75ff !important;
+      color: #ffffff !important;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(11, 117, 255, 0.3);
+      margin: 8px 0;
+    }
+
+    .btn-nova-avaliacao:hover {
+      background: #0056cc !important;
+      box-shadow: 0 6px 16px rgba(11, 117, 255, 0.4);
+    }
+
+    .sidebar-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-voltar-principal {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-voltar-principal i { color: #ffffff; }
+    .btn-voltar-principal:hover { background: rgba(255, 255, 255, 0.2); border-color: #ffffff; }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      cursor: pointer;
+    }
+
+    .btn-logout:hover {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    /* --- CONTEÚDO PRINCIPAL (DIVISÃO DE ECRÃ) --- */
+    .area-conteudo {
+      margin-left: 260px;
+      padding: 48px;
+      width: calc(100% - 260px);
+      min-height: 100vh;
+    }
+
+    .area-conteudo h1 {
+      font-size: 2.2rem;
+      color: #092b4c;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .subtitulo {
+      color: #64748b;
+      font-size: 1rem;
+      margin-bottom: 32px;
+    }
+
+    /* Grid principal dividido em duas colunas iguais (1fr 1fr) */
+    .layout-grid-portal {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* Coluna Direita empilha os containers de História e Comorbilidades */
+    .coluna-direita {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* --- CARTÕES / CONTAINERS --- */
+    .cartao-portal {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+    }
+
+    .cartao-portal h2 {
+      font-size: 1.4rem;
+      color: #07213b;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 12px;
+    }
+
+    /* --- ESTILOS DE DADOS E LISTAS --- */
+    .seccao-dados {
+      margin-bottom: 24px;
+    }
+
+    .seccao-dados h3 {
+      font-size: 1rem;
+      color: #0b75ff;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    .campo-info {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f8fafc;
+      font-size: 0.95rem;
+    }
+
+    .campo-info .label {
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .campo-info .valor {
+      color: #092b4c;
+      font-weight: 500;
+      text-align: right;
+    }
+
+    /* Itens de listas clínicas (História familiar e comorbilidades) */
+    .item-clinico {
+      background: #f8fafc;
+      border-left: 4px solid #75d0fb;
+      padding: 16px;
+      border-radius: 4px 12px 12px 4px;
+      margin-bottom: 12px;
+    }
+
+    .item-clinico:last-child {
+      margin-bottom: 0;
+    }
+
+    .item-clinico-titulo {
+      font-weight: 700;
+      color: #07213b;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .item-clinico-desc {
+      font-size: 0.9rem;
+      color: #4a5568;
+      line-height: 1.4;
+    }
+
+    .estado-vazio {
+      text-align: center;
+      padding: 24px;
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="perfil-utente">
+      <a href="portalPessoalUtente.html" class="perfil-foto-link" title="Ir para o Portal Pessoal">
+        <div class="perfil-foto" id="foto-perfil-display">
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </a>
+      <div class="perfil-nome" id="nome-utente-sidebar">A carregar...</div>
+      <div class="perfil-tipo">Utente</div>
+    </div>
+
+    <nav class="sidebar-menu">
+      <a href="historicoAvaliacoes.html" class="menu-item">
+        <i class="fa-solid fa-clock-rotate-left"></i> Histórico de Avaliações
+      </a>
+
+      <a href="preenchimentoCarat.html" class="menu-item btn-nova-avaliacao">
+        <i class="fa-solid fa-plus"></i> Nova Avaliação
+      </a>
+
+      <a href="#" class="menu-item">
+        <i class="fa-solid fa-file-waveform"></i> Exames
+      </a>
+
+      <a href="#" class="menu-item">
+        <i class="fa-solid fa-pills"></i> Medicação
+      </a>
+
+      <div class="sidebar-footer">
+        <a href="utentePrincipal.html" class="btn-voltar-principal"><i class="fa-solid fa-house"></i> Menu Principal</a>
+        <a href="#" class="btn-logout" id="btnLogout"><i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão</a>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="area-conteudo">
+    <h1><i class="fa-solid fa-id-card" style="color: #0b75ff;"></i> O Meu Portal Pessoal</h1>
+    <p class="subtitulo">Consulte o seu perfil clínico, informações pessoais registadas e historial clínico.</p>
+
+    <div class="layout-grid-portal">
+      
+      <section class="cartao-portal">
+        <h2><i class="fa-solid fa-user-gear" style="color: #0b75ff;"></i> Identificação & Contactos</h2>
+        
+        <div class="seccao-dados">
+          <h3>Dados Pessoais</h3>
+          <div class="campo-info">
+            <span class="label">Nome Completo</span>
+            <span class="valor" id="utente-nome">A carregar...</span>
+          </div>
+          <div class="campo-info">
+            <span class="label">Data de Nascimento</span>
+            <span class="valor" id="utente-data-nascimento">A carregar...</span>
+          </div>
+          <div class="campo-info">
+            <span class="label">Sexo Biológico</span>
+            <span class="valor" id="utente-sexo" style="text-transform: capitalize;">A carregar...</span>
+          </div>
+        </div>
+
+        <div class="seccao-dados" style="margin-bottom: 0;">
+          <h3>Informação Administrativa</h3>
+          <div class="campo-info">
+            <span class="label">Morada</span>
+            <span class="valor" id="admin-morada">A carregar...</span>
+          </div>
+          <div class="campo-info">
+            <span class="label">NIF</span>
+            <span class="valor" id="admin-nif">A carregar...</span>
+          </div>
+          <div class="campo-info">
+            <span class="label">Telemóvel</span>
+            <span class="valor" id="admin-telemovel">A carregar...</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="coluna-direita">
+        
+        <section class="cartao-portal">
+          <h2><i class="fa-solid fa-people-roof" style="color: #10b981;"></i> História Familiar</h2>
+          <div id="container-historia-familiar">
+            <div class="estado-vazio">A carregar dados...</div>
+          </div>
+        </section>
+
+        <section class="cartao-portal">
+          <h2><i class="fa-solid fa-heart-pulse" style="color: #ef4444;"></i> Comorbilidades</h2>
+          <div id="container-comorbilidades">
+            <div class="estado-vazio">A carregar dados...</div>
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = "http://localhost:3000";
+    let idUtenteGlobal = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const token = verificarEConfigurarSessao();
+      if (!token) return;
+
+      carregarFotoSessao();
+      carregarDadosIniciais(token);
+    });
+
+    function redirecionarLogin() {
+      localStorage.clear();
+      window.location.href = 'autenticacao.html';
+    }
+
+    function verificarEConfigurarSessao() {
+      const token = localStorage.getItem('token');
+      const userRaw = localStorage.getItem('user');
+
+      if (!token || !userRaw) {
+        redirecionarLogin();
+        return null;
+      }
+
+      let utilizador;
+      try {
+        utilizador = JSON.parse(userRaw);
+      } catch (e) {
+        redirecionarLogin();
+        return null;
+      }
+      
+      document.getElementById('nome-utente-sidebar').textContent = utilizador.nome || "Utente";
+      idUtenteGlobal = utilizador.id_especifico;
+
+      if (!idUtenteGlobal) {
+        console.error("ID do utente não encontrado");
+        redirecionarLogin();
+        return null;
+      }    
+      
+      configurarLogout();
+      return token;
+    }
+
+    function carregarFotoSessao() {
+      const fotoGuardada = localStorage.getItem(`foto_perfil_${idUtenteGlobal}`);
+      if (fotoGuardada) {
+        const display = document.getElementById('foto-perfil-display');
+        display.innerHTML = `<img src="${fotoGuardada}" alt="Foto de Perfil">`;
+      }
+    }
+
+    function configurarLogout() {
+      document.getElementById("btnLogout").addEventListener("click", (e) => {
+        e.preventDefault();
+        localStorage.clear();
+        window.location.href = "autenticacao.html";
+      });
+    }
+
+    /* --- CARREGAMENTO INTEGRADO DE DADOS (API) --- */
+    async function carregarDadosIniciais(token) {
+      const headers = {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      };
+
+      // 1. Procurar Dados base do Utente (Entidade Utente)
+      try {
+        const resUtente = await fetch(`${API_BASE}/utente/${idUtenteGlobal}`, { method: "GET", headers });
+        if (resUtente.ok) {
+          const utente = await resUtente.json();
+          document.getElementById("utente-nome").textContent = utente.nome || "Não definido";
+          document.getElementById("utente-sexo").textContent = utente.sexo_biologico || "Não definido";
+          
+          if (utente.data_nascimento) {
+            const dataFormatada = new Date(utente.data_nascimento).toLocaleDateString("pt-PT");
+            document.getElementById("utente-data-nascimento").textContent = dataFormatada;
+          } else {
+            document.getElementById("utente-data-nascimento").textContent = "Não definida";
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao ir buscar dados do utente:", err);
+      }
+
+      // 2. Procurar Dados Administrativos
+      try {
+        const resAdmin = await fetch(`${API_BASE}/dadoAdministrativo/utente/${idUtenteGlobal}`, { method: "GET", headers });
+        if (resAdmin.ok) {
+          const dadosAdmin = await resAdmin.json();
+          document.getElementById("admin-morada").textContent = dadosAdmin.morada || "Não registada";
+          document.getElementById("admin-nif").textContent = dadosAdmin.nif || "Não registado";
+          document.getElementById("admin-telemovel").textContent = dadosAdmin.telemovel || "Não registado";
+        } else {
+          marcarCamposComoVaziosAdmin();
+        }
+      } catch (err) {
+        marcarCamposComoVaziosAdmin();
+      }
+
+      // 3. Procurar História Familiar
+      try {
+        const containerHF = document.getElementById("container-historia-familiar");
+        const resHF = await fetch(`${API_BASE}/historiaFamiliar/utente/${idUtenteGlobal}`, { method: "GET", headers });
+        
+        if (resHF.ok) {
+          const listaHF = await resHF.json();
+          if (listaHF.length === 0) {
+            containerHF.innerHTML = `<div class="estado-vazio">Nenhum historial familiar registado pelos médicos.</div>`;
+          } else {
+            containerHF.innerHTML = listaHF.map(item => `
+              <div class="item-clinico">
+                <div class="item-clinico-titulo">${item.nome || 'Grau de parentesco não especificado'}</div>
+                <div class="item-clinico-desc">${item.descricao || 'Sem descrição registada.'}</div>
+              </div>
+            `).join('');
+          }
+        }
+      } catch (err) {
+        document.getElementById("container-historia-familiar").innerHTML = `<div class="estado-vazio" style="color: #ef4444;">Erro ao ligar ao servidor.</div>`;
+      }
+
+      // 4. Procurar Comorbilidades
+      try {
+        const containerComorb = document.getElementById("container-comorbilidades");
+        const resComorb = await fetch(`${API_BASE}/comorbilidade/utente/${idUtenteGlobal}`, { method: "GET", headers });
+        
+        if (resComorb.ok) {
+          const listaComorb = await resComorb.json();
+          if (listaComorb.length === 0) {
+            containerComorb.innerHTML = `<div class="estado-vazio">Nenhuma comorbilidade ativa registada.</div>`;
+          } else {
+            containerComorb.innerHTML = listaComorb.map(item => `
+              <div class="item-clinico" style="border-left-color: #ef4444;">
+                <div class="item-clinico-titulo">${item.nome}</div>
+                <div class="item-clinico-desc">${item.descricao}</div>
+              </div>
+            `).join('');
+          }
+        }
+      } catch (err) {
+        document.getElementById("container-comorbilidades").innerHTML = `<div class="estado-vazio" style="color: #ef4444;">Erro ao ligar ao servidor.</div>`;
+      }
+    }
+
+    function marcarCamposComoVaziosAdmin() {
+      document.getElementById("admin-morada").textContent = "Sem informação";
+      document.getElementById("admin-nif").textContent = "Sem informação";
+      document.getElementById("admin-telemovel").textContent = "Sem informação";
+    }
+  </script>
+</body>
+</html>

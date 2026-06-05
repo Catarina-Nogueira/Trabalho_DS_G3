@@ -1,4 +1,5 @@
 import { Sexo_Biologico } from "../models/utente.entity";
+import { Estado, Tipo_Utilizador } from "../models/utilizador.entity";
 
 export interface CriarUtenteDTO {
     nome: string;
@@ -17,7 +18,7 @@ export interface UtenteRespostaDTO {
     data_nascimento: string;
     idade: number;
     sexo_biologico: Sexo_Biologico;
-    utilizador: { id: number; username: string; email: string};
+    utilizador: { id: number; username: string; email: string, estado: Estado, tipo_utilizador: Tipo_Utilizador};
     medico: { id: number; nome: string; especialidade: string };
     data_atualizacao: Date;
 }

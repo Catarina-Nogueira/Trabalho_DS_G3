@@ -73,6 +73,7 @@ export const AutenticacaoService = {
             tipo_utilizador: utilizador.tipo_utilizador ,
             nome,
             id_perfil_especifico: id_especifico
+            
         };
     },
 

@@ -16,7 +16,7 @@
       display: flex;
     }
 
-    /* --- 1) BARRA LATERAL CORRIGIDA (Igual ao Menu Principal) --- */
+    /* --- BARRA LATERAL --- */
     .sidebar {
       width: 260px;
       background: #07213b;
@@ -33,25 +33,49 @@
       border-right: 1px solid rgba(99, 179, 237, 0.15);
     }
 
-    /* Bloco do Utente Logado */
     .perfil-utente {
       text-align: center;
       padding-bottom: 24px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .perfil-foto {
+    /* Área da foto configurada como link para o Portal Pessoal */
+    .perfil-foto-link {
+      display: block;
+      text-decoration: none;
+      position: relative;
       width: 80px;
       height: 80px;
+      margin: 0 auto 12px;
+    }
+
+    .perfil-foto {
+      width: 100%;
+      height: 100%;
       border-radius: 50%;
       background: #1a365d;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 12px;
       border: 3px solid #75d0fb;
       font-size: 2rem;
       color: #75d0fb;
+      overflow: hidden;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .perfil-foto img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Efeito de hover para indicar que é clicável */
+    .perfil-foto-link:hover .perfil-foto {
+      border-color: #ffffff;
+      transform: scale(1.05);
+      background: #0b75ff;
+      color: #ffffff;
     }
 
     .perfil-nome {
@@ -68,7 +92,6 @@
       letter-spacing: 1px;
     }
 
-    /* Menu de Navegação */
     .sidebar-menu {
       flex: 1;
       margin-top: 32px;
@@ -100,7 +123,6 @@
       color: #ffffff;
     }
 
-    /* Bloco Inferior da Sidebar para Agrupar Voltar e Terminar Sessão */
     .sidebar-footer {
       display: flex;
       flex-direction: column;
@@ -110,7 +132,6 @@
       border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Botão da Casinha Branca */
     .btn-voltar-principal {
       display: flex;
       align-items: center;
@@ -126,19 +147,9 @@
       border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
-    .btn-voltar-principal i {
-      font-size: 1.1rem;
-      width: 24px;
-      text-align: center;
-      color: #ffffff;
-    }
+    .btn-voltar-principal i { color: #ffffff; }
+    .btn-voltar-principal:hover { background: rgba(255, 255, 255, 0.2); border-color: #ffffff; }
 
-    .btn-voltar-principal:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: #ffffff;
-    }
-
-    /* Botão Sair */
     .btn-logout {
       display: flex;
       align-items: center;
@@ -152,10 +163,7 @@
       border: 1px solid rgba(239, 68, 68, 0.2);
     }
 
-    .btn-logout:hover {
-      background: #ef4444;
-      color: #ffffff;
-    }
+    .btn-logout:hover { background: #ef4444; color: #ffffff; }
 
     /* --- CONTEÚDO --- */
     .main-conteudo {
@@ -174,13 +182,13 @@
 
     .cabecalho-pagina h1 { font-size: 2.2rem; color: #092b4c; }
 
-   /* --- SCORE TOTALMENTE FLUTUANTE E SEM CAIXA (Corrigido) --- */
+    /* --- SCORE FLUTUANTE --- */
     .score-flutuante-container {
       position: absolute;
       top: 48px;
       right: 48px;
       text-align: right;
-      pointer-events: none; /* Não interfere com cliques na página */
+      pointer-events: none;
     }
 
     .score-rotulo {
@@ -193,10 +201,20 @@
     }
 
     .score-numero {
-      font-size: 2.8rem; /* Tamanho grande e minimalista */
+      font-size: 2.8rem;
       font-weight: 500;
-      color: #64748b; /* Cor azul de destaque da identidade */
+      color: #64748b;
       line-height: 1;
+    }
+
+    .seccao-instrucao {
+      background: rgba(11, 117, 255, 0.05);
+      border-left: 4px solid #0b75ff;
+      padding: 14px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 20px;
+      font-weight: 500;
+      font-size: 0.95rem;
     }
 
     /* --- TABELA CRUZADA (MATRIZ) --- */
@@ -231,11 +249,7 @@
       width: 40%;
     }
 
-    .tabela-carat tr:hover {
-      background: #f8fcff;
-    }
-
-    /* Customizar os Inputs de Rádio na Tabela */
+    .tabela-carat tr:hover { background: #f8fcff; }
     .tabela-carat input[type="radio"], .card-questao input[type="radio"] {
       width: 20px;
       height: 20px;
@@ -280,37 +294,39 @@
       cursor: pointer; float: right; box-shadow: 0 4px 12px rgba(11, 117, 255, 0.2);
     }
     .btn-submeter:hover { background: #0056cc; }
+    .btn-submeter:disabled { background: #94a3b8; cursor: not-allowed; }
+
+    .estado-mensagem {
+      text-align: center;
+      padding: 40px;
+      color: #64748b;
+      font-size: 1.1rem;
+    }
+    .estado-mensagem i { font-size: 2rem; margin-bottom: 12px; display: block; color: #0b75ff; }
   </style>
 </head>
 <body>
 
   <aside class="sidebar">
     <div class="perfil-utente">
-      <div class="perfil-foto"><i class="fa-solid fa-user"></i></div>
-      <div class="perfil-nome">Nome do utente</div>
+      <a href="portalPessoalUtente.html" class="perfil-foto-link" title="Ir para o Portal Pessoal">
+        <div class="perfil-foto" id="foto-perfil-display">
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </a>
+      <div class="perfil-nome" id="nome-utente-sidebar">A carregar...</div>
       <div class="perfil-tipo">Utente</div>
     </div>
     
     <nav class="sidebar-menu">
-      <a href="#" class="menu-item">
-        <i class="fa-solid fa-clock-rotate-left"></i> Histórico de Avaliações
-      </a>
-      <a href="#" class="menu-item">
-        <i class="fa-solid fa-file-waveform"></i> Exames
-      </a>
-      <a href="#" class="menu-item">
-        <i class="fa-solid fa-pills"></i> Medicação
-      </a>
+      <a href="historicoAvaliacoes.html" class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i> Histórico de Avaliações</a>
+      <a href="#" class="menu-item"><i class="fa-solid fa-file-waveform"></i> Exames</a>
+      <a href="#" class="menu-item"><i class="fa-solid fa-pills"></i> Medicação</a>
     </nav>
     
     <div class="sidebar-footer">
-      <a href="utentePrincipal.html" class="btn-voltar-principal">
-        <i class="fa-solid fa-house"></i> Menu Principal
-      </a>
-      
-      <a href="#" class="btn-logout">
-        <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
-      </a>
+      <a href="utentePrincipal.html" class="btn-voltar-principal"><i class="fa-solid fa-house"></i> Menu Principal</a>
+      <a href="autenticacao.html" class="btn-logout" id="btnLogout"><i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão</a>
     </div>
   </aside>
 
@@ -319,15 +335,19 @@
     <div class="cabecalho-container">
       <div class="cabecalho-pagina">
         <h1>Questionário CARAT</h1>
-        <p style="color: #64748b; margin-top: 4px;">Teste de Controlo de Asma e Rinite</p>
+        <p id="versao-questionario" style="color: #64748b; margin-top: 4px;">A carregar versão do questionário...</p>
       </div>
       <div class="score-flutuante-container">
-        <div class="score-rotulo">Pontuação Atual</div>
+        <div class="score-rotulo">Pontuação Estimada</div>
         <div class="score-numero" id="contadorScore">0</div>
       </div>
     </div>
 
-    <form id="formCarat" onsubmit="lidarSubmissao(event)">
+    <div id="loading-container" class="estado-mensagem">
+      <i class="fa-solid fa-circle-notch fa-spin"></i> A carregar perguntas oficiais do sistema...
+    </div>
+
+    <form id="formCarat" style="display: none;" onsubmit="lidarSubmissao(event)">
       
       <div class="seccao-instrucao">
         <i class="fa-solid fa-calendar-days" style="margin-right: 8px;"></i>
@@ -345,7 +365,7 @@
           </tr>
         </thead>
         <tbody id="corpoTabelaCruzada">
-        </tbody>
+          </tbody>
       </table>
 
       <div class="seccao-instrucao">
@@ -354,118 +374,214 @@
       </div>
 
       <div class="card-questao">
-        <div class="texto-questao">10. Aumentar a utilização dos seus medicamentos?</div>
+        <div class="texto-questao" id="tituloPergunta10">10. Aumentar a utilização dos seus medicamentos?</div>
         <div class="grupo-opcoes-p10" id="opcoesPergunta10">
-        </div>
+          </div>
       </div>
       
-      <button type="submit" class="btn-submeter">Submeter Respostas</button>
+      <button type="submit" class="btn-submeter" id="btnSubmeter">Submeter Respostas</button>
     </form>
 
   </main>
 
   <script>
-    const QuestionarioCaratSeed = {
-        versao: 'V1_2024',
-        questoes: [
-            { texto_questao: 'Nariz entupido?' },
-            { texto_questao: 'Espirros?' },
-            { texto_questao: 'Comichão no nariz?' },
-            { texto_questao: 'Corrimento / pingo do nariz?' },
-            { texto_questao: 'Falta de ar / dispneia?' },
-            { texto_questao: 'Chiadeira no peito / pieira?' },
-            { texto_questao: 'Aperto no peito com esforço físico?' },
-            { texto_questao: 'Cansaço/dificuldade em fazer as atividades ou tarefas do dia-a-dia?' },
-            { texto_questao: 'Acordou durante a noite por causa da sua asma/rinite/alergia?' },
-            { 
-                texto_questao: 'Aumentar a utilização dos seus medicamentos?',
-                opcoes: [
-                    { texto_opcao: 'Não estou a tomar medicamentos', score: 0 },
-                    { texto_opcao: 'Nunca', score: 1 },
-                    { texto_opcao: 'Menos de 7 dias', score: 2 },
-                    { texto_opcao: '7 dias ou mais', score: 3 }
-                ]
-            }
-        ]
-    };
+    const API_BASE = "http://localhost:3000";
+    let idQuestionarioAtivo = null;
+    let dadosQuestoesMapeadas = []; // Guarda a árvore temporária para cálculo do score em tempo real
 
-    function construirFormulario() {
+    document.addEventListener("DOMContentLoaded", () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "autenticacao.html";
+        return;
+      }
+
+      // Decodificação básica do payload do Token para apresentar o nome do Utente na Sidebar
+      try {
+        const base64Url = token.split('.')[1];
+        const payload = JSON.parse(window.atob(base64Url));
+        if(payload.nome) document.getElementById("nomeUsuario").textContent = payload.nome;
+      } catch(e) { console.error("Erro ao ler dados do token"); }
+
+      carregarQuestionarioDoBackend(token);
+      
+      document.getElementById("btnLogout").addEventListener("click", () => {
+        localStorage.removeItem("token");
+        window.location.href = "autenticacao.html";
+      });
+    });
+
+    // 1. RF16 — Faz o fetch do questionário configurado e ativo na BD
+    async function carregarQuestionarioDoBackend(token) {
+      try {
+        const resposta = await fetch(`${API_BASE}/carat/questionario-ativo`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!resposta.ok) {
+          if (resposta.status === 404) throw new Error("Não existe nenhum questionário configurado como ativo.");
+          throw new Error("Erro ao obter dados do servidor.");
+        }
+
+        const questionario = await resposta.json();
+        idQuestionarioAtivo = questionario.id;
+        dadosQuestoesMapeadas = questionario.questoes;
+        
+        document.getElementById("versao-questionario").textContent = `Versão do Questionário: ${questionario.versao}`;
+
+        construirEstruturaInterface(questionario.questoes);
+        
+      } catch (err) {
+        document.getElementById("loading-container").innerHTML = `
+          <i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i>
+          <span style="color: #ef4444;">${err.message}</span>`;
+      }
+    }
+
+    // 2. Transforma as entidades do banco de dados nos elementos visuais da matriz
+    function construirEstruturaInterface(questoes) {
       const tabelaCorpo = document.getElementById('corpoTabelaCruzada');
       let tabelaHtml = '';
 
-      for(let i = 0; i < 9; i++) {
+      // As primeiras 9 questões pertencem à tabela de sintomas recorrentes de 4 opções comuns
+      const questoesMatriz = questoes.slice(0, 9);
+      questoesMatriz.forEach((questao, idx) => {
+        // Ordena as opções pelo score crescente para garantir que "Nunca" (0) fique na primeira coluna
+        const opcoesOrdenadas = questao.opcoes;
+
         tabelaHtml += `
           <tr>
-            <td class="alinhamento-esquerda">${i+1}. ${QuestionarioCaratSeed.questoes[i].texto_questao}</td>
-            <td><input type="radio" name="q_${i}" value="0" required onChange="atualizarScore()"></td>
-            <td><input type="radio" name="q_${i}" value="1" required onChange="atualizarScore()"></td>
-            <td><input type="radio" name="q_${i}" value="2" required onChange="atualizarScore()"></td>
-            <td><input type="radio" name="q_${i}" value="3" required onChange="atualizarScore()"></td>
+            <td class="alinhamento-esquerda">${idx + 1}. ${questao.texto_questao}</td>
+            ${opcoesOrdenadas.map(opcao => `
+              <td>
+                <input type="radio" 
+                       name="questao_${questao.id}" 
+                       value="${opcao.id}" 
+                       data-score="${opcao.score}" 
+                       required 
+                       onChange="atualizarScoreFlutuante()">
+              </td>
+            `).join('')}
           </tr>
         `;
-      }
+      });
       tabelaCorpo.innerHTML = tabelaHtml;
 
-      const p10Container = document.getElementById('opcoesPergunta10');
-      let p10Html = '';
-      QuestionarioCaratSeed.questoes[9].opcoes.forEach((opcao, index) => {
-        p10Html += `
-          <label class="opcao-p10-label" id="label-p10-${index}">
-            <input type="radio" name="q_9" value="${opcao.score}" required onChange="gerirSelecaoP10(${index})">
-            <span>${opcao.texto_opcao}</span>
-          </label>
-        `;
-      });
-      p10Container.innerHTML = p10Html;
-    }
-
-    function gerirSelecaoP10(indexSelecionado) {
-      const labels = document.querySelectorAll('.opcao-p10-label');
-      labels.forEach(label => label.classList.remove('selecionada'));
-      
-      document.getElementById(`label-p10-${indexSelecionado}`).classList.add('selecionada');
-      atualizarScore();
-    }
-
-    function atualizarScore() {
-      let scoreAcumulado = 0;
-      const form = document.getElementById('formCarat');
-      const formData = new FormData(form);
-
-      for(let i = 0; i < 10; i++) {
-        const valor = formData.get(`q_${i}`);
-        if(valor !== null) {
-          scoreAcumulado += parseInt(valor);
-        }
+      // Trata de forma isolada a Pergunta 10 (Uso de medicação) com layout em Grid/Cards
+      const questao10 = questoes[9];
+      if (questao10) {
+        document.getElementById("tituloPergunta10").textContent = `10. ${questao10.texto_questao}`;
+        const p10Container = document.getElementById('opcoesPergunta10');
+        
+        let p10Html = '';
+        questao10.opcoes.forEach(opcao => {
+          p10Html += `
+            <label class="opcao-p10-label" id="label-opcao-${opcao.id}">
+              <input type="radio" 
+                     name="questao_${questao10.id}" 
+                     value="${opcao.id}" 
+                     data-score="${opcao.score}" 
+                     required 
+                     onChange="gerirSelecaoP10(${opcao.id}, ${questao10.id})">
+              <span>${opcao.texto_opcao}</span>
+            </label>
+          `;
+        });
+        p10Container.innerHTML = p10Html;
       }
+
+      // Desliga o loading e apresenta o formulário pronto
+      document.getElementById("loading-container").style.display = "none";
+      document.getElementById("formCarat").style.display = "block";
+    }
+
+    // Altera a classe CSS para realçar a escolha na pergunta 10
+    function gerirSelecaoP10(opcaoId, questaoId) {
+      const container = document.getElementById('opcoesPergunta10');
+      const labels = container.querySelectorAll('.opcao-p10-label');
+      labels.forEach(l => l.classList.remove('selecionada'));
+      
+      document.getElementById(`label-opcao-${opcaoId}`).classList.add('selecionada');
+      atualizarScoreFlutuante();
+    }
+
+    // Calcula de forma reativa a soma provisória através do atributo customizado data-score
+    function atualizarScoreFlutuante() {
+      let scoreAcumulado = 0;
+      const radiosSelecionados = document.querySelectorAll('input[type="radio"]:checked');
+      
+      radiosSelecionados.forEach(radio => {
+        scoreAcumulado += parseInt(radio.getAttribute('data-score') || '0');
+      });
 
       document.getElementById('contadorScore').innerText = scoreAcumulado;
     }
 
-    function lidarSubmissao(event) {
+    // 3. RF17, RF18 — Recolhe os IDs do DOM e executa o POST da avaliação clínica
+    async function lidarSubmissao(event) {
       event.preventDefault();
-      const form = document.getElementById('formCarat');
-      const formData = new FormData(form);
-      const respostasDTO = [];
+      
+      const token = localStorage.getItem("token");
+      const btnSubmeter = document.getElementById("btnSubmeter");
+      
+      btnSubmeter.disabled = true;
+      btnSubmeter.textContent = "A gravar...";
 
-      for(let i = 0; i < 10; i++) {
-        respostasDTO.push({
-          id_questao: i + 1,
-          score: parseInt(formData.get(`q_${i}`))
-        });
-      }
+      const respostasDTO = [];
+      
+      // Mapeia todas as perguntas contidas no array retornado pelo backend
+      dadosQuestoesMapeadas.forEach(questao => {
+        const inputMarcado = document.querySelector(`input[name="questao_${questao.id}"]:checked`);
+        if (inputMarcado) {
+          respostasDTO.push({
+            id_questao: questao.id,
+            id_opcao: parseInt(inputMarcado.value) // Envia o ID real da Opção na BD
+          });
+        }
+      });
 
       const payload = {
-        id_utente: 1,
-        versao: QuestionarioCaratSeed.versao,
+        id_questionario: idQuestionarioAtivo,
         respostas: respostasDTO
       };
 
-      console.log("SubmeterAvaliacaoDto enviado para o Backend:", payload);
-      alert("Avaliação guardada com sucesso! Verifique o console.");
-    }
+      try {
+        const respostaSubmissao = await fetch(`${API_BASE}/carat/avaliacoes`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
 
-    window.onload = construirFormulario;
+        if (!respostaSubmissao.ok) {
+          const erroDetalhes = await respostaSubmissao.json().catch(() => ({}));
+          throw new Error(erroDetalhes.erro || "Falha ao submeter o questionário.");
+        }
+
+        const resultadoClinico = await respostaSubmissao.json();
+
+        alert(
+          `Avaliação guardada com sucesso!\n\n` +
+          `Pontuação Final: ${resultadoClinico.avaliacao.score_total} pontos.\n` +
+          `Classificação: ${resultadoClinico.avaliacao.nivel_controlo
+            .toUpperCase()
+            .replace(/_/g, ' ')}`
+        );
+
+        window.location.href = "utentePrincipal.html";
+
+      } catch (err) {
+        alert(`Erro na submissão: ${err.message}`);
+        btnSubmeter.disabled = false;
+        btnSubmeter.textContent = "Submeter Respostas";
+      }
+    }
   </script>
 </body>
 </html>

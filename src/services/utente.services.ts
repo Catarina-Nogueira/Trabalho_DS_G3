@@ -31,6 +31,8 @@ const toResposta = (u: Utente): UtenteRespostaDTO => ({
         id: u.utilizador.id,
         username: u.utilizador.username,
         email: u.utilizador.email,
+        estado: u.utilizador.estado,
+        tipo_utilizador: u.utilizador.tipo_utilizador
     },
     medico: {
         id: u.medico.id,
@@ -98,7 +100,6 @@ export const UtenteService = {
 
         const guardado = await utenteRepo().save(utente);
 
-        // 🚨 CORREÇÃO: Utilização direta do Enum nativo mapeado sem casts redundantes
         await AuditoriaService.registar({
             id_utilizador: idUtilizadorLogado,
             entidade_afetada: EntidadeAuditoria.UTENTE,

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SaudINOB - Reporte de Sintomas</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- BARRA LATERAL --- */
+    .sidebar {
+      width: 260px;
+      background: #07213b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99, 179, 237, 0.15);
+    }
+
+    .perfil-utente {
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Área da foto configurada como link para o Portal Pessoal */
+    .perfil-foto-link {
+      display: block;
+      text-decoration: none;
+      position: relative;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 12px;
+    }
+
+    .perfil-foto {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #1a365d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #75d0fb;
+      font-size: 2rem;
+      color: #75d0fb;
+      overflow: hidden;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .perfil-foto img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Efeito de hover para indicar que é clicável */
+    .perfil-foto-link:hover .perfil-foto {
+      border-color: #ffffff;
+      transform: scale(1.05);
+      background: #0b75ff;
+      color: #ffffff;
+    }
+
+    .perfil-nome {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+      word-break: break-word;
+    }
+
+    .perfil-tipo {
+      font-size: 0.8rem;
+      color: #75d0fb;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #dfe8f6;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .menu-item i {
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+    }
+
+    .btn-nova-avaliacao {
+      background: #0b75ff !important;
+      color: #ffffff !important;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(11, 117, 255, 0.3);
+      margin: 8px 0;
+    }
+
+    .btn-nova-avaliacao:hover {
+      background: #0056cc !important;
+      box-shadow: 0 6px 16px rgba(11, 117, 255, 0.4);
+    }
+
+    .sidebar-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-voltar-principal {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-voltar-principal i { color: #ffffff; }
+    .btn-voltar-principal:hover { background: rgba(255, 255, 255, 0.2); border-color: #ffffff; }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      cursor: pointer;
+    }
+
+    .btn-logout:hover {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    /* --- CONTEÚDO PRINCIPAL --- */
+    .area-conteudo {
+      margin-left: 260px;
+      padding: 48px;
+      width: calc(100% - 260px);
+      min-height: 100vh;
+    }
+
+    .area-conteudo h1 {
+      font-size: 2.2rem;
+      color: #092b4c;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .subtitulo {
+      color: #64748b;
+      font-size: 1rem;
+      margin-bottom: 32px;
+    }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* --- FORMULÁRIO --- */
+    .cartao-formulario {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+    }
+
+    .grupo-campo {
+      margin-bottom: 20px;
+    }
+
+    .grupo-campo label {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #07213b;
+      margin-bottom: 8px;
+    }
+
+    .grupo-campo select, .grupo-campo textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-family: inherit;
+      color: #092b4c;
+      background: #f8fafc;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+
+    .grupo-campo select:focus, .grupo-campo textarea:focus {
+      outline: none;
+      border-color: #0b75ff;
+      background: #ffffff;
+    }
+
+    .btn-submeter {
+      width: 100%;
+      padding: 14px;
+      background: #0b75ff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-submeter:hover {
+      background: #0056cc;
+    }
+
+    /* --- HISTÓRICO --- */
+    .cartao-historico {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 32px;
+      max-height: 750px;
+      overflow-y: auto;
+    }
+
+    .lista-historico {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .item-historico {
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .item-historico-header {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    .data-registo {
+      font-weight: 600;
+      color: #0b75ff;
+    }
+
+    .grid-tags {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+
+    .tag-clinica {
+      background: #edf2f7;
+      padding: 6px 10px;
+      border-radius: 6px;
+      color: #2d3748;
+    }
+
+    .tag-clinica strong {
+      color: #07213b;
+    }
+
+    .notas-bloco {
+      grid-column: span 2;
+      margin-top: 6px;
+      font-style: italic;
+      color: #4a5568;
+      background: #fff;
+      padding: 8px;
+      border-left: 3px solid #cbd5e1;
+      border-radius: 4px;
+    }
+
+    .estado-vazio {
+      text-align: center;
+      padding: 40px;
+      color: #94a3b8;
+    }
+
+    .estado-vazio i {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="perfil-utente">
+      <a href="portalPessoalUtente.html" class="perfil-foto-link" title="Ir para o Portal Pessoal">
+        <div class="perfil-foto" id="foto-perfil-display">
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </a>
+
+      <div class="perfil-nome" id="nome-utente-sidebar">A carregar...</div>
+      <div class="perfil-tipo">Utente</div>
+    </div>
+
+    <nav class="sidebar-menu">
+      <a href="historicoAvaliacoes.html" class="menu-item">
+        <i class="fa-solid fa-clock-rotate-left"></i> Histórico de Avaliações
+      </a>
+
+      <a href="preenchimentoCarat.html" class="menu-item btn-nova-avaliacao">
+        <i class="fa-solid fa-plus"></i> Nova Avaliação
+      </a>
+
+      <a href="#" class="menu-item">
+        <i class="fa-solid fa-file-waveform"></i> Exames
+      </a>
+
+      <a href="#" class="menu-item">
+        <i class="fa-solid fa-pills"></i> Medicação
+      </a>
+
+      <div class="sidebar-footer">
+        <a href="utentePrincipal.html" class="btn-voltar-principal"><i class="fa-solid fa-house"></i> Menu Principal</a>
+        <a href="#" class="btn-logout" id="btnLogout"><i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão</a>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="area-conteudo">
+    <h1><i class="fa-solid fa-notes-medical" style="color: #0b75ff;"></i> Reporte de Sintomas</h1>
+    <p class="subtitulo">Garante a monitorização de crises diárias ou alterações fora das suas consultas de rotina.</p>
+
+    <div class="layout-grid">
+      
+      <section class="cartao-formulario">
+        <form id="formSintomas">
+          
+          <div class="grupo-campo">
+            <label for="nivel_mal_estar_geral">Nível de Mal-estar Geral</label>
+            <select id="nivel_mal_estar_geral" required>
+              <option value="0">0 - Nenhum</option>
+              <option value="1">1 - Ligeiro</option>
+              <option value="2">2 - Moderado</option>
+              <option value="3">3 - Grave</option>
+            </select>
+          </div>
+
+          <div class="grupo-campo">
+            <label for="sintomas_pulmonares">Gravidade dos Sintomas Pulmonares (Tosse, Falta de ar)</label>
+            <select id="sintomas_pulmonares" required>
+              <option value="0">0 - Sem sintomas</option>
+              <option value="1">1 - Sintomas ligeiros</option>
+              <option value="2">2 - Sintomas moderados</option>
+              <option value="3">3 - Sintomas graves</option>
+            </select>
+          </div>
+
+          <div class="grupo-campo">
+            <label for="sintomas_nasais">Gravidade dos Sintomas Nasais (Espirros, Obstrução)</label>
+            <select id="sintomas_nasais" required>
+              <option value="0">0 - Sem sintomas</option>
+              <option value="1">1 - Sintomas ligeiros</option>
+              <option value="2">2 - Sintomas moderados</option>
+              <option value="3">3 - Sintomas graves</option>
+            </select>
+          </div>
+
+          <div class="grupo-campo">
+            <label for="interrupcao_sono">Interrupção do Sono</label>
+            <select id="interrupcao_sono" required>
+              <option value="0">0 - Dormiu normalmente</option>
+              <option value="1">1 - Acordou 1 vez</option>
+              <option value="2">2 - Acordou várias vezes</option>
+              <option value="3">3 - Quase não conseguiu dormir</option>
+            </select>
+          </div>
+
+          <div class="grupo-campo">
+            <label for="uso_medicacao_resgate">Uso de Medicação de Resgate (SOS)</label>
+            <select id="uso_medicacao_resgate" required>
+              <option value="0">Não</option>
+              <option value="1">Sim</option>
+            </select>
+          </div>
+
+          <div class="grupo-campo">
+            <label for="gatilho_identificavel">Gatilho Identificável</label>
+            <select id="gatilho_identificavel" required>
+              <option value="0">0 - Nenhum / Desconhecido</option>
+              <option value="2">2 - Alergéneo (Pó, Pólen, Animais...)</option>
+              <option value="3">3 - Esforço Físico</option>
+              <option value="4">4 - Outro</option>
+            </select>
+          </div>
+
+          <div class="grupo-campo">
+            <label for="notas_adicionais">Notas Adicionais (Opcional)</label>
+            <textarea id="notas_adicionais" rows="3" placeholder="Descreva aqui pormenores sobre a crise ou medicação utilizada..."></textarea>
+          </div>
+
+          <button type="submit" class="btn-submeter">Submeter Relatório</button>
+        </form>
+      </section>
+
+      <section class="cartao-historico">
+        <h2>O seu histórico diário</h2>
+        <div class="lista-historico" id="container-historico">
+          <div class="estado-vazio">A carregar histórico...</div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = "http://localhost:3000";
+    let idUtenteGlobal = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const token = verificarEConfigurarSessao();
+      if (!token) return;
+
+      carregarFotoSessao();
+      carregarHistoricoSintomas(token);
+      configurarFormulario(token);
+      configurarLogout();
+    });
+
+    function redirecionarLogin() {
+      localStorage.clear();
+      window.location.href = 'autenticacao.html';
+    }
+
+    function verificarEConfigurarSessao() {
+      const token = localStorage.getItem('token');
+      const userRaw = localStorage.getItem('user');
+
+      if (!token || !userRaw) {
+        redirecionarLogin();
+        return null;
+      }
+
+      let utilizador;
+      try {
+        utilizador = JSON.parse(userRaw);
+      } catch (e) {
+        redirecionarLogin();
+        return null;
+      }
+      
+      document.getElementById('nome-utente-sidebar').textContent = utilizador.nome || "Utente";
+      idUtenteGlobal = utilizador.id_especifico;
+
+      if (!idUtenteGlobal) {
+        console.error("ID do utente não encontrado no localStorage");
+        redirecionarLogin();
+        return null;
+      }    
+      return token;
+    }
+
+    /* Se noutra página (como o Portal Pessoal) guardares uma imagem no localStorage, 
+       esta função garante que ela continua a aparecer aqui de forma estática */
+    function carregarFotoSessao() {
+      const fotoGuardada = localStorage.getItem(`foto_perfil_${idUtenteGlobal}`);
+      if (fotoGuardada) {
+        const display = document.getElementById('foto-perfil-display');
+        display.innerHTML = `<img src="${fotoGuardada}" alt="Foto de Perfil">`;
+      }
+    }
+
+    /* --- OPERAÇÕES DA API --- */
+    async function carregarHistoricoSintomas(token) {
+      const container = document.getElementById("container-historico");
+      
+      try {
+        const resposta = await fetch(`${API_BASE}/sintomaReportado/utente/${idUtenteGlobal}/historico`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!resposta.ok) throw new Error("Erro a carregar o histórico.");
+        const listaSintomas = await resposta.json();
+
+        if (!listaSintomas || listaSintomas.length === 0) {
+          container.innerHTML = `
+            <div class="estado-vazio">
+              <i class="fa-solid fa-folder-open"></i>
+              <p>Ainda não registou nenhum sintoma diário.</p>
+            </div>`;
+          return;
+        }
+
+        const mapGatilhos = { 0: "Nenhum", 2: "Alergéno", 3: "Esforço", 4: "Outro" };
+
+        container.innerHTML = listaSintomas.map(item => {
+          const dataFormatada = new Date(item.data_registo).toLocaleDateString("pt-PT", {
+            day: "2-digit", month: "2-digit", year: "numeric", hour: '2-digit', minute:'2-digit'
+          });
+
+          return `
+            <div class="item-historico">
+              <div class="item-historico-header">
+                <span class="data-registo"><i class="fa-regular fa-calendar"></i> ${dataFormatada}</span>
+              </div>
+              <div class="grid-tags">
+                <div class="tag-clinica">Mal-estar: <strong>${item.nivel_mal_estar_geral}/3</strong></div>
+                <div class="tag-clinica">Pulmonar: <strong>${item.sintomas_pulmonares}/3</strong></div>
+                <div class="tag-clinica">Nasal: <strong>${item.sintomas_nasais}/3</strong></div>
+                <div class="tag-clinica">Sono: <strong>${item.interrupcao_sono}/3</strong></div>
+                <div class="tag-clinica">SOS: <strong>${item.uso_medicacao_resgate === 1 ? 'Sim' : 'Não'}</strong></div>
+                <div class="tag-clinica">Gatilho: <strong>${mapGatilhos[item.gatilho_identificavel] || 'Nenhum'}</strong></div>
+                ${item.notas_adicionais ? `<div class="notas-bloco">"${item.notas_adicionais}"</div>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        container.innerHTML = `
+          <div class="estado-vazio" style="color: #ef4444;">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <p>Erro ao ligar ao servidor de dados.</p>
+          </div>`;
+      }
+    }
+
+    function configurarFormulario(token) {
+      const form = document.getElementById("formSintomas");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const payload = {
+          nivel_mal_estar_geral: Number(document.getElementById("nivel_mal_estar_geral").value),
+          sintomas_pulmonares: Number(document.getElementById("sintomas_pulmonares").value),
+          sintomas_nasais: Number(document.getElementById("sintomas_nasais").value),
+          interrupcao_sono: Number(document.getElementById("interrupcao_sono").value),
+          uso_medicacao_resgate: Number(document.getElementById("uso_medicacao_resgate").value),
+          gatilho_identificavel: Number(document.getElementById("gatilho_identificavel").value),
+          notas_adicionais: document.getElementById("notas_adicionais").value
+        };
+
+        try {
+          const resposta = await fetch(`${API_BASE}/sintomaReportado/utente/${idUtenteGlobal}`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!resposta.ok) {
+            const erroDados = await resposta.json();
+            throw new Error(erroDados.erro || "Erro de submissão.");
+          }
+
+          alert("Sintomas reportados com sucesso!");
+          form.reset();
+          carregarHistoricoSintomas(token);
+
+        } catch (err) {
+          alert(err.message);
+        }
+      });
+    }
+
+    function configurarLogout() {
+      document.getElementById("btnLogout").addEventListener("click", (e) => {
+        e.preventDefault();
+        localStorage.clear();
+        window.location.href = "autenticacao.html";
+      });
+    }
+  </script>
+</body>
+</html>

@@ -66,21 +66,47 @@ export const CaratController = {
             const utilizadorLogado = req.user!;
             let idUtenteAlvo: number;
 
-            if (utilizadorLogado.tipo_utilizador == Tipo_Utilizador.UTENTE) {
-                // Se for utente, ignora qualquer ID da URL e usa o seu próprio ID da sessão
-                idUtenteAlvo = utilizadorLogado.id;
+            if (utilizadorLogado.tipo_utilizador === Tipo_Utilizador.UTENTE) {
+
+                const utenteDados = await utenteRepo.findOne({
+                    where: {
+                        utilizador: {
+                            id: utilizadorLogado.id
+                        }
+                    }
+                });
+
+                if (!utenteDados) {
+                    return res.status(404).json({
+                        erro: 'Perfil de utente não encontrado.'
+                    });
+                }
+
+                idUtenteAlvo = utenteDados.id;
+
             } else if (utilizadorLogado.tipo_utilizador === Tipo_Utilizador.MEDICO) {
-                // Se for médico, vai buscar o ID do utente aos parâmetros da rota
+
                 idUtenteAlvo = Number(req.params.id_utente);
-                if (!idUtenteAlvo) return res.status(400).json({ erro: 'ID do utente em falta.' });
+
+                if (!idUtenteAlvo) {
+                    return res.status(400).json({
+                        erro: 'ID do utente em falta.'
+                    });
+                }
+
             } else {
-                return res.status(403).json({ erro: 'Não autorizado.' });
+                return res.status(403).json({
+                    erro: 'Não autorizado.'
+                });
             }
 
             const dadosGrafico = await CaratService.obterHistoricoGrafico(idUtenteAlvo);
             return res.json(dadosGrafico);
+
         } catch (err: any) {
-            return res.status(500).json({ erro: err.message || 'Erro ao gerar dados do gráfico.' });
+            return res.status(500).json({
+                erro: err.message || 'Erro ao gerar dados do gráfico.'
+            });
         }
     },
 

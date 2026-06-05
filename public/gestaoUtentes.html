@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB - Gestão de Utentes</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- 1) BARRA LATERAL --- */
+    .sidebar {
+      width: 260px;
+      background: #07213b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99, 179, 237, 0.15);
+    }
+
+    .perfil-admin {
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .perfil-foto {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #1a365d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      border: 3px solid #75d0fb;
+      font-size: 2.2rem;
+      color: #75d0fb;
+    }
+
+    .perfil-nome {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #ffffff;
+    }
+
+    .perfil-tipo {
+      font-size: 0.8rem;
+      color: #75d0fb;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      margin-top: 30px;
+    }
+
+    .btn-acao-sidebar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 16px;
+      background: #0b75ff;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 590;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-acao-sidebar:hover {
+      background: #0056cc;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-logout:hover {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    /* --- 2) CONTEÚDO PRINCIPAL --- */
+    .main-conteudo {
+      margin-left: 260px;
+      padding: 48px;
+      width: calc(100% - 260px);
+      max-width: 1200px;
+    }
+
+    .cabecalho-pagina {
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-voltar {
+      color: #0b75ff;
+      text-decoration: none;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cabecalho-pagina h1 {
+      font-size: 2.2rem;
+      color: #092b4c;
+      margin-top: 8px;
+    }
+
+    /* --- BARRA DE FILTROS E ORDENAÇÃO --- */
+    .barra-filtros {
+      display: flex;
+      gap: 16px;
+      background: #ffffff;
+      padding: 16px 24px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      border: 1px solid #e2e8f0;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .grupo-filtro {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .grupo-filtro label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .grupo-filtro select {
+      padding: 10px 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      color: #092b4c;
+      background-color: #ffffff;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      min-width: 220px;
+    }
+
+    .grupo-filtro select:focus {
+      border-color: #0b75ff;
+    }
+
+    /* --- TABELA DE UTENTES --- */
+    .contentor-tabela {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      border: 1px solid #e2e8f0;
+    }
+
+    .tabela-utentes {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .tabela-utentes th {
+      padding: 16px;
+      border-bottom: 2px solid #e2e8f0;
+      color: #64748b;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .tabela-utentes td {
+      padding: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #092b4c;
+      font-size: 1rem;
+      font-weight: 360;
+    }
+
+    .tabela-utentes tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge-medico {
+      background: #f0fdf4;
+      color: #166534;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-detalhes {
+      background: none;
+      border: 1px solid #0b75ff;
+      color: #0b75ff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 550;
+      font-size: 0.87rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-detalhes:hover {
+      background: #0b75ff;
+      color: #ffffff;
+    }
+
+    .msg-vazia {
+      text-align: center;
+      color: #64748b;
+      padding: 40px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="perfil-admin">
+      <div class="perfil-foto"><i class="fa-solid fa-user-shield"></i></div>
+      <div class="perfil-nome">Administrador Sistema</div>
+      <div class="perfil-tipo">Administrador</div>
+    </div>
+    
+    <div class="sidebar-menu">
+      <button class="btn-acao-sidebar" onclick="abrirModalAdicionar()">
+        <i class="fa-solid fa-user-plus"></i> Adicionar Utente
+      </button>
+    </div>
+    
+    <div class="sidebar-footer">
+      <a href="#" class="btn-logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-conteudo">
+    
+    <div class="cabecalho-pagina">
+      <div>
+        <a href="administradorPrincipal.html" class="btn-voltar">
+          <i class="fa-solid fa-arrow-left"></i> Voltar ao Painel
+        </a>
+        <h1>Gestão de Utentes</h1>
+      </div>
+    </div>
+
+    <div class="barra-filtros">
+      <div class="grupo-filtro">
+        <label for="ordenar-nome"><i class="fa-solid fa-sort"></i> Ordem Alfabética:</label>
+        <select id="ordenar-nome">
+          <option value="asc">Nome: A para Z</option>
+          <option value="desc">Nome: Z para A</option>
+        </select>
+      </div>
+
+      <div class="grupo-filtro">
+        <label for="filtrar-medico"><i class="fa-solid fa-user-doctor"></i> Médico Responsável:</label>
+        <select id="filtrar-medico">
+          <option value="todos">Todos os Médicos</option>
+          </select>
+      </div>
+    </div>
+
+    <div class="contentor-tabela">
+      <table class="tabela-utentes">
+        <thead>
+          <tr>
+            <th>Nome do Utente</th>
+            <th>Médico Responsável</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpo-tabela-utentes">
+          <tr>
+            <td colspan="3" class="msg-vazia">A carregar registos dos utentes...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <script>
+     
+     // Função que gera uma cor HSL estável e bonita baseada no ID do médico
+    function obterCorPorId(id) {
+        // O ID funciona como semente para o ângulo da cor (0 a 360)
+        const hash = (parseInt(id) * 137.5) % 360; 
+        // Retorna uma cor com 70% de saturação e 40% de luminosidade (boa leitura sobre fundo branco)
+        return `hsl(${hash}, 70%, 40%)`;
+    }
+
+    // Armazena a resposta bruta da API para filtros locais rápidos
+    let listaUtentesOriginal = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      verificarSessao();
+      carregarUtentes();
+      configurarLogout();
+      configurarEventosFiltro();
+    });
+
+    // 1. Guarda de Rota e Controlo de Acesso
+    function verificarSessao() {
+      const token = localStorage.getItem('token');
+      const userRaw = localStorage.getItem('user');
+
+      if (!token || !userRaw) {
+        window.location.href = 'autenticacao.html';
+        return;
+      }
+
+      const utilizador = JSON.parse(userRaw);
+      // Garante que apenas o Administrador manipula esta lista global
+      if (utilizador.tipo.toLowerCase() !== 'administrador') {
+        window.location.href = 'autenticacao.html';
+        return;
+      }
+
+      const elementoNome = document.querySelector('.perfil-nome');
+      if (elementoNome && utilizador.nome) {
+        elementoNome.textContent = utilizador.nome;
+      }
+    }
+
+    // 2. Procurar Utentes via API do Express
+    async function carregarUtentes() {
+      const tabelaCorpo = document.getElementById('corpo-tabela-utentes');
+      const token = localStorage.getItem('token');
+
+      try {
+        // Rota base do teu Express router: router.get('/', ..., UtenteController.listarTodos);
+        const resposta = await fetch('http://localhost:3000/utentes', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!resposta.ok) throw new Error('Falha ao ligar ao servidor de dados.');
+
+        listaUtentesOriginal = await resposta.json();
+
+        if (listaUtentesOriginal.length === 0) {
+          tabelaCorpo.innerHTML = `<tr><td colspan="3" class="msg-vazia">Nenhum utente cadastrado no sistema.</td></tr>`;
+          return;
+        }
+
+        // Isolar e preencher os médicos existentes na base de dados para o dropdown
+        gerarOpcoesMedicos(listaUtentesOriginal);
+
+        // Processar ordenação inicial e renderizar a tabela
+        processarETratarUtentes();
+
+      } catch (err) {
+        console.error(err);
+        tabelaCorpo.innerHTML = `<tr><td colspan="3" class="msg-vazia" style="color: #ef4444;">Erro ao carregar dados: ${err.message}</td></tr>`;
+      }
+    }
+
+    // 3. Mapear dinamicamente a lista de médicos atribuídos
+    function gerarOpcoesMedicos(utentes) {
+        const selectMedico = document.getElementById('filtrar-medico');
+        const medicosMapeados = new Map();
+
+        // Agrupar médicos únicos de forma limpa
+        utentes.forEach(u => {
+            if (u.medico && u.medico.id) {
+            medicosMapeados.set(u.medico.id, u.medico.nome);
+            }
+        });
+
+        // Gerar as opções sem aplicar estilos de cor
+        medicosMapeados.forEach((nomeMedico, idMedico) => {
+            const opcao = document.createElement('option');
+            opcao.value = idMedico;
+            opcao.textContent = nomeMedico;
+            selectMedico.appendChild(opcao);
+        });
+    }
+
+    // 4. Mecanismo de Filtragem e Ordenação Alfabética Local
+    function processarETratarUtentes() {
+      const tabelaCorpo = document.getElementById('corpo-tabela-utentes');
+      const criterioOrdem = document.getElementById('ordenar-nome').value;
+      const filtroMedico = document.getElementById('filtrar-medico').value;
+
+      // Clonar array para filtragem
+      let utentesFiltrados = [...listaUtentesOriginal];
+
+      // A) Filtragem por ID do Médico Responsável
+      if (filtroMedico !== 'todos') {
+        utentesFiltrados = utentesFiltrados.filter(u => u.medico && u.medico.id == filtroMedico);
+      }
+
+      // B) Ordenação de Strings Nativa (A-Z ou Z-A) com suporte a acentuações portuguesas
+      utentesFiltrados.sort((a, b) => {
+        const nomeA = (a.nome || '').toLowerCase();
+        const nomeB = (b.nome || '').toLowerCase();
+
+        if (criterioOrdem === 'asc') {
+          return nomeA.localeCompare(nomeB, 'pt', { sensitivity: 'base' });
+        } else {
+          return nomeB.localeCompare(nomeA, 'pt', { sensitivity: 'base' });
+        }
+      });
+
+      // C) Construção do DOM da Tabela
+      if (utentesFiltrados.length === 0) {
+        tabelaCorpo.innerHTML = `<tr><td colspan="3" class="msg-vazia">Nenhum utente corresponde aos critérios escolhidos.</td></tr>`;
+        return;
+      }
+
+      tabelaCorpo.innerHTML = '';
+    utentesFiltrados.forEach(utente => {
+        let badgeHTML = '';
+        
+        if (utente.medico && utente.medico.id) {
+            const corMedico = obterCorPorId(utente.medico.id);
+            // Geramos uma variação muito clara para o fundo (95% de luminosidade)
+            const fundoBadge = corMedico.replace('40%', '95%'); 
+            
+            badgeHTML = `
+            <span class="badge-medico" style="background-color: ${fundoBadge}; color: ${corMedico}; border: 1px solid ${corMedico}33;">
+                <i class="fa-solid fa-user-doctor"></i> ${utente.medico.nome}
+            </span>
+            `;
+        } else {
+            badgeHTML = `<span class="badge-medico" style="background: #f1f5f9; color: #64748b;">Nenhum atribuído</span>`;
+        }
+        
+        const linha = document.createElement('tr');
+        linha.innerHTML = `
+            <td><strong>${utente.nome}</strong></td>
+            <td>${badgeHTML}</td>
+            <td>
+            <button class="btn-detalhes" onclick="verDetalhes(${utente.id})">
+                <i class="fa-solid fa-eye"></i> Ver Detalhes
+            </button>
+            </td>
+        `;
+        tabelaCorpo.appendChild(linha);
+    });
+    }
+
+    // 5. Vincular Eventos de Mudança nos inputs
+    function configurarEventosFiltro() {
+      document.getElementById('ordenar-nome').addEventListener('change', processarETratarUtentes);
+      document.getElementById('filtrar-medico').addEventListener('change', processarETratarUtentes);
+    }
+
+    // 6. Encaminhamento de Interface
+    function verDetalhes(idUtente) {
+      // Redireciona aplicando a Query String id para o ecrã de detalhes do utente
+      window.location.href = `detalhesUtente.html?id=${idUtente}`;
+    }
+
+    function abrirModalAdicionar() {
+      window.location.href = 'adicionarUtente.html';
+    }
+
+    function configurarLogout() {
+      const btnLogout = document.querySelector('.btn-logout');
+      if (btnLogout) {
+        btnLogout.addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.clear();
+          window.location.href = 'login.html';
+        });
+      }
+    }
+  </script>
+</body>
+</html>

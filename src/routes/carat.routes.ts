@@ -11,7 +11,7 @@ router.get('/utentes/:id_utente/avaliacoes', autenticarSessao, autorizarSessao('
 router.get('/avaliacoes/:id', autenticarSessao, autorizarSessao('medico', 'utente'), CaratController.getDetalheAvaliacao);
 router.get('/avaliacoes/recomendacoes', autenticarSessao, autorizarSessao('medico', 'utente'), CaratController.getRecomendacoes);
 router.get('/medico/utentes/:id_utente/avaliacoes', autenticarSessao, autorizarSessao('medico'), CaratController.getAvaliacoesMedico);
-router.get('/grafico', autenticarSessao, autorizarSessao('utente'), CaratController.obterDadosGrafico);
+router.get('/grafico', autenticarSessao, autorizarSessao('utente', 'medico'), CaratController.obterDadosGrafico);
 router.get('/grafico/utente/:id_utente', autenticarSessao, autorizarSessao('medico'), CaratController.obterDadosGrafico);
 router.post('/questionarios', autenticarSessao, autorizarSessao('administrador'), CaratController.criarQuestionario);
 router.patch('/questionarios/:id/desativar', autenticarSessao, autorizarSessao('administrador'), CaratController.desativarQuestionario);

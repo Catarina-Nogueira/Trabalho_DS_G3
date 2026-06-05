@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SaudINOB - Alertas do Utente</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- BARRA LATERAL (Idêntica à Página Principal) --- */
+    .sidebar {
+      width: 260px;
+      background: #07213b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99, 179, 237, 0.15);
+    }
+
+    .perfil-utente {
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Área da foto configurada como link para o Portal Pessoal */
+    .perfil-foto-link {
+      display: block;
+      text-decoration: none;
+      position: relative;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 12px;
+    }
+
+    .perfil-foto {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #1a365d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #75d0fb;
+      font-size: 2rem;
+      color: #75d0fb;
+      overflow: hidden;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .perfil-foto img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Efeito de hover para indicar que é clicável */
+    .perfil-foto-link:hover .perfil-foto {
+      border-color: #ffffff;
+      transform: scale(1.05);
+      background: #0b75ff;
+      color: #ffffff;
+    }
+
+    .perfil-nome {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+      word-break: break-word;
+    }
+
+    .perfil-tipo {
+      font-size: 0.8rem;
+      color: #75d0fb;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sidebar-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-voltar-principal {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-voltar-principal i { color: #ffffff; }
+    .btn-voltar-principal:hover { background: rgba(255, 255, 255, 0.2); border-color: #ffffff; }
+
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #dfe8f6;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .menu-item i {
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+    }
+
+    .btn-nova-avaliacao {
+      background: #0b75ff !important;
+      color: #ffffff !important;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(11, 117, 255, 0.3);
+      margin: 8px 0;
+    }
+
+    .btn-nova-avaliacao:hover {
+      background: #0056cc !important;
+      box-shadow: 0 6px 16px rgba(11, 117, 255, 0.4);
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      cursor: pointer;
+    }
+
+    .btn-logout:hover {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    /* --- CONTEÚDO PRINCIPAL --- */
+    .main-conteudo {
+      margin-left: 260px;
+      padding: 48px;
+      width: calc(100% - 260px);
+      max-width: 1000px;
+    }
+
+    .cabecalho-pagina h1 {
+      font-size: 2.2rem;
+      color: #092b4c;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .subtitulo-pagina {
+      color: #64748b;
+      font-size: 1rem;
+      margin-bottom: 32px;
+    }
+
+    /* --- LISTA DE ALERTAS (Todos fixos em Azul) --- */
+    .lista-alertas {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .cartao-alerta {
+      background: #eff6ff;
+      border: 1px solid #dbeafe;
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .cartao-alerta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+    }
+
+    .cartao-alerta .alerta-titulo, .cartao-alerta .alerta-mensagem { color: #1e40af; }
+    .cartao-alerta .alerta-icone { background: #dbeafe; color: #2563eb; }
+    .cartao-alerta .alerta-data { color: #1e40af; opacity: 0.8; }
+
+    .alerta-icone {
+      font-size: 1.5rem;
+      padding: 12px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .alerta-info {
+      flex: 1;
+    }
+
+    .alerta-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .alerta-titulo {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .alerta-data {
+      font-size: 0.85rem;
+    }
+
+    .alerta-mensagem {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .alerta-badge-score {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* --- CORES APENAS PARA OS BADGES (ESTADO) --- */
+    
+    /* Estado: Novo -> Vermelho */
+    .badge-novo {
+      background: #fde8e8 !important;
+      color: #e02424 !important;
+      border: 1px solid #fbd5d5;
+    }
+
+    /* Estado: Em Visto -> Laranja */
+    .badge-visto {
+      background: #ffedd5 !important;
+      color: #ea580c !important;
+      border: 1px solid #fed7aa;
+    }
+
+    /* Estado: Em Seguimento -> Amarelo */
+    .badge-seguimento {
+      background: #fef08a !important;
+      color: #a16207 !important;
+      border: 1px solid #fef08a;
+    }
+
+    /* Estado: Fechado -> Verde */
+    .badge-fechado {
+      background: #dcfce7 !important;
+      color: #16a34a !important;
+      border: 1px solid #bbf7d0;
+    }
+
+    /* --- ESTADOS DA UI (Vazio / Erro) --- */
+    .estado-mensagem {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      color: #94a3b8;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .estado-mensagem i {
+      font-size: 3rem;
+      color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="perfil-utente">
+      <a href="portalPessoalUtente.html" class="perfil-foto-link" title="Ir para o Portal Pessoal">
+        <div class="perfil-foto" id="foto-perfil-display">
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </a>
+      <div class="perfil-nome" id="nome-utente-sidebar">A carregar...</div>
+      <div class="perfil-tipo">Utente</div>
+    </div>
+
+    <nav class="sidebar-menu">
+      <a href="historicoAvaliacoes.html" class="menu-item">
+        <i class="fa-solid fa-clock-rotate-left"></i> Histórico de Avaliações
+      </a>
+      
+      <a href="preenchimentoCarat.html" class="menu-item btn-nova-avaliacao">
+        <i class="fa-solid fa-plus"></i> Nova Avaliação
+      </a>
+      
+      <a href="#" class="menu-item">
+        <i class="fa-solid fa-file-waveform"></i> Exames
+      </a>
+      
+      <a href="#" class="menu-item">
+        <i class="fa-solid fa-pills"></i> Medicação
+      </a>
+
+      <div class="sidebar-footer">
+      <a href="utentePrincipal.html" class="btn-voltar-principal"><i class="fa-solid fa-house"></i> Menu Principal</a>
+      <a href="autenticacao.html" class="btn-logout" id="btnLogout"><i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão</a>
+    </div>
+  </aside>
+
+  <main class="main-conteudo">
+    <div class="cabecalho-pagina">
+      <h1>Histórico de Alertas</h1>
+      <p class="subtitulo-pagina">Consulte as notificações automáticas geradas com base nos seus scores obtidos.</p>
+    </div>
+
+    <div id="contentor-alertas"></div>
+  </main>
+
+  <script>
+    const API_BASE = "http://localhost:3000";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const token = verificarEConfigurarSessao();
+        if (!token) return;
+      
+        carregarAlertasDoUtente(token);
+        configurarLogout();
+    });
+
+    function redirecionarLogin() {
+      localStorage.clear();
+      window.location.href = "autenticacao.html";
+    }
+
+    function verificarEConfigurarSessao() {
+        const token = localStorage.getItem('token');
+        const userRaw = localStorage.getItem('user');
+
+        if (!token || !userRaw) {
+            window.location.href = 'autenticacao.html';
+            return null;
+        }
+
+        const utilizador = JSON.parse(userRaw);
+
+        if (!utilizador.tipo || utilizador.tipo.toLowerCase() !== 'utente') {
+            window.location.href = 'autenticacao.html';
+            return null;
+        }
+
+        document.getElementById('nome-utente-sidebar').textContent = utilizador.nome || "Utente";
+
+        return token; 
+    }
+
+    async function carregarAlertasDoUtente(token) {
+      const contentor = document.getElementById("contentor-alertas");
+
+      try {
+        const resposta = await fetch(`${API_BASE}/alertas/utente`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!resposta.ok) throw new Error("Erro de comunicação com o servidor.");
+
+        const alertas = await resposta.json();
+
+        if (!alertas || alertas.length === 0) {
+          contentor.innerHTML = `
+            <div class="estado-mensagem">
+              <i class="fa-solid fa-bell-slash"></i>
+              <p>Não tem nenhum alerta registado.<br>As notificações surgirão aqui quando houver variações clínicas.</p>
+            </div>`;
+          return;
+        }
+
+        const alertasOrdenados = alertas.sort(
+          (a, b) => new Date(b.data_criacao) - new Date(a.data_criacao)
+        );
+
+        let htmlLista = '<div class="lista-alertas">';
+
+        alertasOrdenados.forEach(alerta => {
+          const estadoString = alerta.estado ? alerta.estado.toLowerCase() : '';
+          
+          let classeBadge = 'badge-novo';
+          let iconeEstado = 'fa-bell';
+
+          // Mapeamento dinâmico baseado no ESTADO do alerta para o BADGE
+          if (estadoString.includes('visto')) {
+            classeBadge = 'badge-visto';
+            iconeEstado = 'fa-eye';
+          } 
+          else if (estadoString.includes('seguimento') || estadoString.includes('progresso')) {
+            classeBadge = 'badge-seguimento';
+            iconeEstado = 'fa-spinner';
+          }
+          else if (estadoString.includes('fechado') || estadoString.includes('concluido')) {
+            classeBadge = 'badge-fechado';
+            iconeEstado = 'fa-circle-check';
+          }
+          else {
+            classeBadge = 'badge-novo';
+            iconeEstado = 'fa-bell';
+          }
+
+          const dataFormatada = new Date(alerta.data_criacao).toLocaleString("pt-PT", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          });
+
+          htmlLista += `
+            <div class="cartao-alerta">
+              <div class="alerta-icone">
+                <i class="fa-solid fa-circle-info"></i>
+              </div>
+
+              <div class="alerta-info">
+                <div class="alerta-meta">
+                  <span class="alerta-titulo">
+                    ${alerta.tipo || "Alerta Clínico"}
+                  </span>
+                  <span class="alerta-data">
+                    ${dataFormatada}
+                  </span>
+                </div>
+
+                <p class="alerta-mensagem">
+                  ${alerta.motivo || "Atualização automática do estado clínico."}
+                </p>
+
+                <span class="alerta-badge-score ${classeBadge}">
+                  <i class="fa-solid ${iconeEstado}"></i> Estado: ${alerta.estado}
+                </span>
+              </div>
+            </div>
+          `;
+        });
+
+        htmlLista += '</div>';
+        contentor.innerHTML = htmlLista;
+
+      } catch (err) {
+        console.error("Erro ao carregar lista de alertas:", err);
+        contentor.innerHTML = `
+          <div class="estado-mensagem">
+            <i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i>
+            <p style="color: #ef4444;">Erro ao carregar alertas clínicos.</p>
+          </div>`;
+      }
+    }
+
+    function configurarLogout() {
+      document.getElementById("btn-terminar-sessao").addEventListener("click", () => {
+        redirecionarLogin();
+      });
+    }
+  </script>
+</body>
+</html>

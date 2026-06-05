@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SaudINOB - Detalhes da Avaliação</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- BARRA LATERAL --- */
+    .sidebar {
+      width: 260px;
+      background: #07213b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99, 179, 237, 0.15);
+    }
+
+    .perfil-utente {
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Área da foto configurada como link para o Portal Pessoal */
+    .perfil-foto-link {
+      display: block;
+      text-decoration: none;
+      position: relative;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 12px;
+    }
+
+    .perfil-foto {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #1a365d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #75d0fb;
+      font-size: 2rem;
+      color: #75d0fb;
+      overflow: hidden;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .perfil-foto img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Efeito de hover para indicar que é clicável */
+    .perfil-foto-link:hover .perfil-foto {
+      border-color: #ffffff;
+      transform: scale(1.05);
+      background: #0b75ff;
+      color: #ffffff;
+    }
+
+    .perfil-nome {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+      word-break: break-word;
+    }
+
+    .perfil-tipo {
+      font-size: 0.8rem;
+      color: #75d0fb;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #dfe8f6;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .menu-item i {
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+    }
+
+    .btn-nova-avaliacao {
+      background: #0b75ff !important;
+      color: #ffffff !important;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(11, 117, 255, 0.3);
+      margin: 8px 0;
+    }
+
+    .btn-nova-avaliacao:hover {
+      background: #0056cc !important;
+      box-shadow: 0 6px 16px rgba(11, 117, 255, 0.4);
+    }
+
+    .sidebar-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-voltar-principal {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-voltar-principal i { color: #ffffff; }
+    .btn-voltar-principal:hover { background: rgba(255, 255, 255, 0.2); border-color: #ffffff; }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      cursor: pointer;
+    }
+
+    .btn-logout:hover {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    /* --- CONTEÚDO PRINCIPAL --- */
+    .main-conteudo {
+      margin-left: 260px;
+      padding: 48px;
+      width: calc(100% - 260px);
+      max-width: 1000px;
+    }
+
+    .btn-voltar {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #0b75ff;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 24px;
+      transition: color 0.2s;
+    }
+
+    .btn-voltar:hover {
+      color: #0056cc;
+    }
+
+    .cabecalho-pagina h1 {
+      font-size: 2.2rem;
+      color: #092b4c;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .subtitulo-pagina {
+      color: #64748b;
+      font-size: 1rem;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Cores Dinâmicas para o Badge de Controlo */
+    .nivel-controlo {
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+    }
+    .nivel-bom { background: #dcfce7; color: #16a34a; }        /* Verde */
+    .nivel-parcial { background: #fef9c3; color: #a16207; }    /* Amarelo */
+    .nivel-mau { background: #fde8e8; color: #e02424; }        /* Vermelho */
+    .nivel-moderado { background: #f1f5f9; color: #475569; }   /* Cinzento */
+
+    /* --- MOSTRADOR DO FORMULÁRIO DINÂMICO --- */
+    .formulario-leitura {
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+      margin-bottom: 32px;
+    }
+
+    .grupo-pergunta {
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 20px;
+    }
+
+    .grupo-pergunta:last-child {
+      border-bottom: none;
+    }
+
+    .pergunta-texto {
+      font-weight: 600;
+      color: #092b4c;
+      margin-bottom: 12px;
+      font-size: 1.05rem;
+    }
+
+    .resposta-selecionada-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #1e293b;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .resposta-selecionada-box i {
+      color: #0b75ff;
+      font-size: 1.1rem;
+    }
+
+    .score-badge {
+      margin-left: auto;
+      font-size: 0.8rem;
+      background: #e2e8f0;
+      color: #475569;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .info-view {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 14px;
+      border-radius: 8px;
+      color: #1e40af;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* --- BLOCO DE RECOMENDAÇÕES --- */
+    .bloco-recomendacoes {
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+
+    .bloco-recomendacoes h2 {
+      font-size: 1.4rem;
+      color: #092b4c;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .bloco-recomendacoes h2 i {
+      color: #0b75ff;
+    }
+
+    .lista-rec {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .cartao-rec {
+      padding: 16px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border-left: 4px solid #64748b;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+
+    /* Cores das Recomendações com base no tipo */
+    .rec-monitorizacao { border-left-color: #10b981; background: #f0fdf4; }
+    .rec-consulta { border-left-color: #f59e0b; background: #fffbeb; }
+    .rec-urgente { border-left-color: #ef4444; background: #fef2f2; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="perfil-utente">
+      <a href="portalPessoalUtente.html" class="perfil-foto-link" title="Ir para o Portal Pessoal">
+        <div class="perfil-foto" id="foto-perfil-display">
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </a>
+      <div class="perfil-nome" id="nome-utente-sidebar">A carregar...</div>
+      <div class="perfil-tipo">Utente</div>
+    </div>
+
+    <nav class="sidebar-menu">
+      <a href="historicoAvaliacoes.html" class="menu-item">
+        <i class="fa-solid fa-clock-rotate-left"></i> Histórico de Avaliações
+      </a>
+
+      <a href="preenchimentoCarat.html" class="menu-item btn-nova-avaliacao">
+        <i class="fa-solid fa-plus"></i> Nova Avaliação
+      </a>
+
+      <a href="#" class="menu-item">
+        <i class="fa-solid fa-file-waveform"></i> Exames
+      </a>
+
+      <a href="#" class="menu-item">
+        <i class="fa-solid fa-pills"></i> Medicação
+      </a>
+
+         <div class="sidebar-footer">
+      <a href="utentePrincipal.html" class="btn-voltar-principal"><i class="fa-solid fa-house"></i> Menu Principal</a>
+      <a href="autenticacao.html" class="btn-logout" id="btnLogout"><i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão</a>
+    </div>
+  </aside>
+
+  <main class="main-conteudo">
+    <a href="historicoAvaliacoes.html" class="btn-voltar">
+      <i class="fa-solid fa-arrow-left"></i> Voltar ao Histórico
+    </a>
+
+    <div class="cabecalho-pagina">
+      <h1>Respostas da Avaliação</h1>
+      <div class="subtitulo-pagina" id="meta-submissao">Carregando detalhes...</div>
+    </div>
+
+    <div class="info-view">
+      <i class="fa-solid fa-eye"></i>
+      <span>Histórico Clínico protegido: Pode consultar as suas respostas gravadas, mas não é possível modificá-las.</span>
+    </div>
+    <br>
+
+    <div class="formulario-leitura" id="formulario-dados">
+      <p style="text-align: center; color: #64748b;">A carregar as perguntas do questionário...</p>
+    </div>
+
+    <div class="bloco-recomendacoes" id="bloco-rec-container" style="display: none;">
+      <h2><i class="fa-solid fa-heart-pulse"></i> Recomendações Clínicas</h2>
+      <div class="lista-rec" id="lista-recomendacoes"></div>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = "http://localhost:3000";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const token = verificarEConfigurarSessao();
+        if (!token) return;
+
+        const parametrosUrl = new URLSearchParams(window.location.search);
+        const idAvaliacao = parametrosUrl.get("id");
+
+        if (!idAvaliacao) {
+          window.location.href = "historicoAvaliacoes.html";
+          return;
+        }
+      
+        carregarDetalhesEspecificos(idAvaliacao, token);
+        configurarLogout();
+    });
+
+    function verificarEConfigurarSessao() {
+        const token = localStorage.getItem('token');
+        const userRaw = localStorage.getItem('user');
+
+        if (!token || !userRaw) {
+            window.location.href = 'autenticacao.html';
+            return null;
+        }
+
+        const utilizador = JSON.parse(userRaw);
+        document.getElementById('nome-utente-sidebar').textContent = utilizador.nome || "Utente";
+        return token; 
+    }
+
+    async function carregarDetalhesEspecificos(id, token) {
+      const formulario = document.getElementById("formulario-dados");
+      const metaSubmissao = document.getElementById("meta-submissao");
+      const blocoRec = document.getElementById("bloco-rec-container");
+      const listaRec = document.getElementById("lista-recomendacoes");
+
+      try {
+        const resposta = await fetch(`${API_BASE}/carat/avaliacoes/${id}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!resposta.ok) throw new Error();
+
+        const dados = await resposta.json();
+
+        // 1. Formatar a data recolhida da BD
+        const dataF = new Date(dados.data_avaliacao).toLocaleDateString("pt-PT", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+
+        // 2. Normalizar o nível de controlo recebido do Enum do Back-end
+        let classeNivel = "nivel-moderado";
+        let textoNivel = dados.nivel_controlo || "Não Avaliado";
+        const nivelNormalizado = textoNivel.toLowerCase().replace('_', ' ');
+
+        if (nivelNormalizado.includes("nao controlado")) {
+            classeNivel = "nivel-mau";
+            textoNivel = "Não Controlado";
+        } else if (nivelNormalizado.includes("parcialmente controlado")) {
+            classeNivel = "nivel-parcial";
+            textoNivel = "Parcialmente Controlado";
+        } else if (nivelNormalizado.includes("controlado")) {
+            classeNivel = "nivel-bom";
+            textoNivel = "Controlado";
+        }
+
+        // 3. Atualizar o cabeçalho superior
+        metaSubmissao.innerHTML = `
+          <span>Submetido em: <strong>${dataF}</strong></span>
+          <span>•</span>
+          <span>Score Total: <strong>${dados.score_total} pts</strong></span>
+          <span>•</span>
+          <span>Controlo: <span class="nivel-controlo ${classeNivel}">${textoNivel}</span></span>
+        `;
+
+        // 4. Renderizar TODAS as perguntas de forma 100% dinâmica
+        let htmlPerguntas = "";
+        
+        dados.respostas.forEach((resp, index) => {
+            htmlPerguntas += `
+              <div class="grupo-pergunta">
+                <p class="pergunta-texto">${index + 1}. ${resp.questao}</p>
+                <div class="resposta-selecionada-box">
+                  <i class="fa-regular fa-circle-check"></i>
+                  <span>${resp.opcao_escolhida}</span>
+                  <span class="score-badge">+${resp.score} pts</span>
+                </div>
+              </div>
+            `;
+        });
+        
+        formulario.innerHTML = htmlPerguntas;
+
+        // 5. Renderizar o Bloco de Recomendações Clínicas
+        if (dados.recomendacoes && dados.recomendacoes.length > 0) {
+            blocoRec.style.display = "block";
+            let htmlRec = "";
+
+            dados.recomendacoes.forEach(rec => {
+                let classeRec = "";
+                if (rec.tipo === "MONITORIZACAO") classeRec = "rec-monitorizacao";
+                if (rec.tipo === "CONSULTA" || rec.tipo === "MEDICACAO") classeRec = "rec-consulta";
+                if (rec.tipo === "INTERVENCAO_URGENTE") classeRec = "rec-urgente";
+
+                htmlRec += `
+                  <div class="cartao-rec ${classeRec}">
+                    ${rec.texto}
+                  </div>
+                `;
+            });
+            listaRec.innerHTML = htmlRec;
+        }
+
+      } catch (err) {
+        console.error(err);
+        formulario.innerHTML = `<p style="color: #ef4444; text-align: center; font-weight: 600; padding: 20px;">Não foi possível recuperar os detalhes desta avaliação do servidor.</p>`;
+      }
+    }
+
+    function configurarLogout() {
+      document.getElementById("btn-terminar-sessao").addEventListener("click", () => {
+        localStorage.clear();
+        window.location.href = "autenticacao.html";
+      });
+    }
+  </script>
+</body>
+</html>

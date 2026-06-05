@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB - Detalhes do Utente</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- BARRA LATERAL (SIDEBAR) --- */
+    .sidebar {
+      width: 280px;
+      background: #07213b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99, 179, 237, 0.15);
+    }
+
+    .perfil-admin {
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 24px;
+    }
+
+    .perfil-foto {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #1a365d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      border: 3px solid #75d0fb;
+      font-size: 2.2rem;
+      color: #75d0fb;
+    }
+
+    .perfil-nome {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .perfil-tipo {
+      font-size: 0.8rem;
+      color: #75d0fb;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Bloco de Botões de Ação na Sidebar */
+    .sidebar-menu-acoes {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-top: 10px;
+    }
+
+    .btn-sidebar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+    }
+
+    /* Botão Atualizar (Azul) */
+    .btn-atualizar {
+      background: #0b75ff;
+      box-shadow: 0 4px 12px rgba(11, 117, 255, 0.2);
+    }
+    .btn-atualizar:hover { background: #0056cc; transform: translateY(-1px); }
+
+    /* Botão Desativar (Vermelho Sólido) */
+    .btn-desativar {
+      background: #ef4444;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+    }
+    .btn-desativar:hover { background: #dc2626; }
+
+    /* Botão Ativar (Verde Sólido) */
+    .btn-ativar {
+      background: #22c55e;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+    }
+    .btn-ativar:hover { background: #16a34a; }
+
+    /* Estado bloqueado enquanto a API não responde */
+    .btn-sidebar:disabled, .btn-sidebar.disabled {
+      background: #334155;
+      color: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+      opacity: 0.6;
+      transform: none !important;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .btn-logout:hover { background: #ef4444; color: #ffffff; }
+
+    /* --- CONTEÚDO PRINCIPAL --- */
+    .main-conteudo {
+      margin-left: 260px;
+      padding: 48px;
+      width: calc(100% - 280px);
+      max-width: 1000px;
+    }
+
+    .btn-voltar {
+      color: #0b75ff;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+
+    .cabecalho-detalhes {
+      margin-bottom: 32px;
+    }
+
+    .info-principal h1 {
+      font-size: 2.2rem;
+      color: #092b4c;
+    }
+
+    .badge-estado {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      width: max-content;
+      text-transform: capitalize;
+    }
+
+    .estado-ativo { background: #dcfce7; color: #15803d; }
+    .estado-inativo { background: #fee2e2; color: #991b1b; }
+
+    .msg-erro { text-align: center; padding: 40px; color: #ef4444; font-weight: 600; }
+
+     .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(7, 33, 59, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.ativo { opacity: 1; pointer-events: auto; }
+
+    .modal-caixa {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 32px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    .modal-overlay.ativo .modal-caixa { transform: scale(1); }
+
+    .modal-icone { font-size: 3rem; margin-bottom: 16px; }
+    .icone-alerta { color: #ef4444; }
+    .icone-ativar { color: #22c55e; }
+
+    .modal-titulo { font-size: 1.3rem; font-weight: 600; margin-bottom: 12px; color: #092b4c; }
+    .modal-texto { font-size: 0.95rem; color: #64748b; line-height: 1.5; margin-bottom: 24px; }
+    
+    .modal-botoes { display: flex; gap: 12px; justify-content: center; }
+    .btn-modal { padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 0.95rem; cursor: pointer; border: none; }
+    .btn-modal-cancelar { background: #f1f5f9; color: #475569; }
+    .btn-modal-cancelar:hover { background: #e2e8f0; }
+    .btn-modal-confirmar-erro { background: #ef4444; color: #ffffff; }
+    .btn-modal-confirmar-erro:hover { background: #dc2626; }
+    .btn-modal-confirmar-sucesso { background: #22c55e; color: #ffffff; }
+    .btn-modal-confirmar-sucesso:hover { background: #16a34a; }
+
+    /* GRELHA DE FICHA CLINICA */
+    .grelha-detalhes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .painel-card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      border: 1px solid #e2e8f0;
+    }
+
+    .painel-card.total-largura {
+      grid-column: span 2;
+    }
+
+    .painel-card h2 {
+      font-size: 1.2rem;
+      color: #0b75ff;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lista-dados {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 24px;
+    }
+
+    .coluna-unica .lista-dados {
+      grid-template-columns: 1fr;
+    }
+
+    .item-dado {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .item-dado span.rotulo {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .item-dado span.valor {
+      font-size: 1.05rem;
+      color: #092b4c;
+    }
+
+    /* CARD DO MÉDICO RESPONSÁVEL COMO LINK */
+    .link-medico-responsavel {
+      text-decoration: none;
+      display: block;
+    }
+
+    .medico-destaque {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 16px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .link-medico-responsavel:hover .medico-destaque {
+      background: #e0f2fe;
+      border-color: #75d0fb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(117, 208, 251, 0.2);
+    }
+
+    .medico-icon {
+      width: 48px;
+      height: 48px;
+      background: #e0f2fe;
+      color: #0369a1;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      transition: all 0.2s ease;
+    }
+
+    .link-medico-responsavel:hover .medico-icon {
+      background: #0b75ff;
+      color: #ffffff;
+    }
+
+
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="perfil-admin">
+      <div class="perfil-foto"><i class="fa-solid fa-user-shield"></i></div>
+      <div class="perfil-nome">Administrador Sistema</div>
+      <div class="perfil-tipo">Administrador</div>
+    </div>
+    
+    <div class="sidebar-menu-acoes">
+      <a href="#" id="link-editar-utente" class="btn-sidebar btn-atualizar disabled">
+        <i class="fa-solid fa-pen-to-square"></i> Atualizar Dados
+      </a>
+
+      <button id="btn-estado-utilizador" class="btn-sidebar btn-desativar disabled" disabled>
+        <i class="fa-solid fa-user-slash"></i> <span>A carregar...</span>
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="#" class="btn-logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-conteudo">
+    
+    <a href="gestaoUtentes.html" class="btn-voltar">
+      <i class="fa-solid fa-arrow-left"></i> Voltar à Listagem
+    </a>
+
+    <div class="cabecalho-detalhes">
+      <div class="info-principal">
+        <h1 id="txt-nome-utente">A carregar nome...</h1>
+        <div id="wrapper-estado">
+          <span class="badge-estado estado-ativo">A carregar estado...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grelha-detalhes">
+      
+      <div class="painel-card">
+        <h2><i class="fa-solid fa-user"></i> Informações de Perfil & Conta</h2>
+        <ul class="lista-dados">
+          <li class="item-dado">
+            <span class="rotulo">Username</span>
+            <span class="valor" id="txt-username">-</span>
+          </li>
+          <li class="item-dado">
+            <span class="rotulo">Endereço de Email</span>
+            <span class="valor" id="txt-email">-</span>
+          </li>
+          <li class="item-dado">
+            <span class="rotulo">Data de Nascimento</span>
+            <span class="valor" id="txt-data-nascimento">-</span>
+          </li>
+          <li class="item-dado">
+            <span class="rotulo">Sexo Biológico</span>
+            <span class="valor" id="txt-sexo">-</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="painel-card coluna-unica">
+        <h2><i class="fa-solid fa-user-doctor"></i> Tutela Clínica</h2>
+        <a href="#" id="link-medico" class="link-medico-responsavel">
+          <div class="medico-destaque">
+            <div class="medico-icon"><i class="fa-solid fa-user-md"></i></div>
+            <div class="item-dado">
+              <span class="rotulo" id="txt-medico-especialidade">Médico Responsável</span>
+              <span class="valor" style="font-weight: 600;" id="txt-medico-nome">Nenhum médico atribuído</span>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="painel-card total-largura">
+        <h2><i class="fa-solid fa-folder-open"></i> Ficha de Dados Administrativos</h2>
+        <ul class="lista-dados">
+          <li class="item-dado">
+            <span class="rotulo">Número de Telemóvel</span>
+            <span class="valor" id="txt-telemovel">-</span>
+          </li>
+          <li class="item-dado">
+            <span class="rotulo">NIF (Identificação Fiscal)</span>
+            <span class="valor" id="txt-nif">-</span>
+          </li>
+          <li class="item-dado total-largura" style="grid-column: span 2;">
+            <span class="rotulo">Morada de Residência</span>
+            <span class="valor" id="txt-morada">-</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div id="modal-confirmacao" class="modal-overlay">
+    <div class="modal-caixa">
+      <div id="modal-icone" class="modal-icone"><i class="fa-solid fa-circle-exclamation"></i></div>
+      <h3 id="modal-titulo" class="modal-titulo">Confirmar Alteração</h3>
+      <p id="modal-texto" class="modal-texto">Tem a certeza que pretende realizar esta operação?</p>
+      <div class="modal-botoes">
+        <button id="btn-modal-cancelar" class="btn-modal btn-modal-cancelar">Cancelar</button>
+        <button id="btn-modal-confirmar" class="btn-modal">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  </main>
+
+  <script>
+    let idUtenteGlobal = null;
+    let idUtilizadorVinculado = null;
+    let estadoAtualUtilizador = 'ativo';
+
+    document.addEventListener("DOMContentLoaded", () => {
+        verificarSessao();
+
+        const parametros = new URLSearchParams(window.location.search);
+        idUtenteGlobal = parametros.get('id');
+
+        if (!idUtenteGlobal) {
+            alert('Nenhum utente foi especificado.');
+            window.location.href = 'gestaoUtentes.html';
+            return;
+        }
+
+        document.getElementById('link-editar-utente').href =
+            `atualizarUtente.html?id=${idUtenteGlobal}`;
+
+        carregarDetalhesUtente();
+
+        configurarLogout();
+    });
+
+    function verificarSessao() {
+        const token = localStorage.getItem('token');
+        const userRaw = localStorage.getItem('user');
+
+        if (!token || !userRaw) {
+            window.location.href = 'autenticacao.html';
+            return;
+        }
+
+        const utilizador = JSON.parse(userRaw);
+        const tipo = utilizador.tipo_utilizador || utilizador.tipo;
+
+        if (!tipo || tipo.toLowerCase() !== 'administrador') {
+            window.location.href = 'autenticacao.html';
+            return;
+        }
+
+        const elementoNome = document.querySelector('.perfil-nome');
+
+        if (elementoNome) {
+            elementoNome.textContent =
+            utilizador.nome ||
+            utilizador.username ||
+            'Administrador';
+        }
+    }
+
+    async function carregarDetalhesUtente() {
+       
+        const token = localStorage.getItem('token');
+
+        try {
+            const respostaUtente = await fetch(`http://localhost:3000/utentes/${idUtenteGlobal}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            });
+
+            if (!respostaUtente.ok) throw new Error('Utente não encontrado no sistema.');
+            const utente = await respostaUtente.json();
+
+            idUtilizadorVinculado = utente.utilizador ? utente.utilizador.id : null;
+            estadoAtualUtilizador = utente.utilizador ? utente.utilizador.estado : 'ativo';
+
+            document.getElementById('txt-nome-utente').textContent = utente.nome;
+            document.getElementById('txt-username').textContent = utente.utilizador ? utente.utilizador.username : 'Não associado';
+            document.getElementById('txt-email').textContent = utente.utilizador ? utente.utilizador.email : '-';
+            document.getElementById('txt-data-nascimento').textContent = formatarData(utente.data_nascimento);
+            document.getElementById('txt-sexo').textContent = utente.sexo_biologico;
+
+            if (utente.medico && utente.medico.id) {
+            document.getElementById('txt-medico-nome').textContent = utente.medico.nome;
+            document.getElementById('txt-medico-especialidade').textContent = `Médico Responsável (${utente.medico.especialidade})`;
+            document.getElementById('link-medico').href = `detalhesMedico.html?id=${utente.medico.id}`;
+            } else {
+            document.getElementById('link-medico').removeAttribute('href');
+            document.getElementById('link-medico').style.cursor = 'default';
+            }
+
+            atualizarBotaoEstadoSidebar(estadoAtualUtilizador);
+
+            try {
+            const respostaDadosAdmin = await fetch(`http://localhost:3000/dados-administrativos/utente/${idUtenteGlobal}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            });
+
+            if (respostaDadosAdmin.ok) {
+                const dadosAdmin = await respostaDadosAdmin.json();
+                document.getElementById('txt-telemovel').textContent = dadosAdmin.telemovel || '-';
+                document.getElementById('txt-nif').textContent = dadosAdmin.nif || '-';
+                document.getElementById('txt-morada').textContent = dadosAdmin.morada || '-';
+            }
+            } catch (errAdmin) {
+            console.warn("Sem ficha administrativa configurada para este utente.");
+            }
+
+        } catch (err) {
+            alert(err.message);
+            window.location.href = 'gestaoUtentes.html';
+        }
+    }
+
+    function atualizarBotaoEstadoSidebar(estado) {
+      const btn = document.getElementById('btn-estado-utilizador');
+      const texto = btn.querySelector('span');
+      const icone = btn.querySelector('i');
+      const wrapperEstado = document.getElementById('wrapper-estado');
+
+      btn.disabled = false;
+      btn.classList.remove('disabled', 'btn-desativar', 'btn-ativar');
+
+      if (String(estado).toLowerCase() === 'ativo') {
+        btn.classList.add('btn-desativar');
+        texto.textContent = "Desativar Utilizador";
+        icone.className = "fa-solid fa-user-slash";
+        wrapperEstado.innerHTML = `<span class="badge-estado estado-ativo"><i class="fa-solid fa-circle-check"></i> Ativo</span>`;
+      } else {
+        btn.classList.add('btn-ativar');
+        texto.textContent = "Ativar Utilizador";
+        icone.className = "fa-solid fa-user-check";
+        wrapperEstado.innerHTML = `<span class="badge-estado estado-inativo"><i class="fa-solid fa-circle-xmark"></i> Inativo</span>`;
+      }
+
+      // Vincula a ação de clique diretamente
+      btn.onclick = () =>
+        alterarEstadoConta(
+            String(estado).toLowerCase() === 'ativo' ? 'desativar' : 'ativar'
+        );
+    }
+
+    async function alterarEstadoConta(acao) {
+      if (!idUtilizadorVinculado) {
+        alert('Este utente não possui uma conta de utilizador associada.');
+        return;
+      }
+
+      const confirmacao = confirm(`Tem a certeza que deseja ${acao} este utente?`);
+      if (!confirmacao) return;
+
+      const token = localStorage.getItem('token');
+      const novoEstado = acao === 'desativar' ? 'inativo' : 'ativo';
+      
+      try {
+        let url = '';
+        let opcoesFetch = {};
+
+        if (acao === 'desativar') {
+          url = `http://localhost:3000/utilizadores/${idUtilizadorVinculado}/desativar`;
+          opcoesFetch = {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+          };
+        } else {
+          url = `http://localhost:3000/utilizadores/${idUtilizadorVinculado}`;
+          opcoesFetch = {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estado: 'ativo' })
+          };
+        }
+
+        const resposta = await fetch(url, { ...opcoesFetch });
+
+        if (!resposta.ok) throw new Error('Falha ao processar alteração de estado no servidor.');
+
+        alert(`O estado do utente foi alterado com sucesso.`);
+        
+        estadoAtualUtilizador = novoEstado;
+        atualizarBotaoEstadoSidebar(estadoAtualUtilizador);
+
+      } catch (err) {
+        alert(`Erro na operação: ${err.message}`);
+      }
+    }
+
+    function formatarData(dataString) {
+      if (!dataString) return '-';
+      const partes = dataString.split('-');
+      if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      }
+      return dataString;
+    }
+
+    function configurarLogout() {
+      const btnLogout = document.querySelector('.btn-logout');
+      if (btnLogout) {
+        btnLogout.addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.clear();
+          window.location.href = 'autenticacao.html';
+        });
+      }
+    }
+  </script>
+</body>
+</html>

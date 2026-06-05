@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SaudINOB - Portal do Utente</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <style>
     * {
@@ -38,31 +39,56 @@
       border-right: 1px solid rgba(99, 179, 237, 0.15);
     }
 
-    /* Bloco do Utente Logado */
     .perfil-utente {
       text-align: center;
       padding-bottom: 24px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .perfil-foto {
+    /* Área da foto configurada como link para o Portal Pessoal */
+    .perfil-foto-link {
+      display: block;
+      text-decoration: none;
+      position: relative;
       width: 80px;
       height: 80px;
+      margin: 0 auto 12px;
+    }
+
+    .perfil-foto {
+      width: 100%;
+      height: 100%;
       border-radius: 50%;
       background: #1a365d;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 12px;
       border: 3px solid #75d0fb;
       font-size: 2rem;
       color: #75d0fb;
+      overflow: hidden;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .perfil-foto img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Efeito de hover para indicar que é clicável */
+    .perfil-foto-link:hover .perfil-foto {
+      border-color: #ffffff;
+      transform: scale(1.05);
+      background: #0b75ff;
+      color: #ffffff;
     }
 
     .perfil-nome {
       font-size: 1.1rem;
       font-weight: 600;
       color: #ffffff;
+      word-break: break-word;
     }
 
     .perfil-tipo {
@@ -73,7 +99,6 @@
       letter-spacing: 1px;
     }
 
-    /* Menu de Navegação */
     .sidebar-menu {
       flex: 1;
       margin-top: 32px;
@@ -105,7 +130,6 @@
       color: #ffffff;
     }
 
-    /* Botão em Destaque: Nova Avaliação */
     .btn-nova-avaliacao {
       background: #0b75ff !important;
       color: #ffffff !important;
@@ -119,7 +143,6 @@
       box-shadow: 0 6px 16px rgba(11, 117, 255, 0.4);
     }
 
-    /* Botão Sair */
     .btn-logout {
       display: flex;
       align-items: center;
@@ -131,6 +154,7 @@
       border-radius: 12px;
       transition: all 0.2s ease;
       border: 1px solid rgba(239, 68, 68, 0.2);
+      cursor: pointer;
     }
 
     .btn-logout:hover {
@@ -138,13 +162,12 @@
       color: #ffffff;
     }
 
-
-    /* --- 2) DIVISÃO CENTRAL (Fundo Branco com Contentores Verticais) --- */
+    /* --- 2) DIVISÃO CENTRAL --- */
     .divisao-central {
       position: fixed;
       top: 0;
       bottom: 0;
-      left: 260px; /* Alinhado logo após a sidebar */
+      left: 260px;
       width: 320px;
       background: #ffffff;
       border-right: 1px solid #e2e8f0;
@@ -155,7 +178,6 @@
       z-index: 90;
     }
 
-    /* Estilo dos Contentores */
     .contentor-central {
       flex: 1;
       background: #f8fafc;
@@ -165,12 +187,15 @@
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+      text-decoration: none; /* Remove o sublinhado padrão de links */
+      cursor: pointer; /* Transmite o feedback visual de clique */
     }
 
     .contentor-central:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      background: #f1f5f9; /* Altera levemente o fundo no hover */
     }
 
     .contentor-central h3 {
@@ -188,15 +213,13 @@
       line-height: 1.4;
     }
 
-    /* Cores de Destaque para os cabeçalhos internos dos blocos */
     .alerta-header { color: #ef4444 !important; }
     .sintoma-header { color: #0b75ff !important; }
     .plano-header { color: #10b981 !important; }
 
-
-    /* --- 3) ÁREA DO DASHBOARD (Direita / Maior Parte) --- */
+    /* --- 3) ÁREA DO DASHBOARD (Gráfico) --- */
     .area-dashboard {
-      margin-left: 580px; /* Largura da Sidebar (260px) + Divisão Central (320px) */
+      margin-left: 580px;
       padding: 48px;
       width: 100%;
       min-height: 100vh;
@@ -207,29 +230,62 @@
       color: #092b4c;
       font-weight: 700;
       letter-spacing: -0.5px;
+      margin-bottom: 8px;
     }
 
-    .area-dashboard .placeholder-texto {
-      color: #94a3b8;
-      margin-top: 12px;
+    .subtitulo-dashboard {
+      color: #64748b;
       font-size: 1rem;
+      margin-bottom: 32px;
+    }
+
+    .cartao-grafico {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+      max-width: 800px;
+    }
+
+    .grafico-wrapper {
+      position: relative;
+      width: 100%;
+      height: 350px;
+    }
+
+    .estado-vazio {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      color: #94a3b8;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .estado-vazio i {
+      font-size: 3rem;
+      color: #cbd5e1;
     }
   </style>
 </head>
 <body>
 
   <aside class="sidebar">
-    
     <div class="perfil-utente">
-      <div class="perfil-foto">
-        <i class="fa-solid fa-user"></i>
-      </div>
-      <div class="perfil-nome">Nome do Utente</div>
+      <a href="portalPessoalUtente.html" class="perfil-foto-link" title="Ir para o Portal Pessoal">
+        <div class="perfil-foto" id="foto-perfil-display">
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </a>
+      <div class="perfil-nome" id="nome-utente-sidebar">A carregar...</div>
       <div class="perfil-tipo">Utente</div>
     </div>
 
     <nav class="sidebar-menu">
-      <a href="#" class="menu-item">
+      <a href="historicoAvaliacoes.html" class="menu-item">
         <i class="fa-solid fa-clock-rotate-left"></i> Histórico de Avaliações
       </a>
       
@@ -246,45 +302,215 @@
       </a>
     </nav>
 
-    <a href="#" class="btn-logout">
+    <div class="btn-logout" id="btn-terminar-sessao">
       <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
-    </a>
-
+    </div>
   </aside>
 
-
   <section class="divisao-central">
-    
-    <div class="contentor-central">
+    <a href="alertasUtente.html" class="contentor-central">
       <h3 class="alerta-header">
         <i class="fa-solid fa-triangle-exclamation"></i> Alertas
       </h3>
-      <p>Não existem alertas críticos ativos de momento. Continue a monitorizar os seus dados diariamente.</p>
-    </div>
+      <p>Poderá ver os alertas associados às suas avaliações neste separador.</p>
+    </a>
 
-    <div class="contentor-central">
+    <a href="reporteSintomas.html" class="contentor-central">
       <h3 class="sintoma-header">
         <i class="fa-solid fa-notes-medical"></i> Reporte de Sintomas
       </h3>
       <p>Registe crises agudas de falta de ar, tosse persistente ou o uso excessivo de medicação SOS.</p>
-    </div>
+    </a>
 
-    <div class="contentor-central">
+    <a href="planoAcompanhamento.html" class="contentor-central">
       <h3 class="plano-header">
         <i class="fa-solid fa-calendar-check"></i> Plano de Acompanhamento
       </h3>
       <p>Confira o plano de acompanhamento organizado pelo seu médico.</p>
-    </div>
-
+    </a>
   </section>
 
-
   <main class="area-dashboard">
-    
-    <h1>Dashboard</h1>
-    <p class="placeholder-texto">Os seus gráficos de evolução clínica e estatísticas respiratórias serão renderizados aqui.</p>
+    <h1>Evolução Clínica</h1>
+    <p class="subtitulo-dashboard">Acompanhe os resultados dos seus questionários CARAT ao longo do tempo.</p>
 
+    <div class="cartao-grafico">
+      <div class="grafico-wrapper" id="container-clinico">
+        <canvas id="graficoCarat"></canvas>
+      </div>
+    </div>
   </main>
 
+  <script>
+    const API_BASE = "http://localhost:3000";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const token = verificarEConfigurarSessao();
+        if (!token) return;
+      
+        carregarDadosGrafico(token);
+        configurarLogout();
+    });
+
+    function redirecionarLogin() {
+      localStorage.clear();
+      window.location.href = "autenticacao.html";
+    }
+
+    function verificarEConfigurarSessao() {
+      const token = localStorage.getItem('token');
+      const userRaw = localStorage.getItem('user');
+
+      if (!token || !userRaw) {
+          window.location.href = 'autenticacao.html';
+          return null;
+      }
+
+      const utilizador = JSON.parse(userRaw);
+
+      if (!utilizador.tipo || utilizador.tipo.toLowerCase() !== 'utente') {
+          window.location.href = 'autenticacao.html';
+          return null;
+      }
+
+      document.getElementById('nome-utente-sidebar').textContent =
+          utilizador.nome || "Utente";
+
+      return token;
+    }
+    
+    async function carregarDadosGrafico(token) {
+      const container = document.getElementById("container-clinico");
+      
+      try {
+        const resposta = await fetch(`${API_BASE}/carat/grafico`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!resposta.ok) throw new Error("Erro na resposta do servidor.");
+
+        const dadosHistorico = await resposta.json();
+
+        if (!dadosHistorico || dadosHistorico.length === 0) {
+          container.innerHTML = `
+            <div class="estado-vazio">
+              <i class="fa-solid fa-chart-line"></i>
+              <p>Ainda não submeteu nenhuma avaliação CARAT.<br>Clique em <strong>Nova Avaliação</strong> para iniciar a monitorização.</p>
+            </div>`;
+          return;
+        }
+
+        const dadosOrdenados = dadosHistorico.sort((a, b) => new Date(a.data_avaliacao) - new Date(b.data_avaliacao));
+        
+        const labelsDatas = dadosOrdenados.map(item => {
+          const d = new Date(item.data_avaliacao);
+          return d.toLocaleDateString("pt-PT", { day: "2-digit", month: "2-digit", year: "2-digit" });
+        });
+        
+        const scoresTotais = dadosOrdenados.map(item => item.score_total);
+
+        renderizarChart(labelsDatas, scoresTotais);
+
+      } catch (err) {
+        console.error("Erro ao gerar dados do gráfico:", err);
+        container.innerHTML = `
+          <div class="estado-vazio">
+            <i class="fa-solid fa-circle-exclamation" style="color: #ef4444;"></i>
+            <p style="color: #ef4444;">Não foi possível carregar os seus dados clínicos neste momento.</p>
+          </div>`;
+      }
+    }
+
+    function renderizarChart(labels, dados) {
+      const ctx = document.getElementById("graficoCarat").getContext("2d");
+      
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Pontuação Score CARAT Total",
+              data: dados,
+              borderColor: "#0b75ff",
+              backgroundColor: "rgba(11, 117, 255, 0.06)",
+              borderWidth: 3,
+              pointBackgroundColor: "#ffffff",
+              pointBorderColor: "#0b75ff",
+              pointBorderWidth: 2,
+              pointRadius: 5,
+              pointHoverRadius: 7,
+              tension: 0.25,
+              fill: true
+            },
+            {
+              label: "Limiar de Controlo",
+              data: Array(labels.length).fill(24),
+              borderColor: "#ef4444",
+              borderWidth: 2,
+              borderDash: [8, 5],
+              pointRadius: 0,
+              fill: false,
+              tension: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: "top",
+              labels: {
+                font: { family: "'Segoe UI', sans-serif", size: 12, weight: "600" },
+                color: "#092b4c"
+              }
+            },
+            tooltip: {
+              padding: 12,
+              backgroundColor: "#07213b",
+              titleFont: { size: 13 },
+              bodyFont: { size: 13 },
+              callbacks: {
+                label: function(context) {
+                  return ` Score CARAT: ${context.parsed.y} pts`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              min: 0,
+              max: 30,
+              ticks: {
+                stepSize: 5,
+                color: "#64748b",
+                font: { size: 11 }
+              },
+              grid: { color: "#e2e8f0" }
+            },
+            x: {
+              ticks: {
+                color: "#64748b",
+                font: { size: 11 }
+              },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function configurarLogout() {
+      document.getElementById("btn-terminar-sessao").addEventListener("click", () => {
+        redirecionarLogin();
+      });
+    }
+  </script>
 </body>
 </html>

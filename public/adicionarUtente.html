@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB - Adicionar Utente</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- 1) BARRA LATERAL --- */
+    .sidebar {
+      width: 260px;
+      background: #07213b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99, 179, 237, 0.15);
+    }
+
+    .perfil-admin {
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .perfil-foto {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #1a365d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      border: 3px solid #75d0fb;
+      font-size: 2.2rem;
+      color: #75d0fb;
+    }
+
+    .perfil-nome {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .perfil-tipo {
+      font-size: 0.8rem;
+      color: #75d0fb;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu-vazio {
+      flex: 1;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-logout:hover {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    /* --- 2) CONTEÚDO PRINCIPAL --- */
+    .main-conteudo {
+      margin-left: 260px;
+      padding: 48px;
+      width: calc(100% - 260px);
+      max-width: 900px;
+    }
+
+    .btn-voltar {
+      color: #0b75ff;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+
+    .btn-voltar:hover {
+      color: #0056cc;
+    }
+
+    .titulo-pagina {
+      font-size: 1.8rem;
+      font-weight: 400;
+      margin-bottom: 8px;
+      color: #092b4c;
+    }
+
+    .subtitulo-pagina {
+      font-size: 0.95rem;
+      color: #64748b;
+      margin-bottom: 32px;
+    }
+
+    /* Formulário */
+    .cartao-formulario {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      border: 1px solid #e2e8f0;
+    }
+
+    .seccao-form {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .seccao-form:last-of-type {
+      border-bottom: none;
+      margin-bottom: 16px;
+      padding-bottom: 0;
+    }
+
+    .seccao-titulo {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #0b75ff;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .grelha-campos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+    }
+
+    .grupo-input {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .grupo-input.totalw {
+      grid-column: 1 / -1;
+    }
+
+    .grupo-input label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .grupo-input input, .grupo-input select {
+      padding: 12px 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 1rem;
+      color: #092b4c;
+      background: #ffffff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .grupo-input input:focus, .grupo-input select:focus {
+      outline: none;
+      border-color: #0b75ff;
+      box-shadow: 0 0 0 3px rgba(11, 117, 255, 0.15);
+    }
+
+    /* Ações */
+    .bloco-botoes {
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .btn-cancelar {
+      padding: 14px 28px;
+      background: #f1f5f9;
+      color: #475569;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-cancelar:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-guardar {
+      padding: 14px 32px;
+      background: #0b75ff;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(11, 117, 255, 0.2);
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-guardar:hover {
+      background: #0056cc;
+    }
+
+    .btn-guardar:active {
+      transform: scale(0.98);
+    }
+
+    .btn-guardar:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="perfil-admin">
+      <div class="perfil-foto"><i class="fa-solid fa-user-shield"></i></div>
+      <div class="perfil-nome">Administrador Sistema</div>
+      <div class="perfil-tipo">Administrador</div>
+    </div>
+    
+    <div class="sidebar-menu-vazio"></div>
+    
+    <div class="sidebar-footer">
+      <a href="#" class="btn-logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-conteudo">
+    
+    <a href="gestaoUtentes.html" class="btn-voltar">
+      <i class="fa-solid fa-arrow-left"></i> Cancelar e Voltar
+    </a>
+
+    <h1 class="titulo-pagina">Registar Novo Utente</h1>
+    <p class="subtitulo-pagina">Preencha as credenciais de utilizador e a respetiva ficha clínica do utente.</p>
+
+    <div class="cartao-formulario">
+      <form id="form-utente">
+        
+        <div class="seccao-form">
+          <div class="seccao-titulo">
+            <i class="fa-solid fa-user-gear"></i> 1. Credenciais do Utilizador
+          </div>
+          <div class="grelha-campos">
+            <div class="grupo-input">
+              <label for="username">Nome de Utilizador (Username) *</label>
+              <input type="text" id="username" required placeholder="ex: jose_lopes" />
+            </div>
+            
+            <div class="grupo-input">
+              <label for="email">Email *</label>
+              <input type="email" id="email" required placeholder="ex: joselopes@teste.com" />
+            </div>
+
+            <div class="grupo-input">
+              <label for="password">Palavra-passe Inicial *</label>
+              <input type="password" id="password" required placeholder="mínimo 6 caracteres" minlength="6" />
+            </div>
+          </div>
+        </div>
+
+        <div class="seccao-form">
+          <div class="seccao-titulo">
+            <i class="fa-solid fa-id-card"></i> 2. Ficha Clínica & Médico Responsável
+          </div>
+          <div class="grelha-campos">
+            <div class="grupo-input totalw">
+              <label for="nome">Nome Completo *</label>
+              <input type="text" id="nome" required placeholder="ex: José Santos Lopes />
+            </div>
+            
+            <div class="grupo-input">
+              <label for="data_nascimento">Data de Nascimento *</label>
+              <input type="date" id="data_nascimento" required />
+            </div>
+
+            <div class="grupo-input">
+              <label for="sexo_biologico">Sexo Biológico *</label>
+              <select id="sexo_biologico" required>
+                <option value="" disabled selected>Selecione...</option>
+                <option value="masculino">Masculino</option>
+                <option value="feminino">Feminino</option>
+              </select>
+            </div>
+
+            <div class="grupo-input totalw">
+              <label for="id_medico">Médico Assistente Responsável</label>
+              <select id="id_medico">
+                <option value="" disabled selected>A carregar médicos disponíveis...</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="bloco-botoes">
+          <a href="gestaoUtentes.html" class="btn-cancelar">Cancelar</a>
+          <button type="submit" class="btn-guardar" id="btn-submeter">Criar Registo Completo</button>
+        </div>
+
+      </form>
+    </div>
+
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      verificarSessao();
+      carregarMedicosDropdown();
+      configurarFormulario();
+      configurarLogout();
+    });
+
+    // 1. Guardião de Rota
+    function verificarSessao() {
+      const token = localStorage.getItem('token');
+      const userRaw = localStorage.getItem('user');
+
+      if (!token || !userRaw) {
+        window.location.href = 'autenticacao.html';
+        return;
+      }
+
+      const utilizadorSessao = JSON.parse(userRaw);
+      const tipo = utilizadorSessao.tipo_utilizador || utilizadorSessao.tipo;
+
+      if (!tipo || tipo.toLowerCase() !== 'administrador') {
+        window.location.href = 'autenticacao.html';
+        return;
+      }
+
+      const elementoNome = document.querySelector('.perfil-nome');
+      if (elementoNome) {
+        elementoNome.textContent = utilizadorSessao.username || utilizadorSessao.nome || "Administrador";
+      }
+    }
+
+    // 2. Carregar dropdown de Médicos
+    async function carregarMedicosDropdown() {
+      const selectMedico = document.getElementById('id_medico');
+      const token = localStorage.getItem('token');
+
+      try {
+        const resposta = await fetch('http://localhost:3000/medicos', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!resposta.ok) throw new Error();
+
+        const medicos = await resposta.json();
+        selectMedico.innerHTML = '<option value="" selected>Nenhum (Sem médico associado de momento)</option>';
+        
+        medicos.forEach(medico => {
+          const opcao = document.createElement('option');
+          opcao.value = medico.id;
+          opcao.textContent = `${medico.nome} (${medico.especialidade})`;
+          selectMedico.appendChild(opcao);
+        });
+
+      } catch (err) {
+        selectMedico.innerHTML = '<option value="" disabled>Erro ao carregar lista de médicos.</option>';
+      }
+    }
+
+    // 3. Submissão Encadeada Dupla (Utilizador -> Utente)
+    function configurarFormulario() {
+      const formulario = document.getElementById('form-utente');
+      const btnSubmeter = document.getElementById('btn-submeter');
+      const token = localStorage.getItem('token');
+
+      formulario.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        btnSubmeter.disabled = true;
+        btnSubmeter.textContent = "A criar registos...";
+
+        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        
+        const nome = document.getElementById('nome').value.trim();
+        const data_nascimento = document.getElementById('data_nascimento').value;
+        const sexo_biologico = document.getElementById('sexo_biologico').value;
+        const id_medico = document.getElementById('id_medico').value;
+
+        try {
+          // --- PASSO 1: Criar Conta de Utilizador base (CriarUtilizadorDTO) ---
+          const respostaUser = await fetch('http://localhost:3000/utilizadores', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ 
+              username, 
+              email, 
+              password, 
+              tipo_utilizador: 'utente' 
+            })
+          });
+
+          if (!respostaUser.ok) {
+            const erroUser = await respostaUser.json().catch(() => ({}));
+            throw new Error(erroUser.erro || 'Falha ao registar conta de utilizador.');
+          }
+
+          const utilizadorNovo = await respostaUser.json();
+
+          // --- PASSO 2: Criar o Perfil do Utente associado (CriarUtenteDTO) ---
+          const respostaUtente = await fetch(`http://localhost:3000/utentes/utilizador/${utilizadorNovo.id}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ nome, data_nascimento, sexo_biologico })
+          });
+
+          if (!respostaUtente.ok) {
+            const erroUtente = await respostaUtente.json().catch(() => ({}));
+            throw new Error(erroUtente.erro || 'Conta criada, mas falhou ao gerar a ficha clínica.');
+          }
+
+          const utenteNovo = await respostaUtente.json();
+
+          // Se um médico foi selecionado no formulário, associa através do PUT (AtualizarUtenteDTO)
+          if (id_medico) {
+            const respostaAssoc = await fetch(`http://localhost:3000/utentes/${utenteNovo.id}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ medico: { id: Number(id_medico) } })
+            });
+
+            if (!respostaAssoc.ok) {
+              const erroAssoc = await respostaAssoc.json().catch(() => ({}));
+              throw new Error(erroAssoc.erro || 'Utente criado, mas falhou a vinculação ao médico.');
+            }
+          }
+
+          alert(`Utente ${nome} registado com sucesso no sistema!`);
+          window.location.href = 'gestaoUtentes.html';
+
+        } catch (err) {
+          alert(`Erro no processo de criação: ${err.message}`);
+          console.error(err);
+          btnSubmeter.disabled = false;
+          btnSubmeter.textContent = "Criar Registo Completo";
+        }
+      });
+    }
+
+    function configurarLogout() {
+      const btnLogout = document.querySelector('.btn-logout');
+      if (btnLogout) {
+        btnLogout.addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.clear();
+          window.location.href = 'autenticacao.html';
+        });
+      }
+    }
+  </script>
+</body>
+</html>
