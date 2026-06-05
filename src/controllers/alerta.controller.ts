@@ -116,7 +116,7 @@ export const AlertaController = {
             }
 
             // Validação limpa: o médico associado ao alerta coincide com o médico autenticado?
-            if (alertaOriginal.medico.id !== req.user!.id_perfil_especifico) {
+            if (alertaOriginal.medico.id !== req.user!.id) {
                 return res.status(403).json({ erro: 'Apenas o médico responsável pode alterar o estado deste alerta.' });
             }
 
