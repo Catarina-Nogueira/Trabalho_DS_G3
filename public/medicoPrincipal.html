@@ -53,11 +53,10 @@
       color: #75d0fb;
     }
 
-    .perfil-nome { font-size: 1.1rem; font-weight: 600; color: #ffffff; }
+    .perfil-nome { font-size: 1.1rem; font-weight: 600; color: #ffffff; word-break: break-word; }
     .perfil-tipo { font-size: 0.8rem; color: #75d0fb; margin-top: 2px; text-transform: uppercase; letter-spacing: 1px; }
     .perfil-especialidade { font-size: 0.85rem; color: #dfe8f6; margin-top: 4px; font-style: italic; }
 
-    /* Bloco centralizado verticalmente para o botão */
     .sidebar-menu-central {
       margin: auto 0;
       display: flex;
@@ -103,6 +102,7 @@
       border-radius: 12px;
       transition: all 0.2s ease;
       border: 1px solid rgba(239, 68, 68, 0.2);
+      cursor: pointer;
     }
     .btn-logout:hover { background: #ef4444; color: #ffffff; }
 
@@ -142,19 +142,27 @@
     .tabela-alertas tr:last-child td { border-bottom: none; }
     .tabela-alertas tr:hover { background: #f8fcff; }
 
-    /* Classes auxiliares para quando injetares os dados por JS */
     .nome-utente { font-weight: 600; color: #092b4c; }
+    .motivo-alerta { color: #475569; font-size: 0.9rem; margin-top: 4px; display: block; font-style: italic; }
+    
+    /* Enums de Prioridade */
     .badge-prioridade { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
-    .prio-critico { background: #fee2e2; color: #991b1b; }
-    .prio-moderado { background: #fef9c3; color: #a16207; }
-    .prio-ligeiro { background: #e0f2fe; color: #0369a1; }
-    .estado-alerta { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #475569; }
+    .prio-alta { background: #fee2e2; color: #991b1b; }
+    .prio-media { background: #fef9c3; color: #a16207; }
+    .prio-baixa { background: #e0f2fe; color: #0369a1; }
+    
+    /* Enums de Estado */
+    .estado-alerta { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #475569; text-transform: capitalize; }
     .ponto-estado { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-    .ponto-pendente { background: #ef4444; }
-    .ponto-revisao { background: #f59e0b; }
-    .ponto-resolvido { background: #10b981; }
-    .btn-detalhes { color: #0b75ff; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; }
+    .ponto-novo { background: #ef4444; }
+    .ponto-visto { background: #3b82f6; }
+    .ponto-em_seguimento { background: #f59e0b; }
+    .ponto-fechado { background: #10b981; }
+    
+    .btn-detalhes { color: #0b75ff; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border: none; background: none; }
     .btn-detalhes:hover { color: #0056cc; }
+
+    .estado-vazio { text-align: center; padding: 40px; color: #94a3b8; font-size: 1rem; }
   </style>
 </head>
 <body>
@@ -162,19 +170,19 @@
   <aside class="sidebar">
     <div class="perfil-medico">
       <div class="perfil-foto"><i class="fa-solid fa-user-doctor"></i></div>
-      <div class="perfil-nome">Dr. X</div>
+      <div class="perfil-nome" id="nome-medico-sidebar">A carregar...</div>
       <div class="perfil-tipo">Médico</div>
-      <div class="perfil-especialidade">Pneumologia</div>
+      <div class="perfil-especialidade" id="especialidade-medico">Pneumologia</div>
     </div>
     
     <div class="sidebar-menu-central">
-      <a href="#" class="btn-destaque-utentes">
+      <a href="listagemUtentes.html" class="btn-destaque-utentes">
         <i class="fa-solid fa-address-book"></i> Listagem de Utentes
       </a>
     </div>
     
     <div class="sidebar-footer">
-      <a href="#" class="btn-logout">
+      <a href="#" class="btn-logout" id="btnLogout">
         <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
       </a>
     </div>
@@ -200,30 +208,198 @@
           </tr>
         </thead>
         <tbody id="listaAlertas">
-          </tbody>
+          <tr>
+            <td colspan="6" class="estado-vazio">A carregar alertas...</td>
+          </tr>
+        </tbody>
       </table>
     </div>
 
   </main>
 
   <script>
-    // Exemplo de integração futura com o teu Service
-    async function carregarAlertasDoService() {
+    const API_BASE = "http://localhost:3000";
+    let idMedicoGlobal = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const token = verificarEConfigurarSessao();
+      if (!token) return;
+
+      carregarPerfilMedico(token);
+
+      carregarAlertasDoService(token);
+      configurarLogout();
+    });
+
+    function redirecionarLogin() {
+      localStorage.clear();
+      window.location.href = 'autenticacao.html';
+    }
+
+    function verificarEConfigurarSessao() {
+      const token = localStorage.getItem('token');
+      const userRaw = localStorage.getItem('user');
+
+      if (!token || !userRaw) {
+        redirecionarLogin();
+        return null;
+      }
+
+      let utilizador;
       try {
-        // const resposta = await fetch('URL_DA_TUA_API/alertas');
-        // const alertas = await resposta.json();
-        
-        const tbody = document.getElementById('listaAlertas');
-        tbody.innerHTML = ''; // Limpar tabela
-        
-        // Mapeamento/Ciclo dos dados viria aqui para gerar o HTML dinâmico
-      } catch (error) {
-        console.error("Erro ao carregar dados do service:", error);
+        utilizador = JSON.parse(userRaw);
+      } catch (e) {
+        redirecionarLogin();
+        return null;
+      }
+      
+      if(!utilizador.tipo || utilizador.tipo.toLowerCase() != 'medico'){
+        redirecionarLogin();
+        return null;
+      }
+
+      // Injeta dinamicamente o nome do médico guardado no login
+      document.getElementById('nome-medico-sidebar').textContent = utilizador.nome || "Medico";
+      idMedicoGlobal = utilizador.id_especifico;
+      
+      // Se tiveres a especialidade guardada no utilizador, podes mapeá-la aqui também:
+      if (utilizador.especialidade) {
+        document.getElementById('especialidade-medico').textContent = utilizador.especialidade;
+      }
+
+      if (!idMedicoGlobal) {
+        console.error ("ID do médico não encontrado no localStorage");
+        redirecionarLogin();
+        return null;
+      }
+      return token;
+    }
+
+    async function carregarPerfilMedico(token) {
+      try {
+        const resposta = await fetch(
+          `${API_BASE}/medicos/${idMedicoGlobal}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }
+          }
+        );
+
+        if (!resposta.ok) {
+          throw new Error("Erro ao obter médico");
+        }
+
+        const medico = await resposta.json();
+
+        document.getElementById("nome-medico-sidebar").textContent =
+          medico.nome;
+
+        document.getElementById("especialidade-medico").textContent =
+          medico.especialidade || "Sem especialidade";
+      }
+      catch (erro) {
+        console.error("Erro ao carregar médico:", erro);
       }
     }
 
-    // Inicializar quando a página carregar
-    window.onload = carregarAlertasDoService;
+    function configurarLogout() {
+      document.getElementById("btnLogout").addEventListener("click", (e) => {
+        e.preventDefault();
+        localStorage.clear();
+        window.location.href = "autenticacao.html";
+      });
+    }
+
+    async function carregarAlertasDoService(token) {
+      const tbody = document.getElementById('listaAlertas');
+      
+      try {
+        // Consome a rota do AlertaRouter: router.get('/medico', ...)
+        const resposta = await fetch(`${API_BASE}/alertas/medico/${idMedicoGlobal}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!resposta.ok) throw new Error("Erro ao obter alertas do servidor.");
+        
+        const alertas = await resposta.json();
+        console.log("Alertas recebidos:", alertas);
+        console.log("Número de alertas:", alertas.length);
+        
+        if (!alertas || alertas.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="estado-vazio"><i class="fa-solid fa-bell-slash"></i> Sem alertas clínicos pendentes de momento.</td></tr>`;
+          return;
+        }
+
+        // Mapeamento textual amigável dos Tipos de Alerta (Enum TipoAlerta)
+        const traducaoTipos = {
+          'score_carat': 'Score Baixo CARAT',
+          'sintoma_grave': 'Sintoma Grave Reportado',
+          'medicacao': 'Alteração de Medicação',
+          'exame_pendente': 'Exame Pendente',
+          'sem_avaliacao': 'Ausência de Avaliação'
+        };
+
+        tbody.innerHTML = alertas.map(alerta => {
+          // Formatação da data vinda do @CreateDateColumn
+          const dataCriacao = new Date(alerta.data_criacao).toLocaleDateString("pt-PT", {
+            day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+          });
+
+          // Tratamento do nome do utente a partir do relacionamento JoinColumn
+          const nomeUtente = alerta.utente ? alerta.utente.nome : "Utente Desconhecido";
+          
+          // Mapeamento limpo das classes CSS conforme os Enums fornecidos
+          const classePrioridade = `prio-${alerta.prioridade}`; // prio-alta, prio-media, prio-baixa
+          const classePonto = `ponto-${alerta.estado}`;       // ponto-novo, ponto-visto, etc.
+          
+          // Formata o estado visual removendo underscores para exibição (ex: em_seguimento -> em seguimento)
+          const textoEstado = alerta.estado.replace('_', ' ');
+
+          return `
+            <tr>
+              <td>
+                <span class="nome-utente">${nomeUtente}</span>
+              </td>
+              <td>
+                <strong>${traducaoTipos[alerta.tipo] || alerta.tipo}</strong>
+                <span class="motivo-alerta">${alerta.motivo}</span>
+              </td>
+              <td>
+                <span class="badge-prioridade ${classePrioridade}">${alerta.prioridade}</span>
+              </td>
+              <td>${dataCriacao}</td>
+              <td>
+                <span class="estado-alerta">
+                  <span class="ponto-estado ${classePonto}"></span>
+                  ${textoEstado}
+                </span>
+              </td>
+              <td style="text-align: right;">
+                <button class="btn-detalhes" onclick="verDetalhesAlerta(${alerta.id})">
+                  <i class="fa-solid fa-magnifying-glass-chart"></i> Analisar
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+      } catch (error) {
+        console.error("Erro ao carregar dados do service:", error);
+        tbody.innerHTML = `<tr><td colspan="6" class="estado-vazio" style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Falha ao carregar a lista de alertas médicos.</td></tr>`;
+      }
+    }
+
+    // Função auxiliar para gatilho de ação no clique de cada alerta
+    function verDetalhesAlerta(idAlerta) {
+      // Aqui podes redirecionar para a página de tratamento ou abrir um modal de revisão
+      window.location.href = `detalheAlerta.html?id=${idAlerta}`;
+    }
   </script>
 </body>
 </html>

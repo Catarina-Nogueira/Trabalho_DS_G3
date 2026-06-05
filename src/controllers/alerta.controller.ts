@@ -3,6 +3,7 @@ import { AlertaService } from '../services/alerta.services';
 import { EstadoAlerta, PrioridadeAlerta } from '../models/alerta.entity';
 import { AppDataSource } from '../database/database';
 import { Utente } from '../models/utente.entity';
+import { Medico } from '../models/medico.entity';
 
 const utenteRepo = AppDataSource.getRepository(Utente);
 
@@ -11,19 +12,41 @@ export const AlertaController = {
     // RF36 - Listagem de alertas direcionados ao Médico autenticado
     listarPorMedico: async (req: Request, res: Response) => {
         try {
-            const id_medico = req.user!.id; 
             const { estado, prioridade, id_utente } = req.query;
 
+            const medico = await AppDataSource
+                .getRepository(Medico)
+                .findOne({
+                    where: {
+                        utilizador: {
+                            id: req.user!.id
+                        }
+                    }
+                });
+
+            if (!medico) {
+                return res.status(404).json({
+                    erro: 'Médico não encontrado.'
+                });
+            }
+
             const alertas = await AlertaService.listarPorMedico(
-                id_medico,
+                medico.id,
                 estado as EstadoAlerta,
                 prioridade as PrioridadeAlerta,
                 id_utente ? Number(id_utente) : undefined
             );
-            
+
+            console.log("Médico:", medico.id);
+            console.log("Alertas encontrados:", alertas.length);
+
             return res.json(alertas);
+
         } catch (err: any) {
-            return res.status(500).json({ erro: 'Erro ao listar alertas do médico.' });
+            console.error(err);
+            return res.status(500).json({
+                erro: 'Erro ao listar alertas do médico.'
+            });
         }
     },
 

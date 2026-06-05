@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB - Detalhes do Alerta Clínico</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- BARRA LATERAL --- */
+    .sidebar {
+      width: 260px;
+      background: #07213b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99, 179, 237, 0.15);
+    }
+
+    .perfil-medico {
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .perfil-foto {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #1a365d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      border: 3px solid #75d0fb;
+      font-size: 2.2rem;
+      color: #75d0fb;
+    }
+
+    .perfil-nome { font-size: 1.1rem; font-weight: 600; color: #ffffff; word-break: break-word; }
+    .perfil-tipo { font-size: 0.8rem; color: #75d0fb; margin-top: 2px; text-transform: uppercase; letter-spacing: 1px; }
+    .perfil-especialidade { font-size: 0.85rem; color: #dfe8f6; margin-top: 4px; font-style: italic; }
+
+    .sidebar-menu-central {
+      margin: auto 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .btn-destaque-utentes {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-destaque-utentes:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-voltar-principal {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-voltar-principal:hover { background: rgba(255, 255, 255, 0.2); border-color: #ffffff; }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .btn-logout:hover { background: #ef4444; color: #ffffff; }
+
+    /* --- CONTEÚDO PRINCIPAL --- */
+    .main-conteudo {
+      margin-left: 260px;
+      padding: 48px;
+      width: calc(100% - 260px);
+      max-width: 1200px;
+    }
+
+    .cabecalho-pagina { margin-bottom: 32px; }
+    .cabecalho-pagina h1 { font-size: 2.2rem; color: #092b4c; }
+    .cabecalho-pagina p { color: #64748b; margin-top: 4px; font-size: 1.05rem; }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1.51fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* --- CARTÕES DE DETALHE --- */
+    .cartao-detalhe {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.01);
+    }
+
+    .cartao-detalhe h2 {
+      font-size: 1.3rem;
+      color: #07213b;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 12px;
+    }
+
+    .campo-info {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid #f8fafc;
+      font-size: 0.98rem;
+    }
+
+    .campo-info .label { font-weight: 600; color: #64748b; }
+    .campo-info .valor { color: #092b4c; font-weight: 500; text-align: right; }
+
+    .bloco-motivo {
+      background: #f8fafc;
+      border-left: 4px solid #0b75ff;
+      padding: 16px;
+      border-radius: 4px 12px 12px 4px;
+      margin-top: 16px;
+    }
+    .bloco-motivo p { font-size: 1rem; color: #334155; line-height: 1.5; font-style: italic; }
+
+    /* --- BADGES --- */
+    .badge-prioridade { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+    .prio-alta { background: #fee2e2; color: #991b1b; }
+    .prio-media { background: #fef9c3; color: #a16207; }
+    .prio-baixa { background: #e0f2fe; color: #0369a1; }
+
+    /* --- FORMULÁRIO DE GESTÃO --- */
+    .grupo-campo { margin-bottom: 24px; }
+    .grupo-campo label { display: block; font-size: 0.95rem; font-weight: 600; color: #07213b; margin-bottom: 8px; }
+    
+    .grupo-campo select {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-family: inherit;
+      color: #092b4c;
+      background: #f8fafc;
+      font-size: 1rem;
+    }
+    .grupo-campo select:focus { outline: none; border-color: #0b75ff; background: #ffffff; }
+
+    .btn-atualizar {
+      width: 100%;
+      padding: 14px;
+      background: #0b75ff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-atualizar:hover { background: #0056cc; }
+
+    .estado-vazio { text-align: center; padding: 40px; color: #94a3b8; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="perfil-medico">
+      <div class="perfil-foto"><i class="fa-solid fa-user-doctor"></i></div>
+      <div class="perfil-nome" id="nome-medico-sidebar">A carregar...</div>
+      <div class="perfil-tipo">Médico</div>
+      <div class="perfil-especialidade" id="especialidade-medico">Pneumologia</div>
+    </div>
+    
+    <div class="sidebar-menu-central">
+      <a href="listagemUtentes.html" class="btn-destaque-utentes">
+        <i class="fa-solid fa-address-book"></i> Listagem de Utentes
+      </a>
+    </div>
+    
+    <div class="sidebar-footer">
+      <a href="painelMedico.html" class="btn-voltar-principal"><i class="fa-solid fa-bell"></i> Central de Alertas</a>
+      <a href="#" class="btn-logout" id="btnLogout"><i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão</a>
+    </div>
+  </aside>
+
+  <main class="main-conteudo">
+    
+    <div class="cabecalho-pagina">
+      <h1>Análise Detalhada do Alerta</h1>
+      <p id="subtitulo-alerta">ID do Alerta: #...</p>
+    </div>
+
+    <div class="layout-grid" id="conteudo-alerta-grid" style="display: none;">
+      
+      <section class="cartao-detalhe">
+        <h2><i class="fa-solid fa-file-medical" style="color: #0b75ff;"></i> Informação do Evento</h2>
+        
+        <div class="campo-info">
+          <span class="label">Utente Afetado</span>
+          <span class="valor" id="alerta-utente" style="font-weight: 700;">A carregar...</span>
+        </div>
+        <div class="campo-info">
+          <span class="label">Tipo de Ocorrência</span>
+          <span class="valor" id="alerta-tipo">A carregar...</span>
+        </div>
+        <div class="campo-info">
+          <span class="label">Nível de Severidade</span>
+          <span class="valor" id="alerta-prioridade-container"></span>
+        </div>
+        <div class="campo-info">
+          <span class="label">Data de Emissão</span>
+          <span class="valor" id="alerta-data">A carregar...</span>
+        </div>
+        <div class="campo-info">
+          <span class="label">Última Atualização</span>
+          <span class="valor" id="alerta-data-atualizacao">A carregar...</span>
+        </div>
+
+        <div style="margin-top: 24px;">
+          <span class="label" style="font-size: 0.95rem; font-weight: 600; color: #64748b;">Evidência Clínica / Motivo</span>
+          <div class="bloco-motivo">
+            <p id="alerta-motivo">A carregar evidências...</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="cartao-detalhe">
+        <h2><i class="fa-solid fa-user-shield" style="color: #10b981;"></i> Ações de Triagem</h2>
+        
+        <form id="formAlterarEstado">
+          <div class="grupo-campo">
+            <label for="selectEstado">Estado Clínico do Alerta</label>
+            <select id="selectEstado" required>
+              <option value="novo">Novo (Não Respondido)</option>
+              <option value="visto">Visto (Em Análise)</option>
+              <option value="em_seguimento">Em Seguimento</option>
+              <option value="fechado">Fechado (Resolvido)</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-atualizar">Guardar Alterações</button>
+        </form>
+      </section>
+
+    </div>
+
+    <div id="estado-carregamento" class="estado-vazio">
+      <p><i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; color: #0b75ff; margin-bottom: 12px;"></i><br>A recolher dados do registo clínico...</p>
+    </div>
+
+  </main>
+
+  <script>
+    const API_BASE = "http://localhost:3000";
+    let idAlertaGlobal = null;
+    let tokenGlobal = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        tokenGlobal = verificarEConfigurarSessao();
+        if (!tokenGlobal) return;
+
+        carregarPerfilMedico(tokenGlobal);
+
+        const parametros = new URLSearchParams(window.location.search);
+        idAlertaGlobal = parametros.get("id");
+
+        if (!idAlertaGlobal) {
+            alert("Alerta inválido ou não especificado.");
+            window.location.href = "painelMedico.html";
+            return;
+        }
+
+        document.getElementById("subtitulo-alerta").textContent =
+            `Referência do Registo: #${idAlertaGlobal}`;
+
+        carregarDetalhesAlerta();
+    });
+
+    function verificarEConfigurarSessao() {
+        const token = localStorage.getItem("token");
+        const userRaw = localStorage.getItem("user");
+
+        if (!token || !userRaw) {
+            redirecionarLogin();
+            return null;
+        }
+
+        let utilizador;
+
+        try {
+            utilizador = JSON.parse(userRaw);
+        } catch (e) {
+            redirecionarLogin();
+            return null;
+        }
+
+        if (
+            !utilizador.tipo ||
+            utilizador.tipo.toLowerCase() !== "medico"
+        ) {
+            redirecionarLogin();
+            return null;
+        }
+
+  document.getElementById("nome-medico-sidebar").textContent =
+    utilizador.nome || "Médico";
+
+  document.getElementById("btnLogout").addEventListener("click", (e) => {
+    e.preventDefault();
+    localStorage.clear();
+    window.location.href = "autenticacao.html";
+  });
+
+  return token;
+}
+
+    async function carregarPerfilMedico(token) {
+        try {
+            const user = JSON.parse(localStorage.getItem("user"));
+
+            const resposta = await fetch(
+            `${API_BASE}/medicos/${user.id_especifico}`,
+            {
+                headers: {
+                Authorization: `Bearer ${token}`
+                }
+            }
+            );
+
+            if (!resposta.ok) return;
+
+            const medico = await resposta.json();
+
+            document.getElementById("nome-medico-sidebar").textContent =
+            medico.nome;
+
+            document.getElementById("especialidade-medico").textContent =
+            medico.especialidade || "Sem especialidade";
+
+        } catch (erro) {
+            console.error("Erro ao carregar médico:", erro);
+        }
+    }
+
+    function redirecionarLogin() {
+      localStorage.clear();
+      window.location.href = 'autenticacao.html';
+    }
+
+    /* --- CONSUMO DA API: BUSCAR POR ID --- */
+    async function carregarDetalhesAlerta() {
+      try {
+        // Consome a rota mapeada: router.get('/:id', ...)
+        const resposta = await fetch(`${API_BASE}/alertas/${idAlertaGlobal}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${tokenGlobal}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!resposta.ok) {
+          const erro = await resposta.json();
+          throw new Error(erro.erro || "Falha ao aceder ao alerta.");
+        }
+
+        const alerta = await resposta.json();
+
+        // Mapeamentos Textuais
+        const traducaoTipos = {
+          'score_carat': 'Score Baixo no Questionário CARAT',
+          'sintoma_grave': 'Sintoma Grave Reportado pelo Utente',
+          'medicacao': 'Revisão Clínico-Medicamentosa',
+          'exame_pendente': 'Exame Médico Pendente',
+          'sem_avaliacao': 'Utente sem Avaliação Recente'
+        };
+
+        // Preenchimento dos campos no HTML
+        document.getElementById("alerta-utente").textContent = alerta.utente ? alerta.utente.nome : "Não identificado";
+        document.getElementById("alerta-tipo").textContent = traducaoTipos[alerta.tipo] || alerta.tipo;
+        document.getElementById("alerta-motivo").textContent = alerta.motivo;
+        
+        document.getElementById("alerta-data").textContent = new Date(alerta.data_criacao).toLocaleDateString("pt-PT", {
+          day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+        });
+        
+        document.getElementById("alerta-data-atualizacao").textContent = new Date(alerta.data_atualizacao).toLocaleDateString("pt-PT", {
+          day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+        });
+
+        // Configuração da Badge de Prioridade
+        const containerPrio = document.getElementById("alerta-prioridade-container");
+        containerPrio.innerHTML = `<span class="badge-prioridade prio-${alerta.prioridade}">${alerta.prioridade}</span>`;
+
+        // Define o estado atual no seletor do formulário
+        document.getElementById("selectEstado").value = alerta.estado;
+
+        // Alterna a visualização dos blocos
+        document.getElementById("estado-carregamento").style.display = "none";
+        document.getElementById("conteudo-alerta-grid").style.display = "grid";
+
+        configurarFormularioEstado();
+
+      } catch (err) {
+        document.getElementById("estado-carregamento").innerHTML = `
+          <div style="color: #ef4444;">
+            <i class="fa-solid fa-circle-xmark" style="font-size: 2.5rem; margin-bottom: 12px;"></i>
+            <p>${err.message}</p>
+          </div>`;
+      }
+    }
+
+    /* --- CONSUMO DA API: PATCH PARA ATUALIZAR ESTADO --- */
+    function configurarFormularioEstado() {
+      const form = document.getElementById("formAlterarEstado");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const novoEstado = document.getElementById("selectEstado").value;
+
+        try {
+          // Consome a rota mapeada: router.patch('/:id/estado', ...)
+          const resposta = await fetch(`${API_BASE}/alertas/${idAlertaGlobal}/estado`, {
+            method: "PATCH",
+            headers: {
+              "Authorization": `Bearer ${tokenGlobal}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ estado: novoEstado })
+          });
+
+          if (!resposta.ok) {
+            const erro = await resposta.json();
+            throw new Error(erro.erro || "Não foi possível modificar o estado.");
+          }
+
+          alert("Estado do alerta clínico atualizado com sucesso!");
+          
+          // Recarrega os dados para atualizar as datas de modificação no ecrã
+          carregarDetalhesAlerta();
+
+        } catch (err) {
+          alert(err.message);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
