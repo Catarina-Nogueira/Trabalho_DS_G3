@@ -137,7 +137,7 @@ export const ExameUtenteController = {
                 data_exame
             };
 
-            const novoExame = await ExameUtenteService.criar(dadosDTO);
+            const novoExame = await ExameUtenteService.criar(dadosDTO, req.user!.id);
             return res.status(201).json(novoExame);
         } catch (err: any) {
             return res.status(500).json({ erro: err.message || 'Erro ao prescrever exame' });
@@ -164,7 +164,7 @@ export const ExameUtenteController = {
                 return res.status(400).json({ erro: 'Resultado e interpretação clínica são obrigatórios.' });
             }
 
-            const examenAtualizado = await ExameUtenteService.registarResultado(id_requisicao, dadosDTO);
+            const examenAtualizado = await ExameUtenteService.registarResultado(id_requisicao, dadosDTO, req.user!.id);
             return res.json(examenAtualizado);
         } catch (err: any) {
             return res.status(500).json({ erro: err.message || 'Erro ao registar resultado do exame' });
@@ -186,7 +186,7 @@ export const ExameUtenteController = {
                 return res.status(403).json({ erro: 'Apenas o médico que requisitou pode eliminar este exame.' });
             }
 
-            await ExameUtenteService.eliminar(id_requisicao);
+            await ExameUtenteService.eliminar(id_requisicao, req.user!.id);
             return res.status(204).send();
         } catch (err: any) {
             return res.status(400).json({ erro: err.message || 'Erro ao eliminar exame' });

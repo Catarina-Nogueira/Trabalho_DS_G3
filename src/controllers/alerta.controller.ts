@@ -93,7 +93,7 @@ export const AlertaController = {
             }
             
             // Validação de Permissão para Médico
-            if (req.user!.tipo_utilizador === 'medico' && idMedicoResponsavel !== req.user!.id) {
+            if (req.user!.tipo_utilizador === 'medico' && idMedicoResponsavel !== req.user!.id_perfil_especifico) {
                 return res.status(403).json({ erro: 'Este alerta pertence a um utente associado a outro médico.' });
             }
 
@@ -116,11 +116,11 @@ export const AlertaController = {
             }
 
             // Validação limpa: o médico associado ao alerta coincide com o médico autenticado?
-            if (alertaOriginal.medico.id !== req.user!.id) {
+            if (alertaOriginal.medico.id !== req.user!.id_perfil_especifico) {
                 return res.status(403).json({ erro: 'Apenas o médico responsável pode alterar o estado deste alerta.' });
             }
 
-            const alertaAtualizado = await AlertaService.atualizarEstado(id_alerta, { estado });
+            const alertaAtualizado = await AlertaService.atualizarEstado(id_alerta, { estado }, req.user!.id);
             return res.json(alertaAtualizado);
         } catch (err: any) {
             return res.status(400).json({ erro: err.message || 'Erro ao atualizar estado do alerta.' });

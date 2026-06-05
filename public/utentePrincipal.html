@@ -302,9 +302,9 @@
       </a>
     </nav>
 
-    <div class="btn-logout" id="btn-terminar-sessao">
+    <a href="#" class="btn-logout" id="btnLogout">
       <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
-    </div>
+    </a>
   </aside>
 
   <section class="divisao-central">
@@ -507,7 +507,8 @@
     }
 
     function configurarLogout() {
-      document.getElementById("btn-terminar-sessao").addEventListener("click", () => {
+      document.getElementById("btnLogout").addEventListener("click", (e) => {
+        e.preventDefault();
         redirecionarLogin();
       });
     }

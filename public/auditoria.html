@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB - Auditoria do Sistema</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- SIDEBAR --- */
+    .sidebar {
+      width: 260px; background: #07213b; color: #fff;
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 40px 24px; position: fixed; top: 0; bottom: 0; left: 0;
+      z-index: 100; border-right: 1px solid rgba(99,179,237,0.15);
+    }
+
+    .perfil-admin { text-align: center; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+    .perfil-foto {
+      width: 80px; height: 80px; border-radius: 50%; background: #1a365d;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px; border: 3px solid #75d0fb;
+      font-size: 2.2rem; color: #75d0fb;
+    }
+
+    .perfil-nome { font-size: 1.1rem; font-weight: 600; color: #fff; word-break: break-word; }
+    .perfil-tipo { font-size: 0.8rem; color: #75d0fb; margin-top: 2px; text-transform: uppercase; letter-spacing: 1px; }
+
+    .sidebar-footer { padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+
+    .btn-logout {
+      display: flex; align-items: center; gap: 16px; padding: 14px 18px;
+      color: #fca5a5; text-decoration: none; font-size: 0.95rem;
+      border-radius: 12px; transition: all 0.2s; border: 1px solid rgba(239,68,68,0.2);
+    }
+    .btn-logout:hover { background: #ef4444; color: #fff; }
+
+    /* --- MAIN --- */
+    .main-conteudo { margin-left: 260px; padding: 48px; width: calc(100% - 260px); }
+
+    .btn-voltar {
+      color: #0b75ff; text-decoration: none; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-bottom: 24px; font-size: 0.95rem;
+    }
+    .btn-voltar:hover { color: #0056cc; }
+
+    .cabecalho-pagina { margin-bottom: 32px; }
+    .cabecalho-pagina h1 { font-size: 2.2rem; color: #092b4c; }
+    .cabecalho-pagina p { color: #64748b; margin-top: 4px; font-size: 1.05rem; }
+
+    /* --- STATS --- */
+    .stats-bar {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 16px; margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+      padding: 20px 24px;
+    }
+    .stat-card .stat-valor { font-size: 2rem; font-weight: 700; color: #07213b; }
+    .stat-card .stat-label { font-size: 0.82rem; color: #64748b; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* --- FILTROS --- */
+    .filtros-container {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+      padding: 20px 24px; margin-bottom: 24px;
+      display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto;
+      gap: 12px; align-items: end;
+    }
+
+    .filtro-grupo label { display: block; font-size: 0.82rem; font-weight: 600; color: #64748b; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .filtro-grupo input,
+    .filtro-grupo select {
+      width: 100%; padding: 10px 12px;
+      border: 1.5px solid #e2e8f0; border-radius: 8px;
+      font-family: inherit; font-size: 0.9rem; color: #092b4c;
+      background: #f8fafc;
+    }
+    .filtro-grupo input:focus,
+    .filtro-grupo select:focus { outline: none; border-color: #0b75ff; background: #fff; }
+
+    .btn-limpar-filtros {
+      padding: 10px 16px; background: #f1f5f9; color: #475569;
+      border: none; border-radius: 8px; font-weight: 600; font-size: 0.88rem;
+      cursor: pointer; white-space: nowrap;
+    }
+    .btn-limpar-filtros:hover { background: #e2e8f0; }
+
+    /* --- BARRA DE AÇÕES --- */
+    .barra-acoes {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .contagem-logs { font-size: 0.9rem; color: #64748b; }
+    .contagem-logs strong { color: #07213b; }
+
+    .btns-exportar { display: flex; gap: 10px; }
+
+    .btn-exportar {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px; border: none; border-radius: 10px;
+      font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-csv { background: #dcfce7; color: #15803d; }
+    .btn-csv:hover { background: #bbf7d0; }
+    .btn-json { background: #e0f2fe; color: #0369a1; }
+    .btn-json:hover { background: #bae6fd; }
+
+    /* --- TABELA --- */
+    .tabela-container {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden;
+    }
+
+    .tabela { width: 100%; border-collapse: collapse; text-align: left; }
+    .tabela th, .tabela td { padding: 14px 20px; border-bottom: 1px solid #f1f5f9; font-size: 0.92rem; }
+    .tabela th {
+      background: #f8fafc; color: #64748b; font-weight: 600;
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0;
+    }
+    .tabela tr:last-child td { border-bottom: none; }
+    .tabela tr:hover { background: #f8fcff; }
+
+    .badge-acao {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.76rem; font-weight: 700; text-transform: uppercase;
+    }
+    .acao-criar    { background: #dcfce7; color: #15803d; }
+    .acao-atualizar{ background: #fef9c3; color: #a16207; }
+    .acao-eliminar { background: #fee2e2; color: #991b1b; }
+    .acao-consultar{ background: #f1f5f9; color: #64748b; }
+    .acao-login    { background: #e0f2fe; color: #0369a1; }
+    .acao-logout   { background: #fce7f3; color: #9d174d; }
+
+    .badge-tipo {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.76rem; font-weight: 600; text-transform: capitalize;
+      background: #f1f5f9; color: #475569;
+    }
+    .tipo-medico        { background: #e0f2fe; color: #0369a1; }
+    .tipo-administrador { background: #fce7f3; color: #9d174d; }
+    .tipo-utente        { background: #dcfce7; color: #15803d; }
+
+    .entidade-texto { font-size: 0.88rem; color: #092b4c; text-transform: capitalize; }
+
+    .estado-vazio { text-align: center; padding: 48px; color: #94a3b8; font-size: 1rem; }
+
+    /* --- PAGINAÇÃO --- */
+    .paginacao {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 20px;
+    }
+
+    .btn-pag {
+      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+      border: 1px solid #e2e8f0; border-radius: 8px; background: #fff;
+      color: #475569; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-pag:hover { background: #f1f5f9; }
+    .btn-pag.ativo { background: #0b75ff; color: #fff; border-color: #0b75ff; font-weight: 700; }
+    .btn-pag:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .info-paginacao { font-size: 0.85rem; color: #64748b; margin: 0 8px; }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="perfil-admin">
+      <div class="perfil-foto"><i class="fa-solid fa-user-shield"></i></div>
+      <div class="perfil-nome" id="nome-admin">Administrador</div>
+      <div class="perfil-tipo">Administrador</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="#" class="btn-logout" id="btnLogout">
+        <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-conteudo">
+
+    <a href="administradorPrincipal.html" class="btn-voltar">
+      <i class="fa-solid fa-arrow-left"></i> Voltar ao Painel
+    </a>
+
+    <div class="cabecalho-pagina">
+      <h1>Auditoria do Sistema</h1>
+      <p>Registo completo de todas as ações realizadas pelos utilizadores — criações, alterações, eliminações e acessos.</p>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-valor" id="stat-total">—</div>
+        <div class="stat-label">Total de Registos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-valor" id="stat-hoje">—</div>
+        <div class="stat-label">Ações Hoje</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-valor" id="stat-criações">—</div>
+        <div class="stat-label">Criações</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-valor" id="stat-eliminações">—</div>
+        <div class="stat-label">Eliminações</div>
+      </div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="filtros-container">
+      <div class="filtro-grupo">
+        <label>Utilizador (email)</label>
+        <input type="text" id="filtro-email" placeholder="Filtrar por email..." oninput="aplicarFiltros()" />
+      </div>
+      <div class="filtro-grupo">
+        <label>Entidade</label>
+        <select id="filtro-entidade" onchange="aplicarFiltros()">
+          <option value="">Todas as entidades</option>
+        </select>
+      </div>
+      <div class="filtro-grupo">
+        <label>Ação</label>
+        <select id="filtro-acao" onchange="aplicarFiltros()">
+          <option value="">Todas as ações</option>
+          <option value="criar">Criar</option>
+          <option value="atualizar">Atualizar</option>
+          <option value="eliminar">Eliminar</option>
+          <option value="consultar">Consultar</option>
+          <option value="login">Login</option>
+          <option value="logout">Logout</option>
+        </select>
+      </div>
+      <div class="filtro-grupo">
+        <label>Data (a partir de)</label>
+        <input type="date" id="filtro-data" onchange="aplicarFiltros()" />
+      </div>
+      <button class="btn-limpar-filtros" onclick="limparFiltros()">
+        <i class="fa-solid fa-xmark"></i> Limpar
+      </button>
+    </div>
+
+    <!-- BARRA DE AÇÕES -->
+    <div class="barra-acoes">
+      <span class="contagem-logs">A mostrar <strong id="contagem-filtrada">0</strong> de <strong id="contagem-total">0</strong> registos</span>
+      <div class="btns-exportar">
+        <button class="btn-exportar btn-csv" onclick="exportarCSV()">
+          <i class="fa-solid fa-file-csv"></i> Exportar CSV
+        </button>
+        <button class="btn-exportar btn-json" onclick="exportarJSON()">
+          <i class="fa-solid fa-file-code"></i> Exportar JSON
+        </button>
+      </div>
+    </div>
+
+    <!-- TABELA -->
+    <div class="tabela-container">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Data / Hora</th>
+            <th>Utilizador</th>
+            <th>Tipo</th>
+            <th>Entidade Afetada</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-logs">
+          <tr><td colspan="6" class="estado-vazio">A carregar registos...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINAÇÃO -->
+    <div class="paginacao" id="paginacao"></div>
+
+  </main>
+
+  <script>
+    const API_BASE = "http://localhost:3000";
+    let token = null;
+    let todosOsLogs = [];
+    let logsFiltrados = [];
+
+    const REGISTOS_POR_PAGINA = 25;
+    let paginaAtual = 1;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      token = localStorage.getItem("token");
+      const userRaw = localStorage.getItem("user");
+
+      if (!token || !userRaw) { redirecionarLogin(); return; }
+
+      let utilizador;
+      try { utilizador = JSON.parse(userRaw); } catch { redirecionarLogin(); return; }
+
+      if (!utilizador.tipo || utilizador.tipo.toLowerCase() !== "administrador") { redirecionarLogin(); return; }
+
+      document.getElementById("nome-admin").textContent = utilizador.nome || "Administrador";
+
+      document.getElementById("btnLogout").addEventListener("click", (e) => {
+        e.preventDefault(); localStorage.clear(); window.location.href = "autenticacao.html";
+      });
+
+      carregarLogs();
+    });
+
+    function redirecionarLogin() { localStorage.clear(); window.location.href = "autenticacao.html"; }
+
+    async function carregarLogs() {
+      try {
+        const r = await fetch(`${API_BASE}/auditorias`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!r.ok) throw new Error("Sem permissão para aceder aos logs.");
+        todosOsLogs = await r.json();
+        logsFiltrados = [...todosOsLogs];
+
+        calcularStats();
+        preencherFiltroEntidades();
+        renderizarTabela();
+      } catch (e) {
+        document.getElementById("tbody-logs").innerHTML =
+          `<tr><td colspan="6" class="estado-vazio" style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> ${e.message}</td></tr>`;
+      }
+    }
+
+    function calcularStats() {
+      const hoje = new Date().toDateString();
+      const hojeCount = todosOsLogs.filter(l => new Date(l.data).toDateString() === hoje).length;
+      const criações = todosOsLogs.filter(l => l.acao === 'criar').length;
+      const eliminações = todosOsLogs.filter(l => l.acao === 'eliminar').length;
+
+      document.getElementById("stat-total").textContent = todosOsLogs.length.toLocaleString("pt-PT");
+      document.getElementById("stat-hoje").textContent = hojeCount.toLocaleString("pt-PT");
+      document.getElementById("stat-criações").textContent = criações.toLocaleString("pt-PT");
+      document.getElementById("stat-eliminações").textContent = eliminações.toLocaleString("pt-PT");
+    }
+
+    function preencherFiltroEntidades() {
+      const entidades = [...new Set(todosOsLogs.map(l => l.entidade_afetada))].sort();
+      const sel = document.getElementById("filtro-entidade");
+      entidades.forEach(e => {
+        const opt = document.createElement("option");
+        opt.value = e; opt.textContent = e.replace(/_/g, ' ');
+        sel.appendChild(opt);
+      });
+    }
+
+    function aplicarFiltros() {
+      const email = document.getElementById("filtro-email").value.toLowerCase().trim();
+      const entidade = document.getElementById("filtro-entidade").value;
+      const acao = document.getElementById("filtro-acao").value;
+      const dataStr = document.getElementById("filtro-data").value;
+      const dataFiltro = dataStr ? new Date(dataStr) : null;
+
+      logsFiltrados = todosOsLogs.filter(l => {
+        if (email && !l.utilizador.email.toLowerCase().includes(email)) return false;
+        if (entidade && l.entidade_afetada !== entidade) return false;
+        if (acao && l.acao !== acao) return false;
+        if (dataFiltro && new Date(l.data) < dataFiltro) return false;
+        return true;
+      });
+
+      paginaAtual = 1;
+      renderizarTabela();
+    }
+
+    function limparFiltros() {
+      document.getElementById("filtro-email").value = "";
+      document.getElementById("filtro-entidade").value = "";
+      document.getElementById("filtro-acao").value = "";
+      document.getElementById("filtro-data").value = "";
+      logsFiltrados = [...todosOsLogs];
+      paginaAtual = 1;
+      renderizarTabela();
+    }
+
+    function renderizarTabela() {
+      const tbody = document.getElementById("tbody-logs");
+      document.getElementById("contagem-filtrada").textContent = logsFiltrados.length.toLocaleString("pt-PT");
+      document.getElementById("contagem-total").textContent = todosOsLogs.length.toLocaleString("pt-PT");
+
+      if (!logsFiltrados.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="estado-vazio"><i class="fa-solid fa-magnifying-glass"></i> Nenhum registo corresponde aos filtros aplicados.</td></tr>`;
+        document.getElementById("paginacao").innerHTML = "";
+        return;
+      }
+
+      const inicio = (paginaAtual - 1) * REGISTOS_POR_PAGINA;
+      const fim = inicio + REGISTOS_POR_PAGINA;
+      const pagina = logsFiltrados.slice(inicio, fim);
+
+      tbody.innerHTML = pagina.map(log => {
+        const data = new Date(log.data).toLocaleDateString("pt-PT", {
+          day: "2-digit", month: "2-digit", year: "numeric",
+          hour: "2-digit", minute: "2-digit", second: "2-digit"
+        });
+        const tipoClasse = `tipo-${log.utilizador.tipo}`;
+        const acaoClasse = `acao-${log.acao}`;
+        return `<tr>
+          <td style="color:#94a3b8;font-size:0.82rem;">#${log.id}</td>
+          <td style="white-space:nowrap;font-size:0.88rem;">${data}</td>
+          <td>
+            <div style="font-weight:600;font-size:0.92rem;">${log.utilizador.email}</div>
+          </td>
+          <td><span class="badge-tipo ${tipoClasse}">${log.utilizador.tipo}</span></td>
+          <td><span class="entidade-texto">${log.entidade_afetada.replace(/_/g, ' ')}</span></td>
+          <td><span class="badge-acao ${acaoClasse}">${log.acao}</span></td>
+        </tr>`;
+      }).join('');
+
+      renderizarPaginacao();
+    }
+
+    function renderizarPaginacao() {
+      const totalPaginas = Math.ceil(logsFiltrados.length / REGISTOS_POR_PAGINA);
+      const pag = document.getElementById("paginacao");
+
+      if (totalPaginas <= 1) { pag.innerHTML = ""; return; }
+
+      let html = `<button class="btn-pag" onclick="irParaPagina(${paginaAtual - 1})" ${paginaAtual === 1 ? 'disabled' : ''}>
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>`;
+
+      const inicio = Math.max(1, paginaAtual - 2);
+      const fim = Math.min(totalPaginas, paginaAtual + 2);
+
+      if (inicio > 1) html += `<button class="btn-pag" onclick="irParaPagina(1)">1</button>${inicio > 2 ? '<span style="color:#94a3b8;padding:0 4px;">…</span>' : ''}`;
+
+      for (let i = inicio; i <= fim; i++) {
+        html += `<button class="btn-pag ${i === paginaAtual ? 'ativo' : ''}" onclick="irParaPagina(${i})">${i}</button>`;
+      }
+
+      if (fim < totalPaginas) html += `${fim < totalPaginas - 1 ? '<span style="color:#94a3b8;padding:0 4px;">…</span>' : ''}<button class="btn-pag" onclick="irParaPagina(${totalPaginas})">${totalPaginas}</button>`;
+
+      html += `<button class="btn-pag" onclick="irParaPagina(${paginaAtual + 1})" ${paginaAtual === totalPaginas ? 'disabled' : ''}>
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+      <span class="info-paginacao">Página ${paginaAtual} de ${totalPaginas}</span>`;
+
+      pag.innerHTML = html;
+    }
+
+    function irParaPagina(n) {
+      const totalPaginas = Math.ceil(logsFiltrados.length / REGISTOS_POR_PAGINA);
+      if (n < 1 || n > totalPaginas) return;
+      paginaAtual = n;
+      renderizarTabela();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- EXPORTAÇÃO --- */
+    function exportarCSV() {
+      const cabecalho = ["ID", "Data", "Email Utilizador", "Tipo Utilizador", "Entidade Afetada", "Ação"];
+      const linhas = logsFiltrados.map(l => [
+        l.id,
+        new Date(l.data).toLocaleString("pt-PT"),
+        l.utilizador.email,
+        l.utilizador.tipo,
+        l.entidade_afetada,
+        l.acao
+      ]);
+
+      const csv = [cabecalho, ...linhas]
+        .map(row => row.map(cel => `"${String(cel).replace(/"/g, '""')}"`).join(";"))
+        .join("\n");
+
+      const bom = "﻿"; // BOM para Excel reconhecer UTF-8
+      descarregar(bom + csv, `auditoria_${dataHoje()}.csv`, "text/csv;charset=utf-8;");
+    }
+
+    function exportarJSON() {
+      const dados = logsFiltrados.map(l => ({
+        id: l.id,
+        data: l.data,
+        utilizador: { email: l.utilizador.email, tipo: l.utilizador.tipo },
+        entidade_afetada: l.entidade_afetada,
+        acao: l.acao
+      }));
+      descarregar(JSON.stringify(dados, null, 2), `auditoria_${dataHoje()}.json`, "application/json");
+    }
+
+    function descarregar(conteudo, nomeFile, tipo) {
+      const blob = new Blob([conteudo], { type: tipo });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = nomeFile; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function dataHoje() {
+      return new Date().toISOString().slice(0, 10);
+    }
+  </script>
+</body>
+</html>

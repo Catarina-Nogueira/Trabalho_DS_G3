@@ -386,7 +386,7 @@
 
          <div class="sidebar-footer">
       <a href="utentePrincipal.html" class="btn-voltar-principal"><i class="fa-solid fa-house"></i> Menu Principal</a>
-      <a href="autenticacao.html" class="btn-logout" id="btnLogout"><i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão</a>
+      <a href="#" class="btn-logout" id="btnLogout"><i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão</a>
     </div>
   </aside>
 
@@ -547,7 +547,8 @@
     }
 
     function configurarLogout() {
-      document.getElementById("btn-terminar-sessao").addEventListener("click", () => {
+      document.getElementById("btnLogout").addEventListener("click", (e) => {
+        e.preventDefault();
         localStorage.clear();
         window.location.href = "autenticacao.html";
       });

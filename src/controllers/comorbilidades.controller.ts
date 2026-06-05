@@ -57,7 +57,7 @@ export const ComorbilidadeController = {
             if (!controlo.valido) return res.status(controlo.status!).json({ erro: controlo.erro });
 
             const dadosDTO: CriarComorbilidadeDTO = { nome: nome.trim(), descricao: descricao.trim() };
-            const comorbilidade = await ComorbilidadeService.criar(id_utente_alvo, dadosDTO);
+            const comorbilidade = await ComorbilidadeService.criar(id_utente_alvo, dadosDTO, req.user!.id);
             
             return res.status(201).json(comorbilidade);
         } catch (err: any) {
@@ -93,7 +93,7 @@ export const ComorbilidadeController = {
             if (!controlo.valido) return res.status(controlo.status!).json({ erro: controlo.erro });
 
             const dadosDTO: AtualizarComorbilidadeDTO = req.body;
-            const comorbilidade = await ComorbilidadeService.atualizar(id, dadosDTO);
+            const comorbilidade = await ComorbilidadeService.atualizar(id, dadosDTO, req.user!.id);
             
             return res.json(comorbilidade);
         } catch (err: any) {
@@ -113,7 +113,7 @@ export const ComorbilidadeController = {
             const controlo = await validarAcessoFichaUtente(req.user!, comorbilidadeOriginal.utente.id);
             if (!controlo.valido) return res.status(controlo.status!).json({ erro: controlo.erro });
 
-            await ComorbilidadeService.eliminar(id);
+            await ComorbilidadeService.eliminar(id, req.user!.id);
             return res.status(204).send();
         } catch (err: any) {
             return res.status(400).json({ erro: err.message || 'Erro ao eliminar comorbilidade' });

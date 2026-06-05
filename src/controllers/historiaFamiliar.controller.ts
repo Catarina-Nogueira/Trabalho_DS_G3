@@ -70,7 +70,7 @@ export const HistoriaFamiliarController = {
             if (!controlo.valido) return res.status(controlo.status!).json({ erro: controlo.erro });
 
             const dadosDTO: CriarHistoriaFamiliarDTO = { nome: nome.trim(), descricao: descricao.trim() };
-            const historia = await HistoriaFamiliarService.criar(id_utente_alvo, dadosDTO);
+            const historia = await HistoriaFamiliarService.criar(id_utente_alvo, dadosDTO, req.user!.id);
             
             return res.status(201).json(historia);
         } catch (err: any) {
@@ -109,7 +109,7 @@ export const HistoriaFamiliarController = {
             if (!controlo.valido) return res.status(controlo.status!).json({ erro: controlo.erro });
 
             const dadosDTO: AtualizarHistoriaFamiliarDTO = req.body;
-            const historia = await HistoriaFamiliarService.atualizar(id, dadosDTO);
+            const historia = await HistoriaFamiliarService.atualizar(id, dadosDTO, req.user!.id);
             
             return res.json(historia);
         } catch (err: any) {
@@ -129,7 +129,7 @@ export const HistoriaFamiliarController = {
             const controlo = await validarAcessoFichaUtente(req.user!, historiaOriginal.utente.id);
             if (!controlo.valido) return res.status(controlo.status!).json({ erro: controlo.erro });
 
-            await HistoriaFamiliarService.eliminar(id);
+            await HistoriaFamiliarService.eliminar(id, req.user!.id);
             return res.status(204).send();
         } catch (err: any) {
             return res.status(400).json({ erro: err.message || 'Erro ao eliminar registo de história familiar' });

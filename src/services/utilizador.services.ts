@@ -53,8 +53,8 @@ export const UtilizadorService = {
 
         await AuditoriaService.registar({
             id_utilizador: idUtilizadorLogado,
-            entidade_afetada: 'UTILIZADOR' as EntidadeAuditoria,
-            acao: 'CRIAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.UTILIZADOR,
+            acao: AcaoAuditoria.CRIAR
         });
 
         return toResposta(guardado);
@@ -95,8 +95,8 @@ export const UtilizadorService = {
 
         await AuditoriaService.registar({
             id_utilizador: utilizadorSessao.id,
-            entidade_afetada: 'UTILIZADOR' as EntidadeAuditoria,
-            acao: 'ATUALIZAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.UTILIZADOR,
+            acao: AcaoAuditoria.ATUALIZAR
         });
 
         return toResposta(atualizado);
@@ -116,8 +116,8 @@ export const UtilizadorService = {
 
         await AuditoriaService.registar({
             id_utilizador: utilizadorSessao.id,
-            entidade_afetada: 'UTILIZADOR' as EntidadeAuditoria,
-            acao: 'ATUALIZAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.UTILIZADOR,
+            acao: AcaoAuditoria.ATUALIZAR
         });
 
         return toResposta(atualizado);
@@ -135,8 +135,8 @@ export const UtilizadorService = {
 
         await AuditoriaService.registar({
             id_utilizador: utilizadorSessao.id,
-            entidade_afetada: 'UTILIZADOR' as EntidadeAuditoria,
-            acao: 'ELIMINAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.UTILIZADOR,
+            acao: AcaoAuditoria.ELIMINAR
         });
     },
 };

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB - Listagem de Utentes</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- 1) BARRA LATERAL DO MÉDICO --- */
+    .sidebar {
+      width: 260px;
+      background: #07213b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99, 179, 237, 0.15);
+    }
+
+    .perfil-medico {
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .perfil-foto {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #1a365d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      border: 3px solid #75d0fb;
+      font-size: 2.2rem;
+      color: #75d0fb;
+    }
+
+    .perfil-nome { font-size: 1.1rem; font-weight: 600; color: #ffffff; word-break: break-word; }
+    .perfil-tipo { font-size: 0.8rem; color: #75d0fb; margin-top: 2px; text-transform: uppercase; letter-spacing: 1px; }
+    .perfil-especialidade { font-size: 0.85rem; color: #dfe8f6; margin-top: 4px; font-style: italic; }
+
+    .sidebar-footer {
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .btn-logout:hover { background: #ef4444; color: #ffffff; }
+
+    /* --- 2) CONTEÚDO PRINCIPAL --- */
+    .main-conteudo {
+      margin-left: 260px;
+      padding: 48px;
+      width: calc(100% - 260px);
+      max-width: 1200px;
+    }
+
+    .cabecalho-pagina { margin-bottom: 32px; }
+    .cabecalho-pagina h1 { font-size: 2.2rem; color: #092b4c; }
+    .cabecalho-pagina p { color: #64748b; margin-top: 4px; font-size: 1.05rem; }
+
+    /* --- TABELA --- */
+    .tabela-container {
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+      border: 1px solid #e2e8f0;
+    }
+
+    .tabela-utentes { width: 100%; border-collapse: collapse; text-align: left; }
+    .tabela-utentes th, .tabela-utentes td { padding: 18px 24px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+    
+    .tabela-utentes th {
+      background: #f8fafc;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+    }
+
+    .tabela-utentes tr:last-child td { border-bottom: none; }
+    .tabela-utentes tr:hover { background: #f8fcff; }
+
+    .nome-utente { font-weight: 600; color: #092b4c; font-size: 1.05rem; }
+    .info-secundaria { font-size: 0.85rem; color: #64748b; text-transform: capitalize; }
+    
+    .btn-detalhes { 
+      color: #0b75ff; 
+      text-decoration: none; 
+      font-weight: 600; 
+      font-size: 0.9rem; 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 6px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-detalhes:hover { color: #0056cc; }
+
+    .estado-vazio { text-align: center; padding: 40px; color: #94a3b8; font-size: 1rem; }
+
+    .btn-voltar {
+      color: #0b75ff;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+    .btn-voltar:hover { color: #0056cc; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="perfil-medico">
+      <div class="perfil-foto"><i class="fa-solid fa-user-doctor"></i></div>
+      <div class="perfil-nome" id="nome-medico-sidebar">A carregar...</div>
+      <div class="perfil-tipo">Médico</div>
+      <div class="perfil-especialidade" id="especialidade-medico">A carregar...</div>
+    </div>
+    
+    <div class="sidebar-footer">
+      <a href="#" class="btn-logout" id="btnLogout">
+        <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-conteudo">
+    
+    <a href="medicoPrincipal.html" class="btn-voltar">
+      <i class="fa-solid fa-arrow-left"></i> Voltar ao Painel
+    </a>
+
+    <div class="cabecalho-pagina">
+      <h1>Listagem de utentes</h1>
+      <p>Lista de utentes sob a sua estrita tutela clínica e monitorização respiratória.</p>
+    </div>
+
+    <div class="tabela-container">
+      <table class="tabela-utentes">
+        <thead>
+          <tr>
+            <th>Nome do Utente</th>
+            <th>Género Biológico</th>
+            <th>Data de Nascimento</th>
+            <th style="text-align: right;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="listaUtentes">
+          <tr>
+            <td colspan="4" class="estado-vazio">A carregar registos dos utentes...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <script>
+    const API_BASE = "http://localhost:3000";
+    let tokenGlobal = null;
+    let medicoIdGlobal = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      configurarSessao();
+    });
+
+    function configurarSessao() {
+      tokenGlobal = localStorage.getItem('token');
+      const userRaw = localStorage.getItem('user');
+
+      if (!tokenGlobal || !userRaw) {
+        redirecionarLogin();
+        return;
+      }
+
+      try {
+        const utilizador = JSON.parse(userRaw);
+
+        // Só médicos devem aceder a esta página
+        if (!utilizador.tipo || utilizador.tipo.toLowerCase() !== 'medico') {
+          redirecionarLogin();
+          return;
+        }
+
+        // O login guarda o ID do perfil em id_especifico
+        medicoIdGlobal = utilizador.id_especifico;
+        if (!medicoIdGlobal) {
+          redirecionarLogin();
+          return;
+        }
+
+        document.getElementById('nome-medico-sidebar').textContent = utilizador.nome || "Médico";
+
+        // Configura o evento de terminação de sessão
+        document.getElementById("btnLogout").addEventListener("click", (e) => {
+          e.preventDefault();
+          redirecionarLogin();
+        });
+
+        // Busca os detalhes do médico (incluindo especialidade) e carrega os utentes
+        carregarDetalhesMedico();
+        carregarUtentesDoMedico();
+
+      } catch (e) {
+        redirecionarLogin();
+      }
+    }
+
+    function redirecionarLogin() {
+      localStorage.clear();
+      window.location.href = 'autenticacao.html';
+    }
+
+    /* --- DETALHES DO MÉDICO (especialidade) --- */
+    async function carregarDetalhesMedico() {
+      try {
+        const resposta = await fetch(`${API_BASE}/medicos/${medicoIdGlobal}`, {
+          headers: { "Authorization": `Bearer ${tokenGlobal}` }
+        });
+        if (resposta.ok) {
+          const medico = await resposta.json();
+          if (medico.especialidade) {
+            document.getElementById('especialidade-medico').textContent = medico.especialidade;
+          }
+        }
+      } catch (_) {}
+    }
+
+    /* --- CHAMADA DINÂMICA AO BACKEND --- */
+    async function carregarUtentesDoMedico() {
+      const tbody = document.getElementById('listaUtentes');
+      
+      try {
+        const resposta = await fetch(`${API_BASE}/utentes/medico/${medicoIdGlobal}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${tokenGlobal}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!resposta.ok) {
+          const erroJson = await resposta.json().catch(() => null);
+          const mensagem = erroJson?.erro || `Erro ${resposta.status}: ${resposta.statusText}`;
+          throw new Error(mensagem);
+        }
+
+        const utentes = await resposta.json();
+
+        if (!utentes || utentes.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="estado-vazio"><i class="fa-solid fa-users-slash"></i> Não possui utentes associados ao seu perfil de momento.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = utentes.map(utente => {
+          const dataFormatada = new Date(utente.data_nascimento).toLocaleDateString("pt-PT", {
+            day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC"
+          });
+
+          return `
+            <tr>
+              <td>
+                <span class="nome-utente">${utente.nome}</span>
+              </td>
+              <td>
+                <span class="info-secundaria">${utente.sexo_biologico}</span>
+              </td>
+              <td>${dataFormatada}</td>
+              <td style="text-align: right;">
+                <button class="btn-detalhes" onclick="verDetalhesUtente(${utente.id})">
+                  <i class="fa-solid fa-address-card"></i> Ver Detalhes
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+      } catch (error) {
+        console.error("Erro no fetch dos utentes:", error);
+        tbody.innerHTML = `<tr><td colspan="4" class="estado-vazio" style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> ${error.message || 'Ocorreu um erro ao obter os utentes do servidor.'}</td></tr>`;
+      }
+    }
+
+    function verDetalhesUtente(idUtente) {
+      window.location.href = `perfilUtente.html?id=${idUtente}`;
+    }
+  </script>
+</body>
+</html>

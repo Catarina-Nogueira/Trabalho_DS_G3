@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>SaudINOB - Detalhes do Alerta Clínico</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -128,13 +128,25 @@
       max-width: 1200px;
     }
 
+    .btn-voltar {
+      color: #0b75ff;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+    .btn-voltar:hover { color: #0056cc; }
+
     .cabecalho-pagina { margin-bottom: 32px; }
     .cabecalho-pagina h1 { font-size: 2.2rem; color: #092b4c; }
     .cabecalho-pagina p { color: #64748b; margin-top: 4px; font-size: 1.05rem; }
 
     .layout-grid {
       display: grid;
-      grid-template-columns: 1.51fr 1fr;
+      grid-template-columns: 1.5fr 1fr;
       gap: 32px;
       align-items: start;
     }
@@ -179,6 +191,83 @@
     }
     .bloco-motivo p { font-size: 1rem; color: #334155; line-height: 1.5; font-style: italic; }
 
+    /* --- CARTÃO ORIGEM --- */
+    .cartao-origem {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.01);
+      margin-top: 32px;
+    }
+
+    .cartao-origem h2 {
+      font-size: 1.3rem;
+      color: #07213b;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 12px;
+    }
+
+    .origem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .origem-metrica {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .origem-metrica .metrica-valor {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #092b4c;
+      line-height: 1;
+    }
+
+    .origem-metrica .metrica-label {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metrica-valor.nivel-controlado { color: #16a34a; }
+    .metrica-valor.nivel-parcial { color: #d97706; }
+    .metrica-valor.nivel-nao-controlado { color: #dc2626; }
+
+    .badge-nivel {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+    .nivel-controlado { background: #dcfce7; color: #15803d; }
+    .nivel-parcial { background: #fef9c3; color: #a16207; }
+    .nivel-nao-controlado { background: #fee2e2; color: #991b1b; }
+
+    .notas-origem {
+      background: #f8fafc;
+      border-left: 4px solid #f59e0b;
+      padding: 14px 16px;
+      border-radius: 4px 12px 12px 4px;
+      margin-top: 16px;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+
     /* --- BADGES --- */
     .badge-prioridade { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
     .prio-alta { background: #fee2e2; color: #991b1b; }
@@ -188,7 +277,7 @@
     /* --- FORMULÁRIO DE GESTÃO --- */
     .grupo-campo { margin-bottom: 24px; }
     .grupo-campo label { display: block; font-size: 0.95rem; font-weight: 600; color: #07213b; margin-bottom: 8px; }
-    
+
     .grupo-campo select {
       width: 100%;
       padding: 14px;
@@ -200,6 +289,31 @@
       font-size: 1rem;
     }
     .grupo-campo select:focus { outline: none; border-color: #0b75ff; background: #ffffff; }
+
+    .estado-atual-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-bottom: 16px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+
+    .ponto-estado { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .ponto-novo { background: #ef4444; }
+    .ponto-visto { background: #3b82f6; }
+    .ponto-em_seguimento { background: #f59e0b; }
+    .ponto-fechado { background: #10b981; }
+
+    .aviso-fluxo {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 8px;
+      font-style: italic;
+    }
 
     .btn-atualizar {
       width: 100%;
@@ -214,8 +328,37 @@
       transition: background 0.2s;
     }
     .btn-atualizar:hover { background: #0056cc; }
+    .btn-atualizar:disabled { background: #94a3b8; cursor: not-allowed; }
 
     .estado-vazio { text-align: center; padding: 40px; color: #94a3b8; }
+
+    .mensagem-sucesso {
+      background: #dcfce7;
+      border: 1px solid #86efac;
+      color: #15803d;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-top: 16px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mensagem-erro {
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-top: 16px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
   </style>
 </head>
 <body>
@@ -225,84 +368,116 @@
       <div class="perfil-foto"><i class="fa-solid fa-user-doctor"></i></div>
       <div class="perfil-nome" id="nome-medico-sidebar">A carregar...</div>
       <div class="perfil-tipo">Médico</div>
-      <div class="perfil-especialidade" id="especialidade-medico">Pneumologia</div>
+      <div class="perfil-especialidade" id="especialidade-medico">A carregar...</div>
     </div>
-    
+
     <div class="sidebar-menu-central">
       <a href="listagemUtentes.html" class="btn-destaque-utentes">
         <i class="fa-solid fa-address-book"></i> Listagem de Utentes
       </a>
     </div>
-    
+
     <div class="sidebar-footer">
-      <a href="painelMedico.html" class="btn-voltar-principal"><i class="fa-solid fa-bell"></i> Central de Alertas</a>
-      <a href="#" class="btn-logout" id="btnLogout"><i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão</a>
+      <a href="medicoPrincipal.html" class="btn-voltar-principal">
+        <i class="fa-solid fa-bell"></i> Central de Alertas
+      </a>
+      <a href="#" class="btn-logout" id="btnLogout">
+        <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
+      </a>
     </div>
   </aside>
 
   <main class="main-conteudo">
-    
+
+    <a href="medicoPrincipal.html" class="btn-voltar">
+      <i class="fa-solid fa-arrow-left"></i> Voltar aos Alertas
+    </a>
+
     <div class="cabecalho-pagina">
       <h1>Análise Detalhada do Alerta</h1>
-      <p id="subtitulo-alerta">ID do Alerta: #...</p>
-    </div>
-
-    <div class="layout-grid" id="conteudo-alerta-grid" style="display: none;">
-      
-      <section class="cartao-detalhe">
-        <h2><i class="fa-solid fa-file-medical" style="color: #0b75ff;"></i> Informação do Evento</h2>
-        
-        <div class="campo-info">
-          <span class="label">Utente Afetado</span>
-          <span class="valor" id="alerta-utente" style="font-weight: 700;">A carregar...</span>
-        </div>
-        <div class="campo-info">
-          <span class="label">Tipo de Ocorrência</span>
-          <span class="valor" id="alerta-tipo">A carregar...</span>
-        </div>
-        <div class="campo-info">
-          <span class="label">Nível de Severidade</span>
-          <span class="valor" id="alerta-prioridade-container"></span>
-        </div>
-        <div class="campo-info">
-          <span class="label">Data de Emissão</span>
-          <span class="valor" id="alerta-data">A carregar...</span>
-        </div>
-        <div class="campo-info">
-          <span class="label">Última Atualização</span>
-          <span class="valor" id="alerta-data-atualizacao">A carregar...</span>
-        </div>
-
-        <div style="margin-top: 24px;">
-          <span class="label" style="font-size: 0.95rem; font-weight: 600; color: #64748b;">Evidência Clínica / Motivo</span>
-          <div class="bloco-motivo">
-            <p id="alerta-motivo">A carregar evidências...</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="cartao-detalhe">
-        <h2><i class="fa-solid fa-user-shield" style="color: #10b981;"></i> Ações de Triagem</h2>
-        
-        <form id="formAlterarEstado">
-          <div class="grupo-campo">
-            <label for="selectEstado">Estado Clínico do Alerta</label>
-            <select id="selectEstado" required>
-              <option value="novo">Novo (Não Respondido)</option>
-              <option value="visto">Visto (Em Análise)</option>
-              <option value="em_seguimento">Em Seguimento</option>
-              <option value="fechado">Fechado (Resolvido)</option>
-            </select>
-          </div>
-
-          <button type="submit" class="btn-atualizar">Guardar Alterações</button>
-        </form>
-      </section>
-
+      <p id="subtitulo-alerta">Referência do Registo: #...</p>
     </div>
 
     <div id="estado-carregamento" class="estado-vazio">
       <p><i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; color: #0b75ff; margin-bottom: 12px;"></i><br>A recolher dados do registo clínico...</p>
+    </div>
+
+    <div id="conteudo-alerta-grid" style="display: none;">
+
+      <div class="layout-grid">
+
+        <!-- Coluna esquerda: informação do evento -->
+        <section class="cartao-detalhe">
+          <h2><i class="fa-solid fa-file-medical" style="color: #0b75ff;"></i> Informação do Evento</h2>
+
+          <div class="campo-info">
+            <span class="label">Utente Afetado</span>
+            <span class="valor" id="alerta-utente" style="font-weight: 700;">—</span>
+          </div>
+          <div class="campo-info">
+            <span class="label">Tipo de Ocorrência</span>
+            <span class="valor" id="alerta-tipo">—</span>
+          </div>
+          <div class="campo-info">
+            <span class="label">Nível de Severidade</span>
+            <span class="valor" id="alerta-prioridade-container"></span>
+          </div>
+          <div class="campo-info">
+            <span class="label">Data de Emissão</span>
+            <span class="valor" id="alerta-data">—</span>
+          </div>
+          <div class="campo-info" style="border-bottom: none;">
+            <span class="label">Última Atualização</span>
+            <span class="valor" id="alerta-data-atualizacao">—</span>
+          </div>
+
+          <div style="margin-top: 24px;">
+            <span class="label" style="font-size: 0.9rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Evidência Clínica / Motivo</span>
+            <div class="bloco-motivo">
+              <p id="alerta-motivo">A carregar evidências...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Coluna direita: ações de triagem -->
+        <section class="cartao-detalhe">
+          <h2><i class="fa-solid fa-user-shield" style="color: #10b981;"></i> Ações de Triagem</h2>
+
+          <div class="estado-atual-info">
+            <span class="ponto-estado" id="ponto-estado-atual"></span>
+            <span>Estado atual: <strong id="texto-estado-atual">—</strong></span>
+          </div>
+
+          <form id="formAlterarEstado">
+            <div class="grupo-campo">
+              <label for="selectEstado">Alterar para</label>
+              <select id="selectEstado" required></select>
+              <p class="aviso-fluxo">O fluxo clínico segue a ordem: Novo → Visto → Em Seguimento → Fechado.</p>
+            </div>
+
+            <button type="submit" class="btn-atualizar" id="btnGuardar">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar Alterações
+            </button>
+
+            <div class="mensagem-sucesso" id="msgSucesso">
+              <i class="fa-solid fa-circle-check"></i> Estado atualizado com sucesso!
+            </div>
+            <div class="mensagem-erro" id="msgErro">
+              <i class="fa-solid fa-circle-xmark"></i> <span id="textoErro"></span>
+            </div>
+          </form>
+        </section>
+
+      </div>
+
+      <!-- Secção de Origem (só aparece quando existe avaliação ou sintoma ligados) -->
+      <div id="secao-origem" style="display: none;">
+        <div class="cartao-origem">
+          <h2 id="titulo-origem"><i class="fa-solid fa-magnifying-glass" style="color: #f59e0b;"></i> Origem do Alerta</h2>
+          <div id="conteudo-origem"></div>
+        </div>
+      </div>
+
     </div>
 
   </main>
@@ -311,105 +486,95 @@
     const API_BASE = "http://localhost:3000";
     let idAlertaGlobal = null;
     let tokenGlobal = null;
+    let estadoAtualGlobal = null;
+
+    const fluxoEstados = {
+      'novo':          ['visto'],
+      'visto':         ['em_seguimento', 'fechado'],
+      'em_seguimento': ['fechado'],
+      'fechado':       []
+    };
+
+    const nomesEstados = {
+      'novo': 'Novo (Não Respondido)',
+      'visto': 'Visto (Em Análise)',
+      'em_seguimento': 'Em Seguimento',
+      'fechado': 'Fechado (Resolvido)'
+    };
+
+    const traducaoTipos = {
+      'score_carat':    'Score Baixo no Questionário CARAT',
+      'sintoma_grave':  'Sintoma Grave Reportado pelo Utente',
+      'medicacao':      'Revisão Clínico-Medicamentosa',
+      'exame_pendente': 'Exame Médico Pendente',
+      'sem_avaliacao':  'Utente sem Avaliação Recente'
+    };
 
     document.addEventListener("DOMContentLoaded", () => {
-        tokenGlobal = verificarEConfigurarSessao();
-        if (!tokenGlobal) return;
+      tokenGlobal = verificarEConfigurarSessao();
+      if (!tokenGlobal) return;
 
-        carregarPerfilMedico(tokenGlobal);
+      carregarPerfilMedico(tokenGlobal);
 
-        const parametros = new URLSearchParams(window.location.search);
-        idAlertaGlobal = parametros.get("id");
+      const parametros = new URLSearchParams(window.location.search);
+      idAlertaGlobal = parametros.get("id");
 
-        if (!idAlertaGlobal) {
-            alert("Alerta inválido ou não especificado.");
-            window.location.href = "painelMedico.html";
-            return;
-        }
+      if (!idAlertaGlobal) {
+        alert("Alerta inválido ou não especificado.");
+        window.location.href = "medicoPrincipal.html";
+        return;
+      }
 
-        document.getElementById("subtitulo-alerta").textContent =
-            `Referência do Registo: #${idAlertaGlobal}`;
-
-        carregarDetalhesAlerta();
+      document.getElementById("subtitulo-alerta").textContent = `Referência do Registo: #${idAlertaGlobal}`;
+      carregarDetalhesAlerta();
     });
 
     function verificarEConfigurarSessao() {
-        const token = localStorage.getItem("token");
-        const userRaw = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
+      const userRaw = localStorage.getItem("user");
 
-        if (!token || !userRaw) {
-            redirecionarLogin();
-            return null;
-        }
+      if (!token || !userRaw) { redirecionarLogin(); return null; }
 
-        let utilizador;
+      let utilizador;
+      try { utilizador = JSON.parse(userRaw); } catch (e) { redirecionarLogin(); return null; }
 
-        try {
-            utilizador = JSON.parse(userRaw);
-        } catch (e) {
-            redirecionarLogin();
-            return null;
-        }
+      if (!utilizador.tipo || utilizador.tipo.toLowerCase() !== "medico") {
+        redirecionarLogin();
+        return null;
+      }
 
-        if (
-            !utilizador.tipo ||
-            utilizador.tipo.toLowerCase() !== "medico"
-        ) {
-            redirecionarLogin();
-            return null;
-        }
+      document.getElementById("nome-medico-sidebar").textContent = utilizador.nome || "Médico";
 
-  document.getElementById("nome-medico-sidebar").textContent =
-    utilizador.nome || "Médico";
+      document.getElementById("btnLogout").addEventListener("click", (e) => {
+        e.preventDefault();
+        localStorage.clear();
+        window.location.href = "autenticacao.html";
+      });
 
-  document.getElementById("btnLogout").addEventListener("click", (e) => {
-    e.preventDefault();
-    localStorage.clear();
-    window.location.href = "autenticacao.html";
-  });
-
-  return token;
-}
-
-    async function carregarPerfilMedico(token) {
-        try {
-            const user = JSON.parse(localStorage.getItem("user"));
-
-            const resposta = await fetch(
-            `${API_BASE}/medicos/${user.id_especifico}`,
-            {
-                headers: {
-                Authorization: `Bearer ${token}`
-                }
-            }
-            );
-
-            if (!resposta.ok) return;
-
-            const medico = await resposta.json();
-
-            document.getElementById("nome-medico-sidebar").textContent =
-            medico.nome;
-
-            document.getElementById("especialidade-medico").textContent =
-            medico.especialidade || "Sem especialidade";
-
-        } catch (erro) {
-            console.error("Erro ao carregar médico:", erro);
-        }
+      return token;
     }
 
     function redirecionarLogin() {
       localStorage.clear();
-      window.location.href = 'autenticacao.html';
+      window.location.href = "autenticacao.html";
     }
 
-    /* --- CONSUMO DA API: BUSCAR POR ID --- */
+    async function carregarPerfilMedico(token) {
+      try {
+        const user = JSON.parse(localStorage.getItem("user"));
+        const resposta = await fetch(`${API_BASE}/medicos/${user.id_especifico}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!resposta.ok) return;
+        const medico = await resposta.json();
+        document.getElementById("nome-medico-sidebar").textContent = medico.nome;
+        document.getElementById("especialidade-medico").textContent = medico.especialidade || "Sem especialidade";
+      } catch (_) {}
+    }
+
     async function carregarDetalhesAlerta() {
       try {
-        // Consome a rota mapeada: router.get('/:id', ...)
         const resposta = await fetch(`${API_BASE}/alertas/${idAlertaGlobal}`, {
-          method: "GET",
           headers: {
             "Authorization": `Bearer ${tokenGlobal}`,
             "Content-Type": "application/json"
@@ -422,52 +587,151 @@
         }
 
         const alerta = await resposta.json();
+        estadoAtualGlobal = alerta.estado;
 
-        // Mapeamentos Textuais
-        const traducaoTipos = {
-          'score_carat': 'Score Baixo no Questionário CARAT',
-          'sintoma_grave': 'Sintoma Grave Reportado pelo Utente',
-          'medicacao': 'Revisão Clínico-Medicamentosa',
-          'exame_pendente': 'Exame Médico Pendente',
-          'sem_avaliacao': 'Utente sem Avaliação Recente'
-        };
-
-        // Preenchimento dos campos no HTML
+        // Preencher informação do evento
         document.getElementById("alerta-utente").textContent = alerta.utente ? alerta.utente.nome : "Não identificado";
         document.getElementById("alerta-tipo").textContent = traducaoTipos[alerta.tipo] || alerta.tipo;
         document.getElementById("alerta-motivo").textContent = alerta.motivo;
-        
-        document.getElementById("alerta-data").textContent = new Date(alerta.data_criacao).toLocaleDateString("pt-PT", {
-          day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
-        });
-        
-        document.getElementById("alerta-data-atualizacao").textContent = new Date(alerta.data_atualizacao).toLocaleDateString("pt-PT", {
-          day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
-        });
 
-        // Configuração da Badge de Prioridade
+        document.getElementById("alerta-data").textContent = formatarData(alerta.data_criacao);
+        document.getElementById("alerta-data-atualizacao").textContent = formatarData(alerta.data_atualizacao);
+
         const containerPrio = document.getElementById("alerta-prioridade-container");
         containerPrio.innerHTML = `<span class="badge-prioridade prio-${alerta.prioridade}">${alerta.prioridade}</span>`;
 
-        // Define o estado atual no seletor do formulário
-        document.getElementById("selectEstado").value = alerta.estado;
+        // Estado atual
+        const pontoEl = document.getElementById("ponto-estado-atual");
+        pontoEl.className = `ponto-estado ponto-${alerta.estado}`;
+        document.getElementById("texto-estado-atual").textContent = alerta.estado.replace('_', ' ');
 
-        // Alterna a visualização dos blocos
+        // Preencher select com transições permitidas
+        preencherSelectEstado(alerta.estado);
+
+        // Preencher secção de origem
+        preencherOrigem(alerta);
+
         document.getElementById("estado-carregamento").style.display = "none";
-        document.getElementById("conteudo-alerta-grid").style.display = "grid";
+        document.getElementById("conteudo-alerta-grid").style.display = "block";
 
         configurarFormularioEstado();
 
       } catch (err) {
         document.getElementById("estado-carregamento").innerHTML = `
-          <div style="color: #ef4444;">
+          <div style="color: #ef4444; text-align: center;">
             <i class="fa-solid fa-circle-xmark" style="font-size: 2.5rem; margin-bottom: 12px;"></i>
             <p>${err.message}</p>
           </div>`;
       }
     }
 
-    /* --- CONSUMO DA API: PATCH PARA ATUALIZAR ESTADO --- */
+    function preencherSelectEstado(estadoAtual) {
+      const select = document.getElementById("selectEstado");
+      const transicoes = fluxoEstados[estadoAtual] || [];
+      select.innerHTML = "";
+
+      if (transicoes.length === 0) {
+        select.innerHTML = `<option value="">Alerta fechado — sem mais transições</option>`;
+        select.disabled = true;
+        document.getElementById("btnGuardar").disabled = true;
+        return;
+      }
+
+      transicoes.forEach(estado => {
+        const opt = document.createElement("option");
+        opt.value = estado;
+        opt.textContent = nomesEstados[estado] || estado;
+        select.appendChild(opt);
+      });
+    }
+
+    function preencherOrigem(alerta) {
+      const secao = document.getElementById("secao-origem");
+      const conteudo = document.getElementById("conteudo-origem");
+      const titulo = document.getElementById("titulo-origem");
+
+      // Score CARAT
+      if (alerta.tipo === 'score_carat' && alerta.avaliacao) {
+        const av = alerta.avaliacao;
+        const nivelClasse = av.nivel_controlo === 'controlado' ? 'nivel-controlado'
+                          : av.nivel_controlo === 'parcialmente_controlado' ? 'nivel-parcial'
+                          : 'nivel-nao-controlado';
+        const nivelTexto = av.nivel_controlo.replace(/_/g, ' ');
+
+        titulo.innerHTML = `<i class="fa-solid fa-chart-line" style="color: #f59e0b;"></i> Origem: Avaliação CARAT #${av.id}`;
+
+        conteudo.innerHTML = `
+          <div class="origem-grid">
+            <div class="origem-metrica">
+              <div class="metrica-valor ${nivelClasse}">${av.score_total}</div>
+              <div class="metrica-label">Score Total</div>
+            </div>
+            <div class="origem-metrica">
+              <div class="metrica-valor" style="font-size: 1rem; padding-top: 4px;">
+                <span class="badge-nivel ${nivelClasse}">${nivelTexto}</span>
+              </div>
+              <div class="metrica-label">Nível de Controlo</div>
+            </div>
+            <div class="origem-metrica">
+              <div class="metrica-valor" style="font-size: 1.2rem;">${formatarData(av.data_avaliacao)}</div>
+              <div class="metrica-label">Data da Avaliação</div>
+            </div>
+          </div>
+        `;
+        secao.style.display = "block";
+        return;
+      }
+
+      // Sintoma Grave
+      if (alerta.tipo === 'sintoma_grave' && alerta.sintoma) {
+        const s = alerta.sintoma;
+        titulo.innerHTML = `<i class="fa-solid fa-lungs-virus" style="color: #f59e0b;"></i> Origem: Sintomas Reportados #${s.id}`;
+
+        const escalaNome = (v) => v >= 4 ? 'Grave' : v >= 2 ? 'Moderado' : 'Ligeiro';
+        const escalaClasse = (v) => v >= 4 ? 'nivel-nao-controlado' : v >= 2 ? 'nivel-parcial' : 'nivel-controlado';
+
+        conteudo.innerHTML = `
+          <div class="origem-grid">
+            <div class="origem-metrica">
+              <div class="metrica-valor ${escalaClasse(s.nivel_mal_estar_geral)}">${s.nivel_mal_estar_geral}/5</div>
+              <div class="metrica-label">Mal-Estar Geral</div>
+            </div>
+            <div class="origem-metrica">
+              <div class="metrica-valor ${escalaClasse(s.sintomas_pulmonares)}">${s.sintomas_pulmonares}/5</div>
+              <div class="metrica-label">Sintomas Pulmonares</div>
+            </div>
+            <div class="origem-metrica">
+              <div class="metrica-valor ${escalaClasse(s.sintomas_nasais)}">${s.sintomas_nasais}/5</div>
+              <div class="metrica-label">Sintomas Nasais</div>
+            </div>
+            <div class="origem-metrica">
+              <div class="metrica-valor ${escalaClasse(s.interrupcao_sono)}">${s.interrupcao_sono}/5</div>
+              <div class="metrica-label">Interrupção do Sono</div>
+            </div>
+            <div class="origem-metrica">
+              <div class="metrica-valor" style="font-size: 1.1rem;">${s.uso_medicacao_resgate ? 'Sim' : 'Não'}</div>
+              <div class="metrica-label">Medicação de Resgate</div>
+            </div>
+            <div class="origem-metrica">
+              <div class="metrica-valor" style="font-size: 1.1rem;">${s.gatilho_identificavel ? 'Identificado' : 'Não Identificado'}</div>
+              <div class="metrica-label">Gatilho</div>
+            </div>
+          </div>
+          ${s.notas_adicionais ? `<div class="notas-origem"><strong>Notas do Utente:</strong> ${s.notas_adicionais}</div>` : ''}
+          <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 12px;">Registado em ${formatarData(s.data_registo)}</p>
+        `;
+        secao.style.display = "block";
+      }
+    }
+
+    function formatarData(dataStr) {
+      if (!dataStr) return "—";
+      return new Date(dataStr).toLocaleDateString("pt-PT", {
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+      });
+    }
+
     function configurarFormularioEstado() {
       const form = document.getElementById("formAlterarEstado");
 
@@ -475,9 +739,18 @@
         e.preventDefault();
 
         const novoEstado = document.getElementById("selectEstado").value;
+        if (!novoEstado) return;
+
+        const btnGuardar = document.getElementById("btnGuardar");
+        const msgSucesso = document.getElementById("msgSucesso");
+        const msgErro = document.getElementById("msgErro");
+
+        btnGuardar.disabled = true;
+        btnGuardar.textContent = "A guardar...";
+        msgSucesso.style.display = "none";
+        msgErro.style.display = "none";
 
         try {
-          // Consome a rota mapeada: router.patch('/:id/estado', ...)
           const resposta = await fetch(`${API_BASE}/alertas/${idAlertaGlobal}/estado`, {
             method: "PATCH",
             headers: {
@@ -492,13 +765,16 @@
             throw new Error(erro.erro || "Não foi possível modificar o estado.");
           }
 
-          alert("Estado do alerta clínico atualizado com sucesso!");
-          
-          // Recarrega os dados para atualizar as datas de modificação no ecrã
-          carregarDetalhesAlerta();
+          msgSucesso.style.display = "flex";
+
+          // Recarrega para refletir o novo estado e transições disponíveis
+          setTimeout(() => carregarDetalhesAlerta(), 1200);
 
         } catch (err) {
-          alert(err.message);
+          document.getElementById("textoErro").textContent = err.message;
+          msgErro.style.display = "flex";
+          btnGuardar.disabled = false;
+          btnGuardar.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar Alterações';
         }
       });
     }

@@ -44,8 +44,8 @@ export const MedicacaoService = {
 
         await AuditoriaService.registar({
             id_utilizador: idUtilizadorLogado,
-            entidade_afetada: 'MEDICACAO' as EntidadeAuditoria,
-            acao: 'CRIAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.MEDICACAO,
+            acao: AcaoAuditoria.CRIAR
         });
 
         return guardado;
@@ -68,8 +68,8 @@ export const MedicacaoService = {
 
         await AuditoriaService.registar({
             id_utilizador: idUtilizadorLogado,
-            entidade_afetada: 'MEDICACAO' as EntidadeAuditoria,
-            acao: 'ATUALIZAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.MEDICACAO,
+            acao: AcaoAuditoria.ATUALIZAR
         });
 
         return atualizado;
@@ -86,8 +86,8 @@ export const MedicacaoService = {
 
         await AuditoriaService.registar({
             id_utilizador: idUtilizadorLogado,
-            entidade_afetada: 'MEDICACAO' as EntidadeAuditoria,
-            acao: 'ELIMINAR' as AcaoAuditoria
+            entidade_afetada: EntidadeAuditoria.MEDICACAO,
+            acao: AcaoAuditoria.ELIMINAR
         });
 
         return true;

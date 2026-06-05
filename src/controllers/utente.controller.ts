@@ -16,21 +16,37 @@ export const UtenteController = {
     listarPorMedico: async (req: Request, res: Response) => {
         try {
             if (!req.user) {
-                return res.status(401).json({ erro: 'Utilizador não autenticado na sessão.' });
+                return res.status(401).json({
+                    erro: 'Utilizador não autenticado na sessão.'
+                });
             }
 
-            const utilizadorLogado = req.user;
-            const id_medico_param = Number(req.params.id_medico);
-
-            // BARREIRA DE SEGURANÇA: Um médico não pode ver a lista de utentes de outro colega
-            if (utilizadorLogado.tipo_utilizador === 'medico' && utilizadorLogado.id !== id_medico_param) {
-                return res.status(403).json({ erro: 'Acesso negado. Não pode listar utentes de outros médicos.' });
+            if (req.user.tipo_utilizador !== 'medico') {
+                return res.status(403).json({
+                    erro: 'Apenas médicos podem consultar esta listagem.'
+                });
             }
 
-            const utentes = await UtenteService.listarPorMedico(id_medico_param);
+            const id_medico = req.user.id_perfil_especifico;
+
+            if (!id_medico) {
+                return res.status(400).json({
+                    erro: 'ID do médico não encontrado na sessão.'
+                });
+            }
+
+            console.log('[DEBUG] Médico autenticado:', id_medico);
+
+            const utentes = await UtenteService.listarPorMedico(id_medico);
+
             return res.json(utentes);
-        } catch (err) {
-            return res.status(500).json({ erro: 'Erro ao listar utentes do médico.' });
+
+        } catch (err: any) {
+            console.error(err);
+
+            return res.status(500).json({
+                erro: err.message || 'Erro ao listar utentes do médico.'
+            });
         }
     },
 
@@ -47,7 +63,7 @@ export const UtenteController = {
             if (!utente) return res.status(404).json({ erro: 'Utente não encontrado.' });
 
             // BARREIRA DE SEGURANÇA: Bloqueia médicos intrusos
-            if (utilizadorLogado.tipo_utilizador === 'medico' && utente.medico.id !== utilizadorLogado.id) {
+            if (utilizadorLogado.tipo_utilizador === 'medico' && utente.medico.id !== utilizadorLogado.id_perfil_especifico) {
                 return res.status(403).json({ erro: 'Acesso negado. Este utente não está sob a sua tutela clínica.' });
             }
 
@@ -73,11 +89,10 @@ export const UtenteController = {
             if (utilizadorLogado.tipo_utilizador === 'utente' && utente.utilizador.id !== utilizadorLogado.id) {
                 return res.status(403).json({ erro: 'Acesso negado. Não pode ver dados de outros utentes.' });
             }
-            if (utilizadorLogado.tipo_utilizador === 'medico' && utente.medico.id !== utilizadorLogado.id) {
+            if (utilizadorLogado.tipo_utilizador === 'medico' && utente.medico.id !== utilizadorLogado.id_perfil_especifico) {
                 return res.status(403).json({ erro: 'Acesso negado. Este utente não está sob a sua tutela clínica.' });
             }
 
-            // 🚨 CORREÇÃO: Desestruturação limpa convertendo de forma explícita para Record<string, unknown>
             const { utilizador, medico, ...dadosLimpos } = utente as Record<string, any>;
             return res.json(dadosLimpos);
         } catch (err) {

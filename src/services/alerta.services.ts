@@ -1,6 +1,8 @@
 import { AppDataSource } from '../database/database';
 import { Alerta, EstadoAlerta, PrioridadeAlerta, TipoAlerta } from '../models/alerta.entity';
 import { AtualizarAlertaDTO } from '../dtos/alerta.dto';
+import { AuditoriaService } from './auditoria.services';
+import { EntidadeAuditoria, AcaoAuditoria } from '../models/auditoria.entity';
 
 const alertaRepo = AppDataSource.getRepository(Alerta);
 
@@ -113,7 +115,7 @@ export const AlertaService = {
     },
 
     // RF34 - Máquina de Estados Finita e Controlada para Transição Clínica
-    atualizarEstado: async (id: number, dados: AtualizarAlertaDTO) => {
+    atualizarEstado: async (id: number, dados: AtualizarAlertaDTO, idUtilizadorLogado: number) => {
         if (!id || id <= 0) throw new Error('ID inválido');
 
         const alerta = await alertaRepo.findOne({
@@ -130,9 +132,16 @@ export const AlertaService = {
         }
 
         alerta.estado = dados.estado;
-        
-        // Deixa que o @UpdateDateColumn trate do timestamp de mutação de forma nativa!
-        return await alertaRepo.save(alerta);
+
+        const atualizado = await alertaRepo.save(alerta);
+
+        await AuditoriaService.registar({
+            id_utilizador: idUtilizadorLogado,
+            entidade_afetada: EntidadeAuditoria.ALERTA,
+            acao: AcaoAuditoria.ATUALIZAR
+        });
+
+        return atualizado;
     },
 
     // Eliminar alerta física do sistema

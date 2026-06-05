@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>SaudINOB - Perfil do Utente</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: #f5fcff;
+      color: #092b4c;
+      display: flex;
+    }
+
+    /* --- SIDEBAR --- */
+    .sidebar {
+      width: 260px;
+      background: #07213b;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px;
+      position: fixed;
+      top: 0; bottom: 0; left: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(99,179,237,0.15);
+    }
+
+    .perfil-medico { text-align: center; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+    .perfil-foto {
+      width: 80px; height: 80px; border-radius: 50%; background: #1a365d;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px; border: 3px solid #75d0fb;
+      font-size: 2.2rem; color: #75d0fb;
+    }
+
+    .perfil-nome { font-size: 1.1rem; font-weight: 600; color: #fff; word-break: break-word; }
+    .perfil-tipo { font-size: 0.8rem; color: #75d0fb; margin-top: 2px; text-transform: uppercase; letter-spacing: 1px; }
+    .perfil-especialidade { font-size: 0.85rem; color: #dfe8f6; margin-top: 4px; font-style: italic; }
+
+    .sidebar-menu-central { margin: auto 0; display: flex; flex-direction: column; }
+
+    .btn-destaque-utentes {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      padding: 16px 20px; background: rgba(255,255,255,0.05); color: #fff;
+      text-decoration: none; font-size: 1rem; font-weight: 600;
+      border-radius: 14px; transition: all 0.2s ease;
+    }
+    .btn-destaque-utentes:hover { background: rgba(255,255,255,0.1); }
+
+    .sidebar-footer { padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+
+    .btn-logout {
+      display: flex; align-items: center; gap: 16px; padding: 14px 18px;
+      color: #fca5a5; text-decoration: none; font-size: 0.95rem;
+      border-radius: 12px; transition: all 0.2s ease;
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+    .btn-logout:hover { background: #ef4444; color: #fff; }
+
+    /* --- MAIN --- */
+    .main-conteudo { margin-left: 260px; padding: 48px; width: calc(100% - 260px); }
+
+    .btn-voltar {
+      color: #0b75ff; text-decoration: none; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-bottom: 24px; font-size: 0.95rem;
+    }
+    .btn-voltar:hover { color: #0056cc; }
+
+    .cabecalho-pagina { margin-bottom: 36px; }
+    .cabecalho-pagina h1 { font-size: 2.2rem; color: #092b4c; }
+    .cabecalho-pagina p { color: #64748b; margin-top: 4px; font-size: 1.05rem; }
+
+    /* --- CARD DADOS UTENTE --- */
+    .card-utente {
+      background: #07213b;
+      border-radius: 20px;
+      padding: 32px 40px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      margin-bottom: 36px;
+      color: #fff;
+    }
+
+    .utente-avatar {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: #1a365d; border: 3px solid #75d0fb;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.8rem; color: #75d0fb; flex-shrink: 0;
+    }
+
+    .utente-info h2 { font-size: 1.8rem; font-weight: 700; color: #fff; }
+    .utente-info .sub { font-size: 0.9rem; color: #75d0fb; margin-top: 2px; }
+
+    .utente-meta { display: flex; gap: 32px; margin-top: 16px; flex-wrap: wrap; }
+    .meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .meta-item .meta-label { font-size: 0.75rem; color: #8aafc8; text-transform: uppercase; letter-spacing: 0.5px; }
+    .meta-item .meta-valor { font-size: 1rem; font-weight: 600; color: #fff; }
+
+    /* --- SECÇÕES --- */
+    .secao { margin-bottom: 36px; }
+
+    .secao-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .secao-titulo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.2rem; font-weight: 700; color: #07213b;
+    }
+
+    .secao-titulo i { color: #0b75ff; }
+
+    .btn-adicionar {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px; background: #0b75ff; color: #fff;
+      border: none; border-radius: 10px; font-weight: 600;
+      font-size: 0.9rem; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-adicionar:hover { background: #0056cc; }
+
+    .card-secao {
+      background: #fff; border: 1px solid #e2e8f0;
+      border-radius: 16px; overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    /* --- LISTAS --- */
+    .lista-item {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 18px 24px; border-bottom: 1px solid #f1f5f9; gap: 16px;
+    }
+    .lista-item:last-child { border-bottom: none; }
+
+    .item-info { flex: 1; }
+    .item-nome { font-weight: 600; color: #092b4c; font-size: 1rem; }
+    .item-desc { font-size: 0.88rem; color: #64748b; margin-top: 4px; }
+
+    .btn-remover {
+      background: none; border: none; color: #ef4444;
+      cursor: pointer; font-size: 0.85rem; font-weight: 600;
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 10px; border-radius: 8px; transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-remover:hover { background: #fee2e2; }
+
+    /* --- TABELA EXAMES / MEDICAÇÕES --- */
+    .tabela { width: 100%; border-collapse: collapse; text-align: left; }
+    .tabela th, .tabela td { padding: 14px 20px; border-bottom: 1px solid #f1f5f9; font-size: 0.93rem; }
+    .tabela th { background: #f8fafc; color: #64748b; font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .tabela tr:last-child td { border-bottom: none; }
+    .tabela tr:hover { background: #f8fcff; }
+
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.78rem; font-weight: 700; text-transform: capitalize;
+    }
+    .badge-ativo { background: #dcfce7; color: #15803d; }
+    .badge-inativo { background: #f1f5f9; color: #64748b; }
+    .badge-pendente { background: #fef9c3; color: #a16207; }
+    .badge-realizado { background: #e0f2fe; color: #0369a1; }
+
+    .btn-encerrar {
+      background: none; border: 1px solid #ef4444; color: #ef4444;
+      cursor: pointer; font-size: 0.82rem; font-weight: 600;
+      padding: 5px 10px; border-radius: 8px; transition: all 0.2s;
+    }
+    .btn-encerrar:hover { background: #ef4444; color: #fff; }
+
+    .estado-vazio { text-align: center; padding: 32px; color: #94a3b8; font-size: 0.95rem; }
+
+    /* --- MODAL --- */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(7,33,59,0.55); backdrop-filter: blur(4px);
+      z-index: 200; align-items: center; justify-content: center;
+    }
+    .overlay.aberto { display: flex; }
+
+    .modal {
+      background: #fff; border-radius: 20px; padding: 36px;
+      width: 100%; max-width: 520px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      max-height: 90vh; overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .modal-header h3 { font-size: 1.3rem; color: #07213b; font-weight: 700; }
+
+    .btn-fechar-modal {
+      background: none; border: none; font-size: 1.4rem; color: #94a3b8;
+      cursor: pointer; line-height: 1;
+    }
+    .btn-fechar-modal:hover { color: #475569; }
+
+    .grupo-campo { margin-bottom: 20px; }
+    .grupo-campo label { display: block; font-size: 0.9rem; font-weight: 600; color: #334155; margin-bottom: 6px; }
+
+    .grupo-campo input,
+    .grupo-campo textarea,
+    .grupo-campo select {
+      width: 100%; padding: 12px 14px;
+      border: 1.5px solid #cbd5e1; border-radius: 10px;
+      font-family: inherit; font-size: 0.95rem; color: #092b4c;
+      background: #f8fafc; transition: border-color 0.2s;
+    }
+    .grupo-campo input:focus,
+    .grupo-campo textarea:focus,
+    .grupo-campo select:focus { outline: none; border-color: #0b75ff; background: #fff; }
+
+    .grupo-campo textarea { resize: vertical; min-height: 90px; }
+
+    .grupo-campo .hint { font-size: 0.8rem; color: #94a3b8; margin-top: 5px; }
+
+    .card-medicacao-selecionada {
+      background: #f0f9ff; border: 1px solid #bae6fd;
+      border-radius: 10px; padding: 14px; margin-top: 10px;
+      font-size: 0.88rem; color: #0369a1; display: none;
+    }
+
+    .modal-footer { display: flex; gap: 12px; margin-top: 28px; }
+
+    .btn-modal-cancelar {
+      flex: 1; padding: 12px; background: #f1f5f9; color: #475569;
+      border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-modal-cancelar:hover { background: #e2e8f0; }
+
+    .btn-modal-confirmar {
+      flex: 2; padding: 12px; background: #0b75ff; color: #fff;
+      border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-modal-confirmar:hover { background: #0056cc; }
+
+    .msg-feedback {
+      padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: 600;
+      margin-top: 12px; display: none; align-items: center; gap: 8px;
+    }
+    .msg-sucesso { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .msg-erro    { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  </style>
+</head>
+<body>
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="perfil-medico">
+      <div class="perfil-foto"><i class="fa-solid fa-user-doctor"></i></div>
+      <div class="perfil-nome" id="nome-medico-sidebar">A carregar...</div>
+      <div class="perfil-tipo">Médico</div>
+      <div class="perfil-especialidade" id="especialidade-medico">A carregar...</div>
+    </div>
+
+    <div class="sidebar-menu-central">
+      <a href="listagemUtentes.html" class="btn-destaque-utentes">
+        <i class="fa-solid fa-address-book"></i> Listagem de Utentes
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="#" class="btn-logout" id="btnLogout">
+        <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
+      </a>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTEÚDO ===================== -->
+  <main class="main-conteudo">
+
+    <a href="listagemUtentes.html" class="btn-voltar">
+      <i class="fa-solid fa-arrow-left"></i> Voltar à Listagem
+    </a>
+
+    <div class="cabecalho-pagina">
+      <h1>Perfil Clínico do Utente</h1>
+      <p>Gestão centralizada dos dados clínicos, comorbilidades, história familiar, exames e medicações.</p>
+    </div>
+
+    <!-- CARD UTENTE -->
+    <div class="card-utente" id="card-utente" style="display:none;">
+      <div class="utente-avatar"><i class="fa-solid fa-user-injured"></i></div>
+      <div class="utente-info">
+        <h2 id="utente-nome">—</h2>
+        <div class="sub" id="utente-sub">—</div>
+        <div class="utente-meta">
+          <div class="meta-item">
+            <span class="meta-label">Data de Nascimento</span>
+            <span class="meta-valor" id="utente-nascimento">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Idade</span>
+            <span class="meta-valor" id="utente-idade">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Médico Responsável</span>
+            <span class="meta-valor" id="utente-medico">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Estado da Conta</span>
+            <span class="meta-valor" id="utente-estado">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMORBILIDADES -->
+    <div class="secao">
+      <div class="secao-header">
+        <span class="secao-titulo"><i class="fa-solid fa-heart-pulse"></i> Comorbilidades</span>
+        <button class="btn-adicionar" onclick="abrirModal('modal-comorbilidade')">
+          <i class="fa-solid fa-plus"></i> Adicionar
+        </button>
+      </div>
+      <div class="card-secao">
+        <div id="lista-comorbilidades"><div class="estado-vazio">A carregar...</div></div>
+      </div>
+    </div>
+
+    <!-- HISTÓRIA FAMILIAR -->
+    <div class="secao">
+      <div class="secao-header">
+        <span class="secao-titulo"><i class="fa-solid fa-people-roof"></i> História Familiar</span>
+        <button class="btn-adicionar" onclick="abrirModal('modal-historia')">
+          <i class="fa-solid fa-plus"></i> Adicionar
+        </button>
+      </div>
+      <div class="card-secao">
+        <div id="lista-historia"><div class="estado-vazio">A carregar...</div></div>
+      </div>
+    </div>
+
+    <!-- MEDICAÇÕES -->
+    <div class="secao">
+      <div class="secao-header">
+        <span class="secao-titulo"><i class="fa-solid fa-pills"></i> Medicações Prescritas</span>
+        <button class="btn-adicionar" onclick="abrirModal('modal-medicacao')">
+          <i class="fa-solid fa-prescription"></i> Prescrever
+        </button>
+      </div>
+      <div class="card-secao">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th>Medicamento</th>
+              <th>Dosagem</th>
+              <th>Frequência</th>
+              <th>Duração</th>
+              <th>Início</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="lista-medicacoes"><tr><td colspan="7" class="estado-vazio">A carregar...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EXAMES -->
+    <div class="secao">
+      <div class="secao-header">
+        <span class="secao-titulo"><i class="fa-solid fa-microscope"></i> Exames</span>
+        <button class="btn-adicionar" onclick="abrirModal('modal-exame')">
+          <i class="fa-solid fa-flask-vial"></i> Requisitar
+        </button>
+      </div>
+      <div class="card-secao">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th>Exame</th>
+              <th>Tipo</th>
+              <th>Data Marcada</th>
+              <th>Estado</th>
+              <th>Resultado</th>
+            </tr>
+          </thead>
+          <tbody id="lista-exames"><tr><td colspan="5" class="estado-vazio">A carregar...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ===================== MODAL: COMORBILIDADE ===================== -->
+  <div class="overlay" id="modal-comorbilidade">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-heart-pulse" style="color:#0b75ff;"></i> Adicionar Comorbilidade</h3>
+        <button class="btn-fechar-modal" onclick="fecharModal('modal-comorbilidade')">&times;</button>
+      </div>
+      <form id="form-comorbilidade" onsubmit="submeterComorbilidade(event)">
+        <div class="grupo-campo">
+          <label for="com-nome">Nome / Diagnóstico *</label>
+          <input type="text" id="com-nome" placeholder="Ex: Diabetes Mellitus tipo 2" required />
+        </div>
+        <div class="grupo-campo">
+          <label for="com-descricao">Descrição Clínica *</label>
+          <textarea id="com-descricao" placeholder="Observações sobre o diagnóstico, evolução, etc." required></textarea>
+        </div>
+        <div class="msg-feedback msg-sucesso" id="fb-com-sucesso"><i class="fa-solid fa-circle-check"></i> Comorbilidade adicionada.</div>
+        <div class="msg-feedback msg-erro" id="fb-com-erro"><i class="fa-solid fa-circle-xmark"></i> <span id="fb-com-erro-texto"></span></div>
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancelar" onclick="fecharModal('modal-comorbilidade')">Cancelar</button>
+          <button type="submit" class="btn-modal-confirmar">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: HISTÓRIA FAMILIAR ===================== -->
+  <div class="overlay" id="modal-historia">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-people-roof" style="color:#0b75ff;"></i> Adicionar História Familiar</h3>
+        <button class="btn-fechar-modal" onclick="fecharModal('modal-historia')">&times;</button>
+      </div>
+      <form id="form-historia" onsubmit="submeterHistoria(event)">
+        <div class="grupo-campo">
+          <label for="hf-nome">Grau de Parentesco *</label>
+          <input type="text" id="hf-nome" placeholder="Ex: Mãe, Pai, Irmão(ã), Avô(ó)" required />
+        </div>
+        <div class="grupo-campo">
+          <label for="hf-descricao">Condição / Historial *</label>
+          <textarea id="hf-descricao" placeholder="Ex: Asma brônquica diagnosticada aos 30 anos" required></textarea>
+        </div>
+        <div class="msg-feedback msg-sucesso" id="fb-hf-sucesso"><i class="fa-solid fa-circle-check"></i> Registo adicionado.</div>
+        <div class="msg-feedback msg-erro" id="fb-hf-erro"><i class="fa-solid fa-circle-xmark"></i> <span id="fb-hf-erro-texto"></span></div>
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancelar" onclick="fecharModal('modal-historia')">Cancelar</button>
+          <button type="submit" class="btn-modal-confirmar">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: PRESCREVER MEDICAÇÃO ===================== -->
+  <div class="overlay" id="modal-medicacao">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-prescription" style="color:#0b75ff;"></i> Prescrever Medicação</h3>
+        <button class="btn-fechar-modal" onclick="fecharModal('modal-medicacao')">&times;</button>
+      </div>
+      <form id="form-medicacao" onsubmit="submeterMedicacao(event)">
+        <div class="grupo-campo">
+          <label for="med-pesquisa">Pesquisar Medicamento *</label>
+          <input type="text" id="med-pesquisa" placeholder="Nome do medicamento..." oninput="filtrarMedicamentos(this.value)" autocomplete="off" />
+        </div>
+        <div class="grupo-campo">
+          <label for="med-select">Selecionar do Catálogo *</label>
+          <select id="med-select" required onchange="mostrarInfoMedicamento()">
+            <option value="">— Selecione um medicamento —</option>
+          </select>
+          <div class="card-medicacao-selecionada" id="info-medicamento"></div>
+        </div>
+        <div class="grupo-campo">
+          <label for="med-dosagem">Dosagem *</label>
+          <input type="text" id="med-dosagem" placeholder="Ex: 500mg, 10ml" required />
+        </div>
+        <div class="grupo-campo">
+          <label for="med-frequencia">Frequência *</label>
+          <input type="text" id="med-frequencia" placeholder="Ex: 2 vezes por dia, 1x ao deitar" required />
+        </div>
+        <div class="grupo-campo">
+          <label for="med-data-inicio">Data de Início *</label>
+          <input type="date" id="med-data-inicio" required />
+        </div>
+        <div class="grupo-campo">
+          <label for="med-duracao">Duração *</label>
+          <input type="text" id="med-duracao" placeholder="Ex: 30 dias, 1 mês, contínuo" required />
+        </div>
+        <div class="msg-feedback msg-sucesso" id="fb-med-sucesso"><i class="fa-solid fa-circle-check"></i> Medicação prescrita com sucesso.</div>
+        <div class="msg-feedback msg-erro" id="fb-med-erro"><i class="fa-solid fa-circle-xmark"></i> <span id="fb-med-erro-texto"></span></div>
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancelar" onclick="fecharModal('modal-medicacao')">Cancelar</button>
+          <button type="submit" class="btn-modal-confirmar">Prescrever</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: REQUISITAR EXAME ===================== -->
+  <div class="overlay" id="modal-exame">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-flask-vial" style="color:#0b75ff;"></i> Requisitar Exame</h3>
+        <button class="btn-fechar-modal" onclick="fecharModal('modal-exame')">&times;</button>
+      </div>
+      <form id="form-exame" onsubmit="submeterExame(event)">
+        <div class="grupo-campo">
+          <label for="ex-pesquisa">Pesquisar Exame *</label>
+          <input type="text" id="ex-pesquisa" placeholder="Nome do exame..." oninput="filtrarExames(this.value)" autocomplete="off" />
+        </div>
+        <div class="grupo-campo">
+          <label for="ex-select">Selecionar do Catálogo *</label>
+          <select id="ex-select" required onchange="mostrarInfoExame()">
+            <option value="">— Selecione um exame —</option>
+          </select>
+          <div class="card-medicacao-selecionada" id="info-exame"></div>
+        </div>
+        <div class="grupo-campo">
+          <label for="ex-data">Data Prevista *</label>
+          <input type="date" id="ex-data" required />
+        </div>
+        <div class="msg-feedback msg-sucesso" id="fb-ex-sucesso"><i class="fa-solid fa-circle-check"></i> Exame requisitado com sucesso.</div>
+        <div class="msg-feedback msg-erro" id="fb-ex-erro"><i class="fa-solid fa-circle-xmark"></i> <span id="fb-ex-erro-texto"></span></div>
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancelar" onclick="fecharModal('modal-exame')">Cancelar</button>
+          <button type="submit" class="btn-modal-confirmar">Requisitar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== JAVASCRIPT ===================== -->
+  <script>
+    const API_BASE = "http://localhost:3000";
+    let token = null;
+    let idUtenteGlobal = null;
+    let catalogoMedicamentos = [];
+    let catalogoExames = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      token = localStorage.getItem("token");
+      const userRaw = localStorage.getItem("user");
+
+      if (!token || !userRaw) { redirecionarLogin(); return; }
+
+      let utilizador;
+      try { utilizador = JSON.parse(userRaw); } catch { redirecionarLogin(); return; }
+
+      if (!utilizador.tipo || utilizador.tipo.toLowerCase() !== "medico") { redirecionarLogin(); return; }
+
+      document.getElementById("nome-medico-sidebar").textContent = utilizador.nome || "Médico";
+
+      document.getElementById("btnLogout").addEventListener("click", (e) => {
+        e.preventDefault(); localStorage.clear(); window.location.href = "autenticacao.html";
+      });
+
+      const params = new URLSearchParams(window.location.search);
+      idUtenteGlobal = params.get("id");
+
+      if (!idUtenteGlobal) { alert("Utente não especificado."); window.location.href = "listagemUtentes.html"; return; }
+
+      carregarPerfil();
+      carregarComorbilidades();
+      carregarHistoriaFamiliar();
+      carregarMedicacoes();
+      carregarExames();
+      carregarCatalogos();
+      carregarPerfilMedico(utilizador.id_especifico);
+    });
+
+    function redirecionarLogin() { localStorage.clear(); window.location.href = "autenticacao.html"; }
+
+    async function carregarPerfilMedico(id) {
+      try {
+        const r = await fetch(`${API_BASE}/medicos/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+        if (!r.ok) return;
+        const m = await r.json();
+        document.getElementById("nome-medico-sidebar").textContent = m.nome;
+        document.getElementById("especialidade-medico").textContent = m.especialidade || "—";
+      } catch (_) {}
+    }
+
+    /* ---------- PERFIL DO UTENTE ---------- */
+    async function carregarPerfil() {
+      try {
+        const r = await fetch(`${API_BASE}/utentes/${idUtenteGlobal}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!r.ok) throw new Error("Utente não encontrado.");
+        const u = await r.json();
+
+        document.getElementById("utente-nome").textContent = u.nome;
+        document.getElementById("utente-sub").textContent = u.sexo_biologico;
+        document.getElementById("utente-nascimento").textContent =
+          new Date(u.data_nascimento).toLocaleDateString("pt-PT", { day:"2-digit", month:"2-digit", year:"numeric", timeZone:"UTC" });
+        document.getElementById("utente-idade").textContent = u.idade + " anos";
+        document.getElementById("utente-medico").textContent = u.medico?.nome || "—";
+        document.getElementById("utente-estado").textContent = u.utilizador?.estado || "—";
+
+        document.getElementById("card-utente").style.display = "flex";
+        document.querySelector(".cabecalho-pagina p").textContent =
+          `Dados clínicos de ${u.nome} — sob a tutela de ${u.medico?.nome || "—"}.`;
+      } catch (e) {
+        document.querySelector(".cabecalho-pagina p").textContent = e.message;
+      }
+    }
+
+    /* ---------- COMORBILIDADES ---------- */
+    async function carregarComorbilidades() {
+      const el = document.getElementById("lista-comorbilidades");
+      try {
+        const r = await fetch(`${API_BASE}/comorbilidades/utente/${idUtenteGlobal}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const dados = await r.json();
+        if (!dados.length) { el.innerHTML = `<div class="estado-vazio">Sem comorbilidades registadas.</div>`; return; }
+        el.innerHTML = dados.map(c => `
+          <div class="lista-item">
+            <div class="item-info">
+              <div class="item-nome">${c.nome}</div>
+              <div class="item-desc">${c.descricao}</div>
+            </div>
+            <button class="btn-remover" onclick="removerComorbilidade(${c.id})">
+              <i class="fa-solid fa-trash-can"></i> Remover
+            </button>
+          </div>`).join('');
+      } catch { el.innerHTML = `<div class="estado-vazio" style="color:#ef4444;">Erro ao carregar comorbilidades.</div>`; }
+    }
+
+    async function submeterComorbilidade(e) {
+      e.preventDefault();
+      const nome = document.getElementById("com-nome").value.trim();
+      const descricao = document.getElementById("com-descricao").value.trim();
+      try {
+        const r = await fetch(`${API_BASE}/comorbilidades/utente/${idUtenteGlobal}`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ nome, descricao })
+        });
+        if (!r.ok) { const err = await r.json(); throw new Error(err.erro || "Erro ao guardar."); }
+        mostrarFeedback("fb-com-sucesso", "fb-com-erro");
+        document.getElementById("form-comorbilidade").reset();
+        setTimeout(() => { fecharModal("modal-comorbilidade"); carregarComorbilidades(); }, 1000);
+      } catch (err) { mostrarFeedbackErro("fb-com-erro", "fb-com-erro-texto", err.message); }
+    }
+
+    async function removerComorbilidade(id) {
+      if (!confirm("Remover esta comorbilidade?")) return;
+      try {
+        const r = await fetch(`${API_BASE}/comorbilidades/${id}`, {
+          method: "DELETE", headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!r.ok) throw new Error("Erro ao remover.");
+        carregarComorbilidades();
+      } catch (e) { alert(e.message); }
+    }
+
+    /* ---------- HISTÓRIA FAMILIAR ---------- */
+    async function carregarHistoriaFamiliar() {
+      const el = document.getElementById("lista-historia");
+      try {
+        const r = await fetch(`${API_BASE}/historiaFamiliar/utente/${idUtenteGlobal}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const dados = await r.json();
+        if (!dados.length) { el.innerHTML = `<div class="estado-vazio">Sem registos de história familiar.</div>`; return; }
+        el.innerHTML = dados.map(h => `
+          <div class="lista-item">
+            <div class="item-info">
+              <div class="item-nome"><i class="fa-solid fa-user" style="color:#64748b;font-size:0.85rem;"></i> ${h.nome}</div>
+              <div class="item-desc">${h.descricao}</div>
+            </div>
+            <button class="btn-remover" onclick="removerHistoria(${h.id})">
+              <i class="fa-solid fa-trash-can"></i> Remover
+            </button>
+          </div>`).join('');
+      } catch { el.innerHTML = `<div class="estado-vazio" style="color:#ef4444;">Erro ao carregar história familiar.</div>`; }
+    }
+
+    async function submeterHistoria(e) {
+      e.preventDefault();
+      const nome = document.getElementById("hf-nome").value.trim();
+      const descricao = document.getElementById("hf-descricao").value.trim();
+      try {
+        const r = await fetch(`${API_BASE}/historiaFamiliar/utente/${idUtenteGlobal}`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ nome, descricao })
+        });
+        if (!r.ok) { const err = await r.json(); throw new Error(err.erro || "Erro ao guardar."); }
+        mostrarFeedback("fb-hf-sucesso", "fb-hf-erro");
+        document.getElementById("form-historia").reset();
+        setTimeout(() => { fecharModal("modal-historia"); carregarHistoriaFamiliar(); }, 1000);
+      } catch (err) { mostrarFeedbackErro("fb-hf-erro", "fb-hf-erro-texto", err.message); }
+    }
+
+    async function removerHistoria(id) {
+      if (!confirm("Remover este registo de história familiar?")) return;
+      try {
+        const r = await fetch(`${API_BASE}/historiaFamiliar/${id}`, {
+          method: "DELETE", headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!r.ok) throw new Error("Erro ao remover.");
+        carregarHistoriaFamiliar();
+      } catch (e) { alert(e.message); }
+    }
+
+    /* ---------- MEDICAÇÕES ---------- */
+    async function carregarMedicacoes() {
+      const tbody = document.getElementById("lista-medicacoes");
+      try {
+        const r = await fetch(`${API_BASE}/medicacaoUtente/historico/${idUtenteGlobal}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const dados = await r.json();
+        if (!dados.length) { tbody.innerHTML = `<tr><td colspan="7" class="estado-vazio">Sem medicações prescritas.</td></tr>`; return; }
+        tbody.innerHTML = dados.map(m => {
+          const nomeM = m.medicacao?.nome_medicamento || "—";
+          const subst = m.medicacao?.substancia_ativa || "";
+          const badgeClass = m.ativo ? "badge-ativo" : "badge-inativo";
+          const badgeTexto = m.ativo ? "Ativa" : "Encerrada";
+          const btnEncerrar = m.ativo
+            ? `<button class="btn-encerrar" onclick="encerrarMedicacao(${m.id})">Encerrar</button>`
+            : "";
+          const dataInicio = new Date(m.data_inicio).toLocaleDateString("pt-PT", { day:"2-digit", month:"2-digit", year:"numeric", timeZone:"UTC" });
+          return `<tr>
+            <td><strong>${nomeM}</strong><br><span style="font-size:0.82rem;color:#64748b;">${subst}</span></td>
+            <td>${m.dosagem}</td>
+            <td>${m.frequencia}</td>
+            <td>${m.duracao}</td>
+            <td>${dataInicio}</td>
+            <td><span class="badge ${badgeClass}">${badgeTexto}</span></td>
+            <td>${btnEncerrar}</td>
+          </tr>`;
+        }).join('');
+      } catch { tbody.innerHTML = `<tr><td colspan="7" class="estado-vazio" style="color:#ef4444;">Erro ao carregar medicações.</td></tr>`; }
+    }
+
+    async function submeterMedicacao(e) {
+      e.preventDefault();
+      const id_medicacao = Number(document.getElementById("med-select").value);
+      const dosagem = document.getElementById("med-dosagem").value.trim();
+      const frequencia = document.getElementById("med-frequencia").value.trim();
+      const data_inicio = document.getElementById("med-data-inicio").value;
+      const duracao = document.getElementById("med-duracao").value.trim();
+      if (!id_medicacao) { mostrarFeedbackErro("fb-med-erro", "fb-med-erro-texto", "Selecione um medicamento do catálogo."); return; }
+      try {
+        const r = await fetch(`${API_BASE}/medicacaoUtente/${idUtenteGlobal}`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ id_medicacao, dosagem, frequencia, data_inicio, duracao })
+        });
+        if (!r.ok) { const err = await r.json(); throw new Error(err.erro || "Erro ao prescrever."); }
+        mostrarFeedback("fb-med-sucesso", "fb-med-erro");
+        document.getElementById("form-medicacao").reset();
+        document.getElementById("info-medicamento").style.display = "none";
+        setTimeout(() => { fecharModal("modal-medicacao"); carregarMedicacoes(); }, 1000);
+      } catch (err) { mostrarFeedbackErro("fb-med-erro", "fb-med-erro-texto", err.message); }
+    }
+
+    async function encerrarMedicacao(id) {
+      if (!confirm("Encerrar esta prescrição?")) return;
+      try {
+        const r = await fetch(`${API_BASE}/medicacaoUtente/${id}/encerrar`, {
+          method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ ativo: false })
+        });
+        if (!r.ok) throw new Error("Erro ao encerrar.");
+        carregarMedicacoes();
+      } catch (e) { alert(e.message); }
+    }
+
+    /* ---------- EXAMES ---------- */
+    async function carregarExames() {
+      const tbody = document.getElementById("lista-exames");
+      try {
+        const r = await fetch(`${API_BASE}/exameUtente/utente/${idUtenteGlobal}/historico`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const dados = await r.json();
+        if (!dados.length) { tbody.innerHTML = `<tr><td colspan="5" class="estado-vazio">Sem exames requisitados.</td></tr>`; return; }
+        tbody.innerHTML = dados.map(ex => {
+          const nomeEx = ex.exame?.nome_exame || "—";
+          const tipo = ex.exame?.tipo || "—";
+          const dataExame = new Date(ex.data_exame).toLocaleDateString("pt-PT", { day:"2-digit", month:"2-digit", year:"numeric", timeZone:"UTC" });
+          const temResultado = !!ex.resultado;
+          const badgeClass = temResultado ? "badge-realizado" : "badge-pendente";
+          const badgeTexto = temResultado ? "Realizado" : "Pendente";
+          const resultado = temResultado ? `<span title="${ex.interpretacao || ''}">${ex.resultado}</span>` : "—";
+          return `<tr>
+            <td><strong>${nomeEx}</strong></td>
+            <td><span style="text-transform:capitalize;">${tipo}</span></td>
+            <td>${dataExame}</td>
+            <td><span class="badge ${badgeClass}">${badgeTexto}</span></td>
+            <td style="max-width:200px;word-break:break-word;">${resultado}</td>
+          </tr>`;
+        }).join('');
+      } catch { tbody.innerHTML = `<tr><td colspan="5" class="estado-vazio" style="color:#ef4444;">Erro ao carregar exames.</td></tr>`; }
+    }
+
+    async function submeterExame(e) {
+      e.preventDefault();
+      const id_exame = Number(document.getElementById("ex-select").value);
+      const data_exame = document.getElementById("ex-data").value;
+      if (!id_exame) { mostrarFeedbackErro("fb-ex-erro", "fb-ex-erro-texto", "Selecione um exame do catálogo."); return; }
+      try {
+        const r = await fetch(`${API_BASE}/exameUtente/utente/${idUtenteGlobal}`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ id_exame, data_exame })
+        });
+        if (!r.ok) { const err = await r.json(); throw new Error(err.erro || "Erro ao requisitar."); }
+        mostrarFeedback("fb-ex-sucesso", "fb-ex-erro");
+        document.getElementById("form-exame").reset();
+        document.getElementById("info-exame").style.display = "none";
+        setTimeout(() => { fecharModal("modal-exame"); carregarExames(); }, 1000);
+      } catch (err) { mostrarFeedbackErro("fb-ex-erro", "fb-ex-erro-texto", err.message); }
+    }
+
+    /* ---------- CATÁLOGOS (medicamentos + exames) ---------- */
+    async function carregarCatalogos() {
+      try {
+        const [rMed, rEx] = await Promise.all([
+          fetch(`${API_BASE}/medicacao`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_BASE}/exames`, { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+        catalogoMedicamentos = rMed.ok ? await rMed.json() : [];
+        catalogoExames = rEx.ok ? await rEx.json() : [];
+        preencherSelectMedicamentos(catalogoMedicamentos);
+        preencherSelectExames(catalogoExames);
+      } catch (_) {}
+    }
+
+    function preencherSelectMedicamentos(lista) {
+      const sel = document.getElementById("med-select");
+      const valorAtual = sel.value;
+      sel.innerHTML = `<option value="">— Selecione um medicamento —</option>`;
+      lista.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m.id;
+        opt.textContent = `${m.nome_medicamento} (${m.substancia_ativa})`;
+        opt.dataset.substancia = m.substancia_ativa;
+        opt.dataset.objetivo = m.objetivo || "";
+        opt.dataset.tipo = m.tipo || "";
+        sel.appendChild(opt);
+      });
+      if (valorAtual) sel.value = valorAtual;
+    }
+
+    function preencherSelectExames(lista) {
+      const sel = document.getElementById("ex-select");
+      const valorAtual = sel.value;
+      sel.innerHTML = `<option value="">— Selecione um exame —</option>`;
+      lista.forEach(ex => {
+        const opt = document.createElement("option");
+        opt.value = ex.id;
+        opt.textContent = `${ex.nome_exame} (${ex.tipo})`;
+        opt.dataset.tipo = ex.tipo;
+        opt.dataset.descricao = ex.descricao || "";
+        sel.appendChild(opt);
+      });
+      if (valorAtual) sel.value = valorAtual;
+    }
+
+    function filtrarMedicamentos(texto) {
+      const filtrado = catalogoMedicamentos.filter(m =>
+        m.nome_medicamento.toLowerCase().includes(texto.toLowerCase()) ||
+        m.substancia_ativa.toLowerCase().includes(texto.toLowerCase())
+      );
+      preencherSelectMedicamentos(filtrado.length ? filtrado : catalogoMedicamentos);
+    }
+
+    function filtrarExames(texto) {
+      const filtrado = catalogoExames.filter(ex =>
+        ex.nome_exame.toLowerCase().includes(texto.toLowerCase())
+      );
+      preencherSelectExames(filtrado.length ? filtrado : catalogoExames);
+    }
+
+    function mostrarInfoMedicamento() {
+      const sel = document.getElementById("med-select");
+      const opt = sel.options[sel.selectedIndex];
+      const info = document.getElementById("info-medicamento");
+      if (!sel.value) { info.style.display = "none"; return; }
+      info.style.display = "block";
+      info.innerHTML = `<strong>${opt.textContent}</strong><br>
+        ${opt.dataset.objetivo ? `<span>Indicação: ${opt.dataset.objetivo}</span>` : ""}`;
+    }
+
+    function mostrarInfoExame() {
+      const sel = document.getElementById("ex-select");
+      const opt = sel.options[sel.selectedIndex];
+      const info = document.getElementById("info-exame");
+      if (!sel.value) { info.style.display = "none"; return; }
+      info.style.display = "block";
+      info.innerHTML = `<strong>${opt.textContent}</strong><br>
+        ${opt.dataset.descricao ? `<span>${opt.dataset.descricao}</span>` : ""}`;
+    }
+
+    /* ---------- MODAIS ---------- */
+    function abrirModal(id) {
+      document.getElementById(id).classList.add("aberto");
+      ocultarFeedbacks(id);
+    }
+
+    function fecharModal(id) {
+      document.getElementById(id).classList.remove("aberto");
+    }
+
+    function ocultarFeedbacks(modalId) {
+      document.querySelectorAll(`#${modalId} .msg-feedback`).forEach(el => el.style.display = "none");
+    }
+
+    document.querySelectorAll(".overlay").forEach(overlay => {
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) fecharModal(overlay.id);
+      });
+    });
+
+    /* ---------- FEEDBACK ---------- */
+    function mostrarFeedback(idSucesso, idErro) {
+      document.getElementById(idErro).style.display = "none";
+      const el = document.getElementById(idSucesso);
+      el.style.display = "flex";
+    }
+
+    function mostrarFeedbackErro(idErro, idTexto, mensagem) {
+      document.getElementById(idTexto).textContent = mensagem;
+      document.getElementById(idErro).style.display = "flex";
+    }
+  </script>
+</body>
+</html>
