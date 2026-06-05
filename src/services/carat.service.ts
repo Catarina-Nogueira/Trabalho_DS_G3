@@ -136,15 +136,18 @@ export const CaratService = {
             const avaliacaoGuardada = await transactionalEntityManager.save(novaAvaliacao);
 
             if (nivel_controlo === NivelControlo.NAO_CONTROLADO) {
-                await AlertaService.gerarAlertaAutomatico(id_utente, utente.medico.id, TipoAlerta.SCORE_CARAT, `Crítico: Utente com score ${score_total} (Não Controlado).`, avaliacaoGuardada.id);
+                await AlertaService.gerarAlertaAutomatico(id_utente, utente.medico.id, TipoAlerta.SCORE_CARAT, 
+                    `Crítico: Utente com score ${score_total} (Não Controlado).`, avaliacaoGuardada.id);
             } else if (nivel_controlo === NivelControlo.PARCIALMENTE_CONTROLADO) {
-                await AlertaService.gerarAlertaAutomatico(id_utente, utente.medico.id, TipoAlerta.SCORE_CARAT, `Aviso: Utente com score ${score_total} (Parcialmente Controlado).`, avaliacaoGuardada.id);
+                await AlertaService.gerarAlertaAutomatico(id_utente, utente.medico.id, TipoAlerta.SCORE_CARAT, 
+                    `Aviso: Utente com score ${score_total} (Parcialmente Controlado).`, avaliacaoGuardada.id);
             }
 
             if (delta !== null) {
                 const limiarDeterioracao = await getLimiar('limiar_deterioracao', 3);
                 if (delta <= -limiarDeterioracao) {
-                    await AlertaService.gerarAlertaAutomatico(id_utente, utente.medico.id, TipoAlerta.SCORE_CARAT, `Deterioração: Queda abrupta de ${Math.abs(delta)} pontos no teste CARAT.`, avaliacaoGuardada.id);
+                    await AlertaService.gerarAlertaAutomatico(id_utente, utente.medico.id, TipoAlerta.SCORE_CARAT, 
+                        `Deterioração: Queda abrupta de ${Math.abs(delta)} pontos no teste CARAT.`, avaliacaoGuardada.id);
                 }
             }
 

@@ -1,0 +1,859 @@
+{
+  "info": {
+    "_postman_id": "16786d72-8810-472c-95c6-0ba76dc43663",
+    "name": "SaudINOB - Testes API",
+    "description": "Colecção de testes da API REST do sistema SaudINOB",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "43008514"
+  },
+  "item": [
+    {
+      "name": "1. Autenticação",
+      "item": [
+        {
+          "name": "Login - Médico (dr_costa)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Login bem sucedido', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Token JWT devolvido', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.token).to.be.a('string');",
+                  "  pm.collectionVariables.set('token_medico', json.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"dr_costa\",\n  \"password\": \"dr_costa123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/autenticacao/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "autenticacao",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Utente (joao_ferreira)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Login bem sucedido', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Token JWT devolvido', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.token).to.be.a('string');",
+                  "  pm.collectionVariables.set('token_utente', json.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"joao_ferreira\",\n  \"password\": \"teste123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/autenticacao/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "autenticacao",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Administrador (pedro_lima)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Login bem sucedido', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Token JWT devolvido', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.token).to.be.a('string');",
+                  "  pm.collectionVariables.set('token_admin', json.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"pedro_lima\",\n  \"password\": \"pedro_lima123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/autenticacao/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "autenticacao",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Credenciais Inválidas (erro esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401 - Credenciais inválidas rejeitadas', function() {",
+                  "  pm.response.to.have.status(401);",
+                  "});",
+                  "pm.test('Mensagem de erro devolvida', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.erro).to.include('Credenciais inválidas');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"utilizador_inexistente\",\n  \"password\": \"passworderrada\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/autenticacao/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "autenticacao",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Controlo de Acesso (RBAC)",
+      "item": [
+        {
+          "name": "Acesso Proibido - Utente tenta aceder a endpoint de Médico (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403 - Acesso proibido por perfil', function() {",
+                  "  pm.response.to.have.status(403);",
+                  "});",
+                  "pm.test('Mensagem de erro de autorização devolvida', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.erro).to.include('Acesso proibido');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_utente}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/alertas/medico/3",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "alertas",
+                "medico",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Acesso Não Autenticado - Sem token (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401 - Token em falta rejeitado', function() {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/carat/questionario-ativo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carat",
+                "questionario-ativo"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Módulo CARAT",
+      "item": [
+        {
+          "name": "Obter Questionário CARAT Ativo (RF16)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Questionário devolvido', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Questionário tem 10 questões', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.questoes.length).to.equal(10);",
+                  "});",
+                  "pm.test('Versão do questionário correcta', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.versao).to.equal('V1_2026');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/carat/questionario-ativo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carat",
+                "questionario-ativo"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submissão CARAT - Respostas Incompletas (RF18 - erro esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 - Respostas incompletas rejeitadas', function() {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('Lista de questões em falta devolvida', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.questoesPorResponder).to.be.an('array');",
+                  "  pm.expect(json.questoesPorResponder.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_utente}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"respostas\": [\n    {\"id_questao\": 1, \"id_opcao\": 1},\n    {\"id_questao\": 2, \"id_opcao\": 5}\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/carat/avaliacoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carat",
+                "avaliacoes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submissão CARAT - Completa com Score Controlado (RF17, RF19, RF20, RF21, RF25)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 - Avaliação criada', function() {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Score total calculado', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.avaliacao.score_total).to.be.a('number');",
+                  "});",
+                  "pm.test('Nível de controlo determinado', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(['controlado','parcialmente_controlado','nao_controlado']).to.include(json.avaliacao.nivel_controlo);",
+                  "});",
+                  "pm.test('Recomendações geradas automaticamente', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.recomendacoes.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_utente}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"respostas\": [\n    {\"id_questao\": 1, \"id_opcao\": 1},\n    {\"id_questao\": 2, \"id_opcao\": 5},\n    {\"id_questao\": 3, \"id_opcao\": 9},\n    {\"id_questao\": 4, \"id_opcao\": 13},\n    {\"id_questao\": 5, \"id_opcao\": 17},\n    {\"id_questao\": 6, \"id_opcao\": 21},\n    {\"id_questao\": 7, \"id_opcao\": 25},\n    {\"id_questao\": 8, \"id_opcao\": 29},\n    {\"id_questao\": 9, \"id_opcao\": 33},\n    {\"id_questao\": 10, \"id_opcao\": 38}\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/carat/avaliacoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carat",
+                "avaliacoes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Histórico de Avaliações do Utente (RF22)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Histórico devolvido', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Lista de avaliações não vazia', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('array');",
+                  "  pm.expect(json.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/carat/utentes/1/avaliacoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carat",
+                "utentes",
+                "1",
+                "avaliacoes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Dados do Gráfico de Evolução do Utente (RF39)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Dados do gráfico devolvidos', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_utente}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/carat/grafico",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carat",
+                "grafico"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Sistema de Alertas",
+      "item": [
+        {
+          "name": "Listar Alertas do Médico (RF36)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Alertas devolvidos', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Lista de alertas não vazia', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('array');",
+                  "  pm.expect(json.length).to.be.above(0);",
+                  "});",
+                  "pm.test('Alertas têm prioridade alta por score CARAT', function() {",
+                  "  var json = pm.response.json();",
+                  "  var alertasAlta = json.filter(a => a.prioridade === 'alta');",
+                  "  pm.expect(alertasAlta.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/alertas/medico/3",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "alertas",
+                "medico",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Alertas do Utente (RF38)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Alertas do utente devolvidos', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_utente}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/alertas/utente/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "alertas",
+                "utente",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Gestão Clínica",
+      "item": [
+        {
+          "name": "Histórico de Exames do Utente (RF48)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Exames devolvidos', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Exame pendente sem resultado', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.length).to.be.above(0);",
+                  "  pm.expect(json[0].resultado).to.be.null;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/exameUtente/utente/1/historico",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "exameUtente",
+                "utente",
+                "1",
+                "historico"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Histórico de Medicação do Utente (RF45)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Medicação devolvida', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/medicacaoUtente/historico/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "medicacaoUtente",
+                "historico",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Utentes do Médico (RF51)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Lista de utentes devolvida', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/utentes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "utentes"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Gestão de Utilizadores (Administrador)",
+      "item": [
+        {
+          "name": "Listar Todos os Utilizadores (RF09)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Utilizadores devolvidos', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Lista contém múltiplos perfis', function() {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/utilizadores",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "utilizadores"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Auditoria",
+      "item": [
+        {
+          "name": "Listar Logs de Auditoria (RF56, RF57)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Logs devolvidos', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Logs têm campos obrigatórios', function() {",
+                  "  var json = pm.response.json();",
+                  "  if(json.length > 0) {",
+                  "    pm.expect(json[0]).to.have.property('acao');",
+                  "    pm.expect(json[0]).to.have.property('entidade_afetada');",
+                  "    pm.expect(json[0]).to.have.property('data');",
+                  "  }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auditorias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auditorias"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Acesso à Auditoria por Não-Administrador (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403 - Médico não pode aceder à auditoria', function() {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auditorias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auditorias"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token_medico",
+      "value": ""
+    },
+    {
+      "key": "token_utente",
+      "value": ""
+    },
+    {
+      "key": "token_admin",
+      "value": ""
+    }
+  ]
+}
